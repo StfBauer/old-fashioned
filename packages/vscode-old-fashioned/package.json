@@ -1,0 +1,61 @@
+{
+  "name": "vscode-old-fashioned",
+  "displayName": "Old Fashioned",
+  "description": "CSS property sorting with style",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Formatters"
+  ],
+  "activationEvents": [
+    "onLanguage:css",
+    "onLanguage:scss",
+    "onLanguage:less"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "old-fashioned.sortProperties",
+        "title": "Sort CSS Properties (Old Fashioned)"
+      }
+    ],
+    "configuration": {
+      "title": "Old Fashioned",
+      "properties": {
+        "oldFashioned.sortingStrategy": {
+          "type": "string",
+          "default": "grouped",
+          "enum": [
+            "grouped",
+            "alphabetical"
+          ],
+          "description": "Strategy for sorting CSS properties"
+        },
+        "oldFashioned.emptyLinesBetweenGroups": {
+          "type": "boolean",
+          "default": false,
+          "description": "Insert empty lines between property groups"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "postbuild": "npm install postcss-scss stylelint-order stylelint-scss --no-save",
+    "vscode:prepublish": "npm run build"
+  },
+  "dependencies": {
+    "postcss": "^8.4.24",
+    "postcss-scss": "^4.0.9",
+    "stylelint": "^16.0.0",
+    "stylelint-order": "^6.0.4",
+    "stylelint-scss": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.60.0"
+  }
+}

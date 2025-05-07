@@ -1,0 +1,130 @@
+// Random @use and @forward declarations
+@use 'sass:math';
+$primary-color: #3498db;
+@forward 'variables';
+
+// Variables mixed with rules
+.header {
+    font-size: 18px;
+    $header-padding: 20px;
+    display: flex;
+    color: $primary-color;
+    padding: $header-padding;
+    position: relative;
+    background-color: white;
+    z-index: 999;
+    justify-content: space-between;
+    margin: 0;
+    width: 100%;
+    @include box-shadow(2px 2px 5px rgba(0, 0, 0, 0.2));
+
+    // Nested rule with random properties
+    &__logo {
+        height: 50px;
+        @extend %clickable;
+        color: darken($primary-color, 10%);
+        margin-right: 15px;
+        display: inline-block;
+        width: auto;
+    }
+}
+
+// Mixin definition with randomly ordered properties
+@mixin card-style {
+    border-radius: 4px;
+    padding: 15px;
+    background: #fff;
+    display: block;
+    margin: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+// Media query with nested selectors and random properties
+@media screen and (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        width: 100%;
+        padding: 10px;
+
+        .sidebar {
+            border-left: none;
+            width: auto;
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            height: auto;
+            padding: 10px 0;
+        }
+    }
+
+    .header {
+        padding: 10px;
+        flex-wrap: wrap;
+    }
+}
+
+// Complex selector with random properties and nested media query
+.product-card {
+    @include card-style;
+    transition: transform 0.3s ease;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    margin-bottom: 20px;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+    }
+
+    &__image {
+        height: 150px;
+        border-radius: 4px 0 0 4px;
+        background-size: cover;
+        width: 100%;
+    }
+
+    &__content {
+        background-color: #f9f9f9;
+        padding: 15px;
+
+        h3 {
+            margin-top: 0;
+            color: #333;
+            font-weight: 600;
+            font-size: 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+
+        &__image {
+            border-radius: 4px 4px 0 0;
+            height: 120px;
+        }
+    }
+}
+
+// Random placement of @extend and variables
+.footer {
+    color: #999;
+    $spacing: 40px;
+    @extend %container;
+    text-align: center;
+    padding-top: $spacing;
+    padding-bottom: $spacing;
+    margin-top: 20px;
+    background-color: #333;
+    font-size: 14px;
+
+    a {
+        text-decoration: none;
+        margin: 0 10px;
+        color: $primary-color;
+
+        &:hover {
+            text-decoration: underline;
+            color: lighten($primary-color, 10%);
+        }
+    }
+}

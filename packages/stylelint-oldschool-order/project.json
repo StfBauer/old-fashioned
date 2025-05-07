@@ -1,0 +1,53 @@
+{
+  "name": "stylelint-oldschool-order",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/stylelint-oldschool-order/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/stylelint-oldschool-order",
+        "main": "packages/stylelint-oldschool-order/src/index.ts",
+        "tsConfig": "packages/stylelint-oldschool-order/tsconfig.json",
+        "assets": [
+          "packages/stylelint-oldschool-order/README.md"
+        ]
+      }
+    },
+    "package": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm pack",
+        "cwd": "dist/packages/stylelint-oldschool-order"
+      }
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm publish",
+        "cwd": "dist/packages/stylelint-oldschool-order"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ]
+    },
+    "test": {
+      "executor": "@nrwl/vite:test",
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "options": {
+        "passWithNoTests": true,
+        "config": "vitest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

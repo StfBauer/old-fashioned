@@ -1,0 +1,179 @@
+/* Test Case 1: Basic property sorting */
+.basic-sort {
+    color: blue;
+    position: relative;
+    font-size: 16px;
+    top: 0;
+    margin: 20px;
+    display: flex;
+    width: 100px;
+    z-index: 100;
+}
+
+/* Test Case 2: Vendor prefixed properties */
+.vendor-prefixes {
+    -webkit-transform: scale(1.1);
+    width: 100px;
+    -moz-transform: scale(1.1);
+    height: 200px;
+    transform: scale(1.1);
+    background-color: #f5f5f5;
+    -ms-transform: scale(1.1);
+}
+
+/* Test Case 3: Properties with !important */
+.important-flags {
+    padding: 10px !important;
+    color: red;
+    margin: 5px !important;
+    font-size: 14px !important;
+    border: 1px solid black;
+}
+
+/* Test Case 4: Properties with complex values */
+.complex-values {
+    margin: calc(10px + 5vh);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    width: clamp(200px, 50%, 600px);
+    background: linear-gradient(to right, #ff0000, #00ff00);
+    height: 100vh;
+}
+
+/* Test Case 5: Special cases - duplicate properties */
+.duplicate-properties {
+    display: block;
+    color: red;
+    margin: 10px;
+    color: blue;
+    /* Duplicate property */
+    padding: 5px;
+    margin: 20px;
+    /* Duplicate property */
+    background-color: #eee;
+}
+
+/* Test Case 6: Empty rules */
+.empty-rule {}
+
+/* Test Case 7: Single property */
+.single-property {
+    color: green;
+}
+
+/* Test Case 8: CSS Variables/Custom Properties */
+.css-variables {
+    --primary-color: blue;
+    color: var(--primary-color);
+    font-size: 16px;
+    --spacing-unit: 8px;
+    margin: var(--spacing-unit);
+    --border-radius: 4px;
+    padding: calc(var(--spacing-unit) * 2);
+}
+
+/* Test Case 9: Comments between properties */
+.property-comments {
+    position: relative;
+    /* This is a comment about z-index */
+    z-index: 1;
+    display: block;
+    /* Width comment */
+    width: 100%;
+    /* 
+    Multiline comment
+    about height
+  */
+    height: 100%;
+}
+
+/* Test Case 10: Complex selectors */
+.parent>.child:hover,
+.sibling+.another:not([hidden]),
+#id.with-class[data-attr="value"]::after {
+    color: blue;
+    border-radius: 5px;
+    display: flex;
+    background-color: white;
+}
+
+/* Test Case 11: Media query with properties */
+@media (max-width: 768px) {
+    .responsive {
+        width: 100%;
+        font-size: 14px;
+        display: block;
+        margin: 10px 0;
+    }
+}
+
+/* Test Case 12: Animation and keyframes */
+@keyframes slide {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+        background-color: red;
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+        background-color: blue;
+    }
+}
+
+.animation {
+    animation: slide 2s ease;
+    position: relative;
+    background-color: transparent;
+    width: 200px;
+}
+
+/* Test Case 13: Edge case - excessive whitespace */
+.whitespace {
+
+    color: red;
+
+    margin: 10px 20px;
+
+    display: block;
+}
+
+/* Test Case 14: Very long property list */
+.long-property-list {
+    position: absolute;
+    z-index: 100;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    background-image: url('image.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    color: #333;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    opacity: 0.9;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transform: scale(1);
+}

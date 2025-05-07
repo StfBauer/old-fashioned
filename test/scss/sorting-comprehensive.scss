@@ -1,0 +1,302 @@
+// Test Case 1: Basic SCSS with variables and nesting
+$primary-color: #3498db;
+$spacing: 20px;
+
+.basic-scss {
+    color: $primary-color;
+    position: relative;
+    $local-var: 16px;
+    font-size: $local-var;
+    display: flex;
+    margin: $spacing;
+
+    &__child {
+        width: 100%;
+        background-color: lighten($primary-color, 20%);
+        padding: calc($spacing / 2);
+        border-radius: 4px;
+
+        &:hover {
+            transform: scale(1.05);
+            background-color: darken($primary-color, 10%);
+            cursor: pointer;
+        }
+    }
+}
+
+// Test Case 2: Mixins and includes
+@mixin card-style($padding: 15px) {
+    border-radius: 4px;
+    padding: $padding;
+    background: white;
+    display: block;
+    margin: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    @include card-style;
+    transition: transform 0.3s ease;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    margin-bottom: 20px;
+
+    &__content {
+        @include card-style(10px);
+        color: #333;
+    }
+}
+
+// Test Case 3: Media queries within selectors
+.responsive-component {
+    width: 80%;
+    color: #333;
+    margin: 0 auto;
+    padding: 20px;
+
+    @media (max-width: 768px) {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+
+        .child-element {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        max-width: 1140px;
+        background-color: rgba(255, 255, 255, 0.9);
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+    }
+}
+
+// Test Case 4: Extends and placeholders
+%base-button {
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.button-primary {
+    @extend %base-button;
+    background-color: $primary-color;
+    color: white;
+    font-weight: bold;
+
+    &:hover {
+        background-color: darken($primary-color, 10%);
+        transform: translateY(-1px);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+    }
+}
+
+// Test Case 5: Complex SCSS with nested at-rules
+.complex-scss {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 15px;
+
+    @supports (display: grid) {
+        display: grid;
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+
+            &>* {
+                margin-bottom: 15px;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+
+                &:last-child {
+                    margin-bottom: 0;
+                    border-bottom: none;
+                }
+            }
+        }
+    }
+
+    @supports not (display: grid) {
+        display: flex;
+        flex-wrap: wrap;
+
+        &>* {
+            flex: 0 0 30%;
+            margin-right: 3%;
+            margin-bottom: 20px;
+        }
+    }
+}
+
+// Test Case 6: Control directives
+@mixin apply-theme($theme) {
+    @if $theme =='dark' {
+        background-color: #333;
+        color: white;
+        border-color: #555;
+    }
+
+    @else if $theme =='light' {
+        background-color: white;
+        color: #333;
+        border-color: #ddd;
+    }
+
+    @else {
+        background-color: $primary-color;
+        color: white;
+        border-color: darken($primary-color, 10%);
+    }
+}
+
+.themed-component {
+    padding: 20px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 4px;
+    font-size: 16px;
+
+    @include apply-theme('light');
+
+    &--dark {
+        @include apply-theme('dark');
+    }
+}
+
+// Test Case 7: For loops and interpolation
+@for $i from 1 through 4 {
+    .col-#{$i} {
+        width: 25% * $i;
+        padding: 5px * $i;
+        margin-bottom: 10px;
+        font-size: 12px + $i * 2;
+        z-index: 10 - $i;
+    }
+}
+
+// Test Case 8: Function definitions and usage
+@function calculate-width($columns, $total: 12) {
+    @return percentage($columns / $total);
+}
+
+.layout {
+    &__main {
+        width: calculate-width(8);
+        padding: 20px;
+        float: left;
+    }
+
+    &__sidebar {
+        width: calculate-width(4);
+        padding: 15px;
+        float: right;
+        background-color: #f5f5f5;
+    }
+}
+
+// Test Case 9: Using @at-root
+.parent-scope {
+    color: blue;
+    padding: 20px;
+
+    .child-scope {
+        font-size: 16px;
+        margin: 10px;
+
+        @at-root {
+            .outside-scope {
+                background-color: #eee;
+                padding: 15px;
+                border: 1px solid #ddd;
+                position: relative;
+            }
+        }
+    }
+}
+
+// Test Case 10: Map usage and accessing
+$breakpoints: (
+    'small': 576px,
+    'medium': 768px,
+    'large': 992px,
+    'xl': 1200px
+);
+
+.responsive-element {
+    width: 100%;
+    padding: 10px;
+
+    @media (min-width: map-get($breakpoints, 'medium')) {
+        width: 80%;
+        padding: 20px;
+        margin: 0 auto;
+    }
+
+    @media (min-width: map-get($breakpoints, 'xl')) {
+        max-width: 1140px;
+    }
+}
+
+// Test Case 11: Custom properties and calculation
+:root {
+    --main-color: #5c6ac4;
+    --main-bg: #eee;
+    --spacing-unit: 8px;
+}
+
+.custom-properties {
+    background-color: var(--main-bg);
+    color: var(--main-color);
+    font-size: 16px;
+    --local-spacing: 16px;
+    margin: var(--spacing-unit);
+    padding: var(--local-spacing);
+    border: 1px solid var(--main-color);
+}
+
+// Test Case 12: Comment styles and property ordering
+.comment-test {
+    /* Standard CSS comment */
+    display: block;
+
+    // SCSS single-line comment
+    position: relative;
+
+    /*
+   * Multi-line
+   * CSS comment
+   */
+    width: 100%;
+
+    /// Documentation comment
+    z-index: 10;
+
+    /**
+   * Another multi-line
+   * documentation style
+   */
+    color: blue;
+}
+
+// Test Case 13: Import and use directives
+@import 'variables';
+@use 'sass:math';
+@use 'sass:color';
+
+.math-operations {
+    width: math.div(600px, 3);
+    height: math.div(200px, 2);
+    padding: math.div(30px, 2);
+    line-height: math.div(24px, 16px);
+    opacity: math.div(8, 10);
+}

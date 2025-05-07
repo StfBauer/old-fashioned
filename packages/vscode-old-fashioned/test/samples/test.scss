@@ -1,0 +1,30 @@
+// Test file for SCSS property sorting
+@use "sass:math";
+
+$primary-color: #3498db;
+
+.example {
+    // Random property order with SCSS features
+    color: $primary-color;
+    position: relative;
+    $spacing: 20px;
+    margin: $spacing;
+    display: flex;
+    width: 200px;
+    z-index: 100;
+    background-color: white;
+    font-size: 16px;
+    padding: $spacing;
+    border: 1px solid darken($primary-color, 10%);
+
+    &__nested {
+        background-color: lighten($primary-color, 30%);
+        padding: 10px;
+        width: 100%;
+
+        @media (max-width: 768px) {
+            width: 100%;
+            padding: 5px;
+        }
+    }
+}

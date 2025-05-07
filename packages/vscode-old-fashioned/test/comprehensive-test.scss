@@ -1,0 +1,96 @@
+// Test file for Old Fashioned CSS sorting
+
+// Test basic property sorting
+.basic-test {
+    color: blue;
+    position: relative;
+    margin: 10px;
+    display: flex;
+    width: 200px;
+    z-index: 100;
+    background-color: white;
+    font-size: 16px;
+    padding: 20px;
+    border: 1px solid black;
+}
+
+// Test SCSS variables mixed in
+.variable-test {
+    $primary-color: #3498db;
+    font-size: 18px;
+    $spacing: 20px;
+    color: $primary-color;
+    padding: $spacing;
+    display: flex;
+}
+
+// Test mixins and extends
+@mixin card-style {
+    border-radius: 4px;
+    margin: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    background: #fff;
+    display: block;
+}
+
+.card {
+    @include card-style;
+    transition: transform 0.3s ease;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+
+    &__content {
+        background-color: #f9f9f9;
+        padding: 15px;
+        margin: 0;
+
+        h3 {
+            color: #333;
+            margin-top: 0;
+            font-weight: 600;
+            font-size: 18px;
+        }
+    }
+}
+
+// Test nested media queries
+.responsive-element {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        padding: 10px;
+
+        .child {
+            height: auto;
+            width: 100%;
+            margin: 5px 0;
+            display: block;
+        }
+    }
+}
+
+// Test complex nesting with random property order
+.parent {
+    font-size: 16px;
+    color: #333;
+    display: flex;
+    position: relative;
+
+    &__child {
+        width: 50%;
+        height: 100px;
+        background-color: #eee;
+
+        &:hover {
+            transform: scale(1.05);
+            cursor: pointer;
+            background-color: #ddd;
+            transition: all 0.2s;
+        }
+    }
+}

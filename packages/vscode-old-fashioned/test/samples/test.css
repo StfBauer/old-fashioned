@@ -1,0 +1,35 @@
+/* Test file for CSS property sorting */
+.example {
+    color: blue;
+    position: relative;
+    margin: 10px;
+    display: flex;
+    width: 200px;
+    z-index: 100;
+    background-color: white;
+    font-size: 16px;
+    padding: 20px;
+    border: 1px solid black;
+}
+
+.complex-example {
+    /* Random property order */
+    padding: 15px;
+    color: #333;
+    position: absolute;
+    transform: translateY(-10px);
+    top: 0;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    background-color: rgba(255, 255, 255, 0.9);
+    font-family: Arial, sans-serif;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    min-height: 200px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
