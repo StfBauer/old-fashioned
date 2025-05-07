@@ -39,13 +39,13 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
   // Get the text to process
   const { selection, text, isEntireDocument } = getTextToProcess(editor);
 
-  // Show progress indicator
-  await vscode.window.withProgress({
-    location: vscode.ProgressLocation.Notification,
-    title: "Sorting CSS properties...",
-    cancellable: false
-  }, async () => {
-    try {
+  try {
+    // Show progress indicator
+    await vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      title: "Sorting CSS properties...",
+      cancellable: false
+    }, async () => {
       // Run Stylelint with the fix option
       const options = getSortingOptions();
       const syntax = getParseSyntax(document.languageId);
@@ -97,10 +97,11 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
       } else {
         vscode.window.showInformationMessage('CSS properties are already properly sorted');
       }
-    } catch (error) {
-      vscode.window.showErrorMessage(`Error sorting CSS properties: ${error}`);
-    }
-  });
+    });
+  } catch (error) {
+    // Use VS Code API instead of console
+    vscode.window.showErrorMessage(`Error sorting properties: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 /**
