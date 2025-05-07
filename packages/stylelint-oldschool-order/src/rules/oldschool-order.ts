@@ -1,5 +1,6 @@
 import * as stylelint from 'stylelint';
 import { Root, Node, Rule as PostcssRule } from 'postcss';
+// Use the package name instead of relative path
 import { sortProperties, SortingOptions } from '@old-fashioned/shared';
 
 // Define the plugin rule name

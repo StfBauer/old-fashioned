@@ -41,7 +41,7 @@ export function sortProperties(properties: string[], options: SortingOptions): S
 /**
  * Sort properties alphabetically
  */
-function sortAlphabetically(properties: string[]): SortingResult {
+export function sortAlphabetically(properties: string[]): SortingResult {
     return {
         success: true,
         originalProperties: properties,
@@ -52,7 +52,7 @@ function sortAlphabetically(properties: string[]): SortingResult {
 /**
  * Sort properties by concentric order
  */
-function sortByConcentricOrder(properties: string[]): SortingResult {
+export function sortByConcentricOrder(properties: string[]): SortingResult {
     // Create a map for quick lookup of property indices
     const orderMap = new Map<string, number>();
     CONCENTRIC_PROPERTY_ORDER.forEach((prop: string, index: number) => {
@@ -85,7 +85,7 @@ function sortByConcentricOrder(properties: string[]): SortingResult {
 /**
  * Sort properties by groups
  */
-function sortByGroups(properties: string[], groups: string[][], options: SortingOptions): SortingResult {
+export function sortByGroups(properties: string[], groups: string[][], options: SortingOptions): SortingResult {
     // Group properties based on their position in the groups array
     const groupedProps: Array<string[]> = groups.map(() => []);
     const ungrouped: string[] = [];

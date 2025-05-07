@@ -195,3 +195,28 @@ export function validatePropertyArray(arr: string[]): boolean {
 
   return arr.every(item => isCSSProperty(item));
 }
+
+/**
+ * Shuffle the elements of an array randomly
+ * 
+ * @param array - The array to shuffle
+ * @returns A new array with the elements shuffled
+ */
+export function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
+/**
+ * Format a number as a string with comma separators
+ * 
+ * @param num - The number to format
+ * @returns The formatted number string
+ */
+export function formatNumber(num: number): string {
+  return num.toLocaleString();
+}

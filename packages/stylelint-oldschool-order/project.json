@@ -5,18 +5,24 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nrwl/js:tsc",
       "outputs": [
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/packages/stylelint-oldschool-order",
+        "outputPath": "packages/stylelint-oldschool-order/dist",
         "main": "packages/stylelint-oldschool-order/src/index.ts",
         "tsConfig": "packages/stylelint-oldschool-order/tsconfig.json",
-        "assets": [
-          "packages/stylelint-oldschool-order/README.md"
-        ]
-      }
+        "assets": []
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "shared"
+          ],
+          "target": "build"
+        }
+      ]
     },
     "package": {
       "executor": "nx:run-commands",

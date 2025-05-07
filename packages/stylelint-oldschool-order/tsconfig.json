@@ -11,14 +11,21 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "composite": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.js"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "**/*.test.ts"
+  ],
+  "references": [
+    {
+      "path": "../shared"
+    }
   ]
 }

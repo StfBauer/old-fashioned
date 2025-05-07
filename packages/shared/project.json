@@ -5,40 +5,31 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/esbuild:esbuild",
+      "executor": "nx:run-commands",
       "outputs": [
-        "{options.outputPath}"
+        "{workspaceRoot}/packages/shared/dist"
       ],
       "options": {
-        "outputPath": "dist/packages/shared",
-        "main": "packages/shared/src/index.ts",
-        "tsConfig": "packages/shared/tsconfig.json",
-        "assets": [
-          "packages/shared/README.md"
-        ],
-        "format": [
-          "cjs",
-          "esm"
-        ],
-        "bundle": true
+        "command": "tsc --build",
+        "cwd": "packages/shared"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run",
+        "cwd": "packages/shared"
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ]
-    },
-    "test": {
-      "executor": "@nrwl/vite:test",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "passWithNoTests": true,
-        "config": "vitest.config.ts"
+        "command": "eslint src/**/*.ts",
+        "cwd": "packages/shared"
       }
     }
   },
-  "tags": []
+  "tags": [
+    "scope:shared"
+  ]
 }

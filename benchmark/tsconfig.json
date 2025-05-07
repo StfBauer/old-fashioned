@@ -1,16 +1,28 @@
 {
-    "extends": "../tsconfig.json",
+    "extends": "../tsconfig.base.json",
     "compilerOptions": {
         "module": "CommonJS",
         "moduleResolution": "node",
-        "allowImportingTsExtensions": true,
+        "outDir": "./dist",
+        "rootDir": ".",
+        "composite": false,
         "noEmit": true
     },
     "include": [
         "./**/*.ts"
     ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ],
+    "references": [
+        {
+            "path": "../packages/shared"
+        }
+    ],
     "ts-node": {
-        "esm": false,
-        "transpileOnly": true
+        "compilerOptions": {
+            "module": "CommonJS"
+        }
     }
 }

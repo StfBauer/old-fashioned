@@ -4,7 +4,6 @@
  * This extension provides CSS property sorting in VS Code using
  * the stylelint-oldschool-order plugin.
  */
-
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -103,10 +102,12 @@ async function sortCssProperties(document: vscode.TextDocument): Promise<vscode.
 
       // Apply the changes if content was changed
       if (sortedContent && sortedContent !== document.getText()) {
-        return [vscode.TextEdit.replace(
-          new vscode.Range(0, 0, document.lineCount - 1, document.lineAt(document.lineCount - 1).range.end.character),
-          sortedContent
-        )];
+        const range = new vscode.Range(
+          0, 0,
+          document.lineCount - 1,
+          document.lineAt(document.lineCount - 1).range.end.character
+        );
+        return [new vscode.TextEdit(range, sortedContent)];
       }
     } catch (error) {
       console.error('Stylelint error:', error);
