@@ -78,5 +78,14 @@
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/.eslintrc.json"
     ]
+  },
+  "projects": {
+    "stylelint-oldschool-order": {
+      "implicitDependencies": [],
+      "tags": [],
+      "dependsOn": [
+        "shared"
+      ]
+    }
   }
 }

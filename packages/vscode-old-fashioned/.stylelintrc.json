@@ -1,12 +1,84 @@
 {
+    "extends": [
+        "stylelint-config-standard-scss",
+        "stylelint-config-recommended-scss",
+        "stylelint-config-rational-order"
+    ],
     "plugins": [
-        "stylelint-oldschool-order"
+        "stylelint-order"
     ],
     "rules": {
-        "plugin/oldschool-order": {
-            "strategy": "grouped",
-            "emptyLinesBetweenGroups": true,
-            "sortPropertiesWithinGroups": true
-        }
+        "order/properties-order": [
+            {
+                "groupName": "positioning",
+                "properties": [
+                    "position",
+                    "top",
+                    "right",
+                    "bottom",
+                    "left",
+                    "z-index"
+                ]
+            },
+            {
+                "groupName": "box-model",
+                "properties": [
+                    "display",
+                    "visibility",
+                    "box-sizing",
+                    "width",
+                    "height",
+                    "margin",
+                    "padding"
+                ]
+            },
+            {
+                "groupName": "typography",
+                "properties": [
+                    "font-family",
+                    "font-size",
+                    "font-weight",
+                    "line-height",
+                    "color"
+                ]
+            },
+            {
+                "groupName": "visual",
+                "properties": [
+                    "background-color",
+                    "border",
+                    "box-shadow",
+                    "opacity"
+                ]
+            },
+            {
+                "groupName": "misc",
+                "properties": [
+                    "content",
+                    "cursor",
+                    "transition",
+                    "isolation"
+                ]
+            }
+        ],
+        "rule-empty-line-before": [
+            "always",
+            {
+                "except": [
+                    "first-nested"
+                ]
+            }
+        ],
+        "declaration-empty-line-before": [
+            "always",
+            {
+                "except": [
+                    "first-nested"
+                ],
+                "ignore": [
+                    "after-declaration"
+                ]
+            }
+        ]
     }
 }

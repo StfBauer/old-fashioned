@@ -5,8 +5,14 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "test": "vitest run"
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean && mkdir -p dist",
+    "build": "tsc --project tsconfig.json",
+    "postbuild": "[ -d dist ] || mkdir -p dist && [ -f dist/index.js ] || cp src/index.* dist/",
+    "test": "vitest run",
+    "benchmark": "ts-node benchmark/run-benchmark.ts",
+    "benchmark:comprehensive": "ts-node benchmark/sorting-benchmark.ts",
+    "check-css-props": "ts-node src/utils/css-properties-updater.ts"
   },
   "keywords": [
     "css",

@@ -85,3 +85,51 @@ When using the "grouped" sorting strategy, properties are grouped in the followi
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+# Old Fashioned CSS Sorter
+
+A VS Code extension that sorts CSS properties using consistent, configurable strategies.
+
+## Features
+
+- Multiple sorting strategies (grouped, alphabetical, concentric, rational-order, idiomatic-order)
+- SCSS support with directive handling
+- Configurable sorting algorithms for optimal performance
+
+## Usage
+
+1. Open a CSS or SCSS file
+2. Press `Cmd+Shift+P` (macOS) or `Ctrl+Shift+P` (Windows/Linux) to open the Command Palette
+3. Type "Sort CSS Properties (Old Fashioned)" and select the command
+4. Your CSS properties will be sorted according to your selected strategy
+
+## Configuration
+
+In your VS Code settings.json, you can configure the following options:
+
+```json
+{
+  "oldFashioned.sortingStrategy": "grouped", // Options: "alphabetical", "grouped", "concentric", "rational-order", "idiomatic-order"
+  "oldFashioned.algorithm": "auto", // Options: "auto", "standard", "hashmap", "radix"
+  "oldFashioned.emptyLinesBetweenGroups": false,
+  "oldFashioned.sortPropertiesWithinGroups": true,
+  "oldFashioned.processSassDirectives": true
+}
+```
+
+## Sorting Strategies
+
+### Grouped (Default)
+Properties are grouped by type: positioning, box model, typography, visual, etc.
+
+### Alphabetical
+Properties are sorted alphabetically from A to Z.
+
+### Concentric
+Properties are sorted from outside to inside (position → margin → border → padding → content).
+
+### Rational Order
+Based on stylelint-config-rational-order - a popular community standard.
+
+### Idiomatic Order
+Based on stylelint-config-idiomatic-order - follows the principles from CSS Guidelines.

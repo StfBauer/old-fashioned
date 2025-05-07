@@ -24,7 +24,6 @@
     "graph": "nx graph",
     "affected:build": "nx affected --target=build",
     "affected:test": "nx affected --target=test",
-    "clean": "nx reset && rm -rf dist",
     "fix-nx": "nx g @nx/workspace:fix-configuration",
     "test-vscode": "cd packages/vscode-old-fashioned && code --extensionDevelopmentPath=."
   },

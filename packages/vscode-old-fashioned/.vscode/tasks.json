@@ -8,6 +8,10 @@
                 "kind": "build",
                 "isDefault": true
             },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
             "problemMatcher": "$tsc"
         }
     ]

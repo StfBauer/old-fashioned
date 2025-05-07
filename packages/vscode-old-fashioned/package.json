@@ -1,20 +1,30 @@
 {
   "name": "vscode-old-fashioned",
-  "displayName": "Old Fashioned",
-  "description": "CSS property sorting with style",
+  "displayName": "Old Fashioned CSS Sorter",
+  "description": "Sort CSS properties using Old Fashioned standards",
   "version": "0.0.1",
+  "main": "./dist/extension.js",
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Formatters"
   ],
-  "activationEvents": [
-    "onLanguage:css",
-    "onLanguage:scss",
-    "onLanguage:less"
-  ],
-  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "dependencies": {
+    "postcss-scss": "^4.0.9",
+    "stylelint": "^16.3.1",
+    "stylelint-order": "^6.0.4",
+    "stylelint-scss": "^6.2.1",
+    "postcss": "^8.4.38"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean && npm install --no-fund",
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -watch -p tsconfig.json",
+    "postbuild": "mkdir -p dist/temp && cp -r src/resources dist/ || true"
+  },
   "contributes": {
     "commands": [
       {
@@ -23,39 +33,47 @@
       }
     ],
     "configuration": {
-      "title": "Old Fashioned",
+      "title": "Old Fashioned CSS Sorter",
       "properties": {
         "oldFashioned.sortingStrategy": {
           "type": "string",
           "default": "grouped",
           "enum": [
+            "alphabetical",
             "grouped",
-            "alphabetical"
+            "concentric",
+            "rational-order",
+            "idiomatic-order"
           ],
-          "description": "Strategy for sorting CSS properties"
+          "description": "Strategy to use when sorting CSS properties"
+        },
+        "oldFashioned.algorithm": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "standard",
+            "hashmap",
+            "radix"
+          ],
+          "description": "Algorithm to use for sorting (auto selects optimal algorithm based on file size)"
         },
         "oldFashioned.emptyLinesBetweenGroups": {
           "type": "boolean",
           "default": false,
-          "description": "Insert empty lines between property groups"
+          "description": "Add empty lines between property groups"
+        },
+        "oldFashioned.sortPropertiesWithinGroups": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sort properties within each group"
+        },
+        "oldFashioned.processSassDirectives": {
+          "type": "boolean",
+          "default": true,
+          "description": "Special handling for SCSS @use and other directives"
         }
       }
     }
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "postbuild": "npm install postcss-scss stylelint-order stylelint-scss --no-save",
-    "vscode:prepublish": "npm run build"
-  },
-  "dependencies": {
-    "postcss": "^8.4.24",
-    "postcss-scss": "^4.0.9",
-    "stylelint": "^16.0.0",
-    "stylelint-order": "^6.0.4",
-    "stylelint-scss": "^6.2.1"
-  },
-  "devDependencies": {
-    "@types/node": "^18.0.0",
-    "@types/vscode": "^1.60.0"
   }
 }

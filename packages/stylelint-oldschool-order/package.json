@@ -1,18 +1,35 @@
 {
   "name": "stylelint-oldschool-order",
   "version": "0.0.1",
-  "description": "Old fashioned CSS property ordering for Stylelint",
+  "description": "CSS property sorting plugin for stylelint",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "build": "tsc -p tsconfig.json",
     "test": "vitest run"
   },
+  "keywords": [
+    "stylelint",
+    "stylelint-plugin",
+    "css",
+    "sorting",
+    "order",
+    "properties"
+  ],
   "dependencies": {
-    "postcss": "^8.4.24",
-    "stylelint": "^16.0.0",
-    "stylelint-order": "^6.0.4"
+    "@old-fashioned/shared": "0.0.1",
+    "postcss": "^8.4.38",
+    "postcss-scss": "^4.0.9"
   },
   "peerDependencies": {
-    "stylelint": "^14.0.0 || ^15.0.0 || ^16.0.0"
-  }
+    "stylelint": "^15.0.0 || ^16.0.0"
+  },
+  "author": "",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
 }

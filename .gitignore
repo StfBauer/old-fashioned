@@ -1,42 +1,48 @@
 # See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
-# compiled output
-dist
-tmp
-out-tsc
+# Build outputs
+dist/
+packages/*/dist/
+*.tsbuildinfo
 
-# dependencies
-node_modules
+# Don't commit JS files in TS projects
+packages/*/src/**/*.js
+packages/*/src/**/*.js.map
+packages/*/src/**/*.d.ts
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+# Don't commit maps
+*.map
 
-# IDE - VSCode
+# Node modules
+node_modules/
+
+# IDE files
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
 !.vscode/launch.json
-!.vscode/extensions.json
+!.vscode/tasks.json
+.idea/
+*.iml
+*.swp
+*.swo
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# System files
+.DS_Store
+Thumbs.db
 
 # misc
 /.sass-cache
 /connect.lock
 /coverage
 /libpeerconnection.log
-npm-debug.log
-yarn-error.log
 testem.log
 /typings
 
-# System Files
-.DS_Store
-Thumbs.db
-
+# NX files
 .nx/cache
 .nx/workspace-data

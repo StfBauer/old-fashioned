@@ -1,214 +1,121 @@
 /**
- * Diagnostics provider for Old Fashioned VS Code extension
- * 
- * This file handles diagnostics for CSS property ordering issues
+ * Diagnostics provider for Old Fashioned CSS Sorter
  */
-
 import * as vscode from 'vscode';
-import * as stylelint from 'stylelint';
-import { getParseSyntax, createDiagnosticFromWarning, isStyleDocument, getSortingOptions } from './utils';
+import * as path from 'path';
+import * as fs from 'fs';
+import { execSync } from 'child_process';
+import {
+  getParseSyntax,
+  createDiagnosticFromWarning,
+  isStyleDocument,
+  getSortingOptions
+} from './utils';
+import { outputChannel } from './extension';
+
+// Create a diagnostics collection
+const diagnosticCollection = vscode.languages.createDiagnosticCollection('oldFashioned');
 
 /**
- * Interface for Stylelint warning object
+ * Define the interface for stylelint lint options
  */
-interface StylelintWarning {
-  line: number;
-  column: number;
-  rule: string;
-  severity: string;
-  text: string;
+interface StylelintLintOptions {
+  code: string;
+  codeFilename: string | undefined;
+  config: {
+    plugins: string[];
+    rules: Record<string, any>;
+  };
+  customSyntax?: any;
 }
 
 /**
- * Interface for Stylelint result object
+ * Provide diagnostics for CSS files
  */
-interface StylelintResultItem {
-  source: string;
-  warnings: StylelintWarning[];
-  errored?: boolean;
-  deprecations?: { text: string; reference: string }[];
-  invalidOptionWarnings?: { text: string }[];
-}
-
-/**
- * Interface for Stylelint configuration
- */
-interface StylelintConfig {
-  plugins: string[];
-  rules: Record<string, any>;
-  customSyntax?: string;
-}
-
-// Create a diagnostics collection for property order issues
-const diagnosticsCollection = vscode.languages.createDiagnosticCollection('old-fashioned');
-
-/**
- * Activate the diagnostics provider
- * 
- * @param context - The VS Code extension context
- * @returns Array of disposable resources
- */
-export function activateDiagnostics(context: vscode.ExtensionContext): vscode.Disposable[] {
-  const subscriptions: vscode.Disposable[] = [];
-
-  // Register event handlers
-  const didOpenTextDocument = vscode.workspace.onDidOpenTextDocument(document => {
-    if (isStyleDocument(document)) {
-      updateDiagnostics(document);
-    }
-  });
-
-  const didChangeTextDocument = vscode.workspace.onDidChangeTextDocument(event => {
-    // Throttle updates on change to avoid too frequent linting
-    if (isStyleDocument(event.document)) {
-      const documentUri = event.document.uri.toString();
-
-      // Clear previous timer if it exists
-      if (changeTimers.has(documentUri)) {
-        clearTimeout(changeTimers.get(documentUri));
-      }
-
-      // Set a new timer
-      const timerId = setTimeout(() => {
-        updateDiagnostics(event.document);
-        changeTimers.delete(documentUri);
-      }, 500);
-
-      changeTimers.set(documentUri, timerId);
-    }
-  });
-
-  const didSaveTextDocument = vscode.workspace.onDidSaveTextDocument(document => {
-    if (isStyleDocument(document)) {
-      updateDiagnostics(document);
-    }
-  });
-
-  const didCloseTextDocument = vscode.workspace.onDidCloseTextDocument(document => {
-    diagnosticsCollection.delete(document.uri);
-
-    // Clear any timers for this document
-    const documentUri = document.uri.toString();
-    if (changeTimers.has(documentUri)) {
-      clearTimeout(changeTimers.get(documentUri));
-      changeTimers.delete(documentUri);
-    }
-  });
-
-  // Process already open documents
-  vscode.workspace.textDocuments.forEach(document => {
-    if (isStyleDocument(document)) {
-      updateDiagnostics(document);
-    }
-  });
-
-  // Map to store timers for document changes
-  const changeTimers = new Map<string, NodeJS.Timeout>();
-
-  // Add all disposables
-  subscriptions.push(
-    didOpenTextDocument,
-    didChangeTextDocument,
-    didSaveTextDocument,
-    didCloseTextDocument,
-    diagnosticsCollection,
-    // Dispose function to clear all timers
-    {
-      dispose: () => {
-        for (const [, timer] of changeTimers) {
-          clearTimeout(timer);
-        }
-        changeTimers.clear();
-      }
-    }
-  );
-
-  return subscriptions;
-}
-
-/**
- * Update diagnostics for a document
- * 
- * @param document - The document to update diagnostics for
- */
-async function updateDiagnostics(document: vscode.TextDocument): Promise<void> {
-  // Only run on CSS, SCSS, or SASS files
+export async function provideDiagnostics(document: vscode.TextDocument): Promise<void> {
+  // Only process CSS/SCSS files
   if (!isStyleDocument(document)) {
-    diagnosticsCollection.delete(document.uri);
     return;
   }
 
   try {
-    // Run Stylelint on the document
-    const text = document.getText();
-    const result = await lintDocument(document, text);
+    const lintResults = await lintDocument(document);
 
-    if (result && result.results && result.results.length > 0) {
-      const diagnostics: vscode.Diagnostic[] = [];
+    if (lintResults && lintResults.warnings) {
+      const diagnostics = lintResults.warnings.map(warning =>
+        createDiagnosticFromWarning(warning)
+      );
 
-      // Create diagnostics for each warning or error
-      for (const styleResult of result.results) {
-        if (styleResult.warnings && styleResult.warnings.length > 0) {
-          for (const warning of styleResult.warnings) {
-            // Check if warning is from our plugin
-            if (warning.rule && warning.rule.startsWith('plugin/oldschool-order')) {
-              // Create a diagnostic and add it to the collection
-              const diagnostic = createDiagnosticFromWarning(warning, document);
-              diagnostics.push(diagnostic);
-            }
-          }
-        }
-      }
-
-      // Update the diagnostics collection
-      diagnosticsCollection.set(document.uri, diagnostics);
+      diagnosticCollection.set(document.uri, diagnostics);
     } else {
-      // Clear diagnostics if no issues were found
-      diagnosticsCollection.delete(document.uri);
+      diagnosticCollection.set(document.uri, []);
     }
   } catch (error) {
-    // Replace console.error with VS Code API
-    vscode.window.showErrorMessage(`Error running diagnostics: ${error instanceof Error ? error.message : String(error)}`);
-    // Clear diagnostics on error
-    diagnosticsCollection.delete(document.uri);
+    console.error('Error providing diagnostics:', error);
+    outputChannel.appendLine(`Diagnostics error: ${error}`);
+    diagnosticCollection.set(document.uri, []);
   }
 }
 
 /**
- * Lint a document with Stylelint
- * 
- * @param document - The document to lint
- * @param text - The text to lint
- * @returns The Stylelint linter result
+ * Lint document using stylelint
  */
-async function lintDocument(document: vscode.TextDocument, text: string): Promise<stylelint.LinterResult> {
-  // Get the document syntax (css, scss, sass)
-  const syntax = getParseSyntax(document.languageId);
-
-  // Get configuration from user settings
+async function lintDocument(document: vscode.TextDocument): Promise<any> {
+  const content = document.getText();
   const options = getSortingOptions();
+  const syntax = getParseSyntax(document);
 
-  // Determine the appropriate custom syntax based on the document type
-  let customSyntax: string | undefined;
-  if (syntax === 'scss') {
-    customSyntax = 'postcss-scss';
-  } else if (syntax === 'sass') {
-    customSyntax = 'postcss-sass';
-  }
+  try {
+    // Try using stylelint directly
+    const stylelint = require('stylelint');
 
-  // Run Stylelint with our plugin
-  return stylelint.lint({
-    code: text,
-    codeFilename: document.fileName,
-    config: {
-      plugins: ['stylelint-oldschool-order'],
-      rules: {
-        'plugin/oldschool-order': [
-          true,
-          options
-        ]
-      },
-      customSyntax
+    const lintOptions: StylelintLintOptions = {
+      code: content,
+      codeFilename: document.fileName,
+      config: {
+        plugins: ["stylelint-order"],
+        rules: {
+          "order/properties-order": [] // We're just checking for errors, not sorting
+        }
+      }
+    };
+
+    if (syntax) {
+      lintOptions.customSyntax = syntax;
     }
-  });
+
+    const result = await stylelint.lint(lintOptions);
+    return result;
+  } catch (error) {
+    outputChannel.appendLine(`Linting error: ${error}`);
+    console.error('Error linting document:', error);
+    return { warnings: [] };
+  }
+}
+
+/**
+ * Initialize diagnostics
+ */
+export function initDiagnostics(context: vscode.ExtensionContext): void {
+  // Register diagnostics collection
+  context.subscriptions.push(diagnosticCollection);
+
+  // Watch for document changes
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(event => {
+      provideDiagnostics(event.document);
+    })
+  );
+
+  // Watch for document opening
+  context.subscriptions.push(
+    vscode.workspace.onDidOpenTextDocument(document => {
+      provideDiagnostics(document);
+    })
+  );
+
+  // Process currently open document
+  if (vscode.window.activeTextEditor) {
+    provideDiagnostics(vscode.window.activeTextEditor.document);
+  }
 }

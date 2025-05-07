@@ -25,7 +25,7 @@ export interface PropertyGroup {
 /**
  * Supported sorting strategies
  */
-export type SortingStrategy = 'alphabetical' | 'grouped' | 'concentric' | 'custom';
+export type SortingStrategy = 'alphabetical' | 'grouped' | 'concentric' | 'rational-order' | 'idiomatic-order' | 'custom';
 
 /**
  * Sorting options
@@ -34,7 +34,12 @@ export interface SortingOptions {
   /**
    * The sorting strategy to use
    */
-  strategy: SortingStrategy;
+  strategy: 'alphabetical' | 'grouped' | 'concentric' | 'rational-order' | 'idiomatic-order' | 'custom';
+
+  /**
+   * Custom property groups when using 'custom' strategy
+   */
+  propertyGroups?: string[][];
 
   /**
    * Whether to insert empty lines between property groups
@@ -47,9 +52,15 @@ export interface SortingOptions {
   sortPropertiesWithinGroups?: boolean;
 
   /**
-   * Custom property groups when using 'custom' strategy
+   * New option to specify sorting algorithm
    */
-  propertyGroups?: string[][];
+  algorithm?: 'standard' | 'hashmap' | 'radix'; // Algorithm option for performance selection
+
+  /**
+   * SCSS-specific options
+   */
+  processSassDirectives?: boolean;
+  scssDirectivesPosition?: 'top' | 'preserve';
 }
 
 /**
@@ -62,6 +73,11 @@ export interface SortingResult {
   success: boolean;
 
   /**
+   * Error message if the sorting was unsuccessful
+   */
+  error?: string;
+
+  /**
    * The original properties before sorting
    */
   originalProperties?: string[];
@@ -70,11 +86,6 @@ export interface SortingResult {
    * The sorted properties
    */
   sortedProperties?: string[];
-
-  /**
-   * Error message if the sorting was unsuccessful
-   */
-  error?: string;
 }
 
 /**
