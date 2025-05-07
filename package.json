@@ -26,7 +26,13 @@
     "affected:test": "nx affected --target=test",
     "clean": "nx reset && rm -rf dist",
     "fix-nx": "nx g @nx/workspace:fix-configuration",
-    "test-vscode": "cd packages/vscode-old-fashioned && code --extensionDevelopmentPath=."
+    "test-vscode": "cd packages/vscode-old-fashioned && code --extensionDevelopmentPath=.",
+    "benchmark:debug": "npx tsx benchmark/debug-exports.ts",
+    "benchmark": "npm run benchmark:debug && npx tsx benchmark/index.ts",
+    "benchmark:strategies": "npx tsx benchmark/strategies-benchmark.ts",
+    "benchmark:property-count": "npx tsx benchmark/property-count-benchmark.ts",
+    "benchmark:css": "npx tsx benchmark/css-parsing-benchmark.ts",
+    "benchmark:visualize": "npx tsx benchmark/utils/visualization-cli.ts"
   },
   "dependencies": {},
   "devDependencies": {
@@ -44,7 +50,10 @@
     "@nrwl/devkit": "^16.10.0",
     "@nrwl/esbuild": "^16.10.0",
     "esbuild": "^0.18.0",
-    "eslint": "^8.48.0"
+    "eslint": "^8.48.0",
+    "ts-node": "^10.9.1",
+    "@types/node": "^18.11.9",
+    "tsx": "^4.7.0"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

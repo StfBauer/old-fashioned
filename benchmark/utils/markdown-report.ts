@@ -3,7 +3,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { BenchmarkResult } from './benchmark-runner';
+import { BenchmarkResult } from './benchmark-runner.js';
 
 /**
  * Generate a Markdown report from benchmark results

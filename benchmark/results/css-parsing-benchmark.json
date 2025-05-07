@@ -1,0 +1,134 @@
+[
+  {
+    "name": "Small Flat CSS",
+    "fileType": "css",
+    "complexity": "small",
+    "structure": "flat",
+    "contentSize": 266,
+    "parseTime": 1.1030912100000114,
+    "sortTime": 0.000027489999990848445,
+    "totalTime": 1.1032166600000028,
+    "operationsPerSecond": 906.440263510884
+  },
+  {
+    "name": "Medium Flat CSS",
+    "fileType": "css",
+    "complexity": "medium",
+    "structure": "flat",
+    "contentSize": 773,
+    "parseTime": 1.143109960000006,
+    "sortTime": 0.000027539999991859075,
+    "totalTime": 1.1432192599999917,
+    "operationsPerSecond": 874.7228418807493
+  },
+  {
+    "name": "Large Flat CSS",
+    "fileType": "css",
+    "complexity": "large",
+    "structure": "flat",
+    "contentSize": 3704,
+    "parseTime": 1.1469977500000255,
+    "sortTime": 0.000027150000005349283,
+    "totalTime": 1.1471021999999835,
+    "operationsPerSecond": 871.7619057831241
+  },
+  {
+    "name": "Small Nested SCSS",
+    "fileType": "scss",
+    "complexity": "small",
+    "structure": "nested",
+    "contentSize": 451,
+    "parseTime": 1.1458087399999841,
+    "sortTime": 0.00008041000001412612,
+    "totalTime": 1.1461349399999972,
+    "operationsPerSecond": 872.4976135881543
+  },
+  {
+    "name": "Medium Nested SCSS",
+    "fileType": "scss",
+    "complexity": "medium",
+    "structure": "nested",
+    "contentSize": 1376,
+    "parseTime": 1.190348400000007,
+    "sortTime": 0.0001116399999909845,
+    "totalTime": 1.1907982999999875,
+    "operationsPerSecond": 839.7727809991082
+  },
+  {
+    "name": "Large Nested SCSS",
+    "fileType": "scss",
+    "complexity": "large",
+    "structure": "nested",
+    "contentSize": 4657,
+    "parseTime": 1.1426373499999727,
+    "sortTime": 0.00008744999998953063,
+    "totalTime": 1.1430229999999937,
+    "operationsPerSecond": 874.8730340509381
+  },
+  {
+    "name": "Small Flat CSS",
+    "fileType": "css",
+    "complexity": "small",
+    "structure": "flat",
+    "contentSize": 266,
+    "parseTime": 1.1368550699999946,
+    "sortTime": 0.000028710000008231874,
+    "totalTime": 1.1369778999999949,
+    "operationsPerSecond": 879.5245712339743
+  },
+  {
+    "name": "Medium Flat CSS",
+    "fileType": "css",
+    "complexity": "medium",
+    "structure": "flat",
+    "contentSize": 773,
+    "parseTime": 1.1201926199999843,
+    "sortTime": 0.000021600000004582397,
+    "totalTime": 1.1203032600000051,
+    "operationsPerSecond": 892.615451284142
+  },
+  {
+    "name": "Large Flat CSS",
+    "fileType": "css",
+    "complexity": "large",
+    "structure": "flat",
+    "contentSize": 3704,
+    "parseTime": 1.147739599999977,
+    "sortTime": 0.00002695000001722292,
+    "totalTime": 1.1478624499999797,
+    "operationsPerSecond": 871.1845221524737
+  },
+  {
+    "name": "Small Nested SCSS",
+    "fileType": "scss",
+    "complexity": "small",
+    "structure": "nested",
+    "contentSize": 451,
+    "parseTime": 1.1446440999999958,
+    "sortTime": 0.00003918000000112443,
+    "totalTime": 1.1448099899999944,
+    "operationsPerSecond": 873.5074018702483
+  },
+  {
+    "name": "Medium Nested SCSS",
+    "fileType": "scss",
+    "complexity": "medium",
+    "structure": "nested",
+    "contentSize": 1376,
+    "parseTime": 1.1746932399999832,
+    "sortTime": 0.00010676000001240027,
+    "totalTime": 1.1751141599999984,
+    "operationsPerSecond": 850.9811506313578
+  },
+  {
+    "name": "Large Nested SCSS",
+    "fileType": "scss",
+    "complexity": "large",
+    "structure": "nested",
+    "contentSize": 4657,
+    "parseTime": 1.1778500500000177,
+    "sortTime": 0.0000978499999973792,
+    "totalTime": 1.178231500000038,
+    "operationsPerSecond": 848.7296426890366
+  }
+]

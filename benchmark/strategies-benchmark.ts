@@ -2,26 +2,23 @@
  * Benchmark for comparing different sorting strategies
  */
 import {
+    shuffleArray,
     smallPropertySet,
     mediumPropertySet,
     largePropertySet,
     bootstrapPropertySet,
     materialUiPropertySet,
     tailwindClassesPropertySet,
-    generateRandomCSS,
     propertySetWithVendorPrefixes,
     propertySetWithCustomProperties,
-    shuffleArray
-} from './fixtures/property-sets';
-
+    generateRandomCSS
+} from './fixtures/property-sets.js';
 import {
     runBenchmark,
     saveBenchmarkResults,
     BenchmarkResult
-} from './utils/benchmark-runner';
-
-import { generateHtmlReport, saveHtmlReport } from './utils/visualization';
-import { SortingOptions } from '../packages/shared/src/types';
+} from './utils/benchmark-runner.js';
+import { SortingOptions } from '../packages/shared/src/types.js';
 
 // Define strategies to benchmark
 const strategies: SortingOptions[] = [
@@ -103,4 +100,8 @@ async function runStrategiesBenchmarks() {
 }
 
 // Run the benchmarks
-runStrategiesBenchmarks().catch(console.error);
+if (import.meta.url === new URL(import.meta.url).href) {
+    runStrategiesBenchmarks().catch(console.error);
+}
+
+export { runStrategiesBenchmarks };

@@ -3,8 +3,8 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { generateHtmlReport, saveHtmlReport } from './visualization';
-import { generateMarkdownReport, saveMarkdownReport } from './markdown-report';
+import { generateHtmlReport, saveHtmlReport } from './visualization.js';
+import { generateMarkdownReport, saveMarkdownReport } from './markdown-report.js';
 
 // Path to results directory
 const resultsDir = path.join(__dirname, '..', 'results');

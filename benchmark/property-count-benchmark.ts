@@ -1,10 +1,11 @@
 /**
  * Benchmark for testing performance with different property counts
  */
-import { shuffleArray, smallPropertySet, mediumPropertySet, largePropertySet } from './fixtures/property-sets';
-import { runBenchmark, saveBenchmarkResults, BenchmarkResult } from './utils/benchmark-runner';
-import { generateHtmlReport, saveHtmlReport } from './utils/visualization';
-import { SortingOptions } from '../packages/shared/src/types';
+import { shuffleArray, smallPropertySet, mediumPropertySet, largePropertySet } from './fixtures/property-sets.js';
+import { runBenchmark, saveBenchmarkResults, BenchmarkResult } from './utils/benchmark-runner.js';
+import { generateHtmlReport, saveHtmlReport } from './utils/visualization.js';
+import { SortingOptions } from '../packages/shared/src/types.js';
+import { fileURLToPath } from 'url';
 
 // Create test sets with consistent property counts
 function generatePropertySetsOfVaryingSize() {
@@ -75,5 +76,10 @@ async function runPropertyCountBenchmarks() {
     console.log('Property count benchmarks completed!');
 }
 
-// Run the benchmarks
-runPropertyCountBenchmarks().catch(console.error);
+// Export the benchmark function and check for direct execution
+export { runPropertyCountBenchmarks };
+
+// More reliable way to detect direct execution in ESM
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    runPropertyCountBenchmarks().catch(console.error);
+}

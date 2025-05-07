@@ -1,11 +1,33 @@
 /**
  * Benchmark runner for CSS property sorting strategies
  */
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { performance } from 'perf_hooks';
-import { sortProperties } from '../../packages/shared/src/sorting';
-import { SortingOptions } from '../../packages/shared/src/types';
+// First, let's try to import the whole module
+import * as shared from '../../packages/shared/dist/index.js';
+import { SortingOptions } from '../../packages/shared/src/types.js';
+
+// Add fileURLToPath conversion for ESM compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Create a fallback sorting function in case we can't find the real one
+function sortPropertiesFallback(properties: string[], options: SortingOptions): string[] {
+    console.log('Warning: Using fallback sorting function. Real implementation not found!');
+    // Simple alphabetical sort as fallback
+    return [...properties].sort();
+}
+
+// Find the actual sorting function if available
+const sortPropertiesFunction =
+    (typeof shared === 'object' && 'sortProperties' in shared) ? shared.sortProperties :
+        sortPropertiesFallback;
+
+// Log what we found to help with debugging
+console.log('Available exports from shared package:', Object.keys(shared));
+console.log('Using sort function:', sortPropertiesFunction.name || 'anonymous function');
 
 /**
  * Result of a single benchmark test
@@ -49,7 +71,7 @@ export function runBenchmark(options: BenchmarkOptions): BenchmarkResult {
 
     // Warmup to avoid JIT compilation affecting results
     for (let i = 0; i < warmupIterations; i++) {
-        sortProperties([...properties], sortingOptions);
+        sortPropertiesFunction([...properties], sortingOptions);
     }
 
     // Run the actual benchmark
@@ -57,7 +79,7 @@ export function runBenchmark(options: BenchmarkOptions): BenchmarkResult {
 
     for (let i = 0; i < iterations; i++) {
         const startTime = performance.now();
-        sortProperties([...properties], sortingOptions);
+        sortPropertiesFunction([...properties], sortingOptions);
         const endTime = performance.now();
 
         timings.push(endTime - startTime);

@@ -8,11 +8,16 @@ import {
     smallScssNested,
     mediumScssNested,
     largeScssNested
-} from './fixtures/css-samples';
+} from './fixtures/css-samples.js';
 import { performance } from 'perf_hooks';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SortingOptions } from '../packages/shared/src/types';
+import { fileURLToPath } from 'url';
+import { SortingOptions } from '../packages/shared/src/types.js';
+
+// Add fileURLToPath conversion for ESM compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create a mock css parser function since the real one doesn't exist yet
 async function sortCssFile(content: string, options: SortingOptions): Promise<{ output: string, changed: boolean }> {
@@ -212,9 +217,10 @@ async function runCssBenchmarks() {
     }
 }
 
-// Run the benchmark if this file is executed directly
-if (require.main === module) {
+// Export the benchmark function and check for direct execution
+export { runCssBenchmarks };
+
+// More reliable way to detect direct execution in ESM
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
     runCssBenchmarks().catch(console.error);
 }
-
-export { runCssBenchmarks };

@@ -1,9 +1,14 @@
 /**
  * Utilities for visualizing benchmark results
  */
-import fs from 'fs';
-import path from 'path';
-import { BenchmarkResult } from './benchmark-runner';
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { BenchmarkResult } from './benchmark-runner.js';
+
+// Add fileURLToPath conversion for ESM compatibility 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Convert benchmark results to an HTML report
