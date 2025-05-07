@@ -42,44 +42,103 @@ export const DEFAULT_PROPERTY_GROUPS: string[][] = [
 ];
 
 /**
- * Property order for concentric layout (from outside to inside)
+ * Concentric CSS property order
+ * Going from outside (position) to inside (content and visuals)
  */
-export const CONCENTRIC_PROPERTY_ORDER: string[] = [
-    // Content
-    'content',
-
-    // Position
-    'position', 'top', 'right', 'bottom', 'left', 'z-index',
+export const CONCENTRIC_PROPERTY_ORDER = [
+    // Positioning
+    'position',
+    'top',
+    'right',
+    'bottom',
+    'left',
+    'z-index',
 
     // Display & Box Model
-    'display', 'flex-direction', 'flex-wrap', 'flex-flow', 'justify-content', 'align-items', 'align-content',
-    'float', 'clear', 'box-sizing',
+    'display',
+    'flex',
+    'flex-direction',
+    'flex-wrap',
+    'flex-flow',
+    'flex-grow',
+    'flex-shrink',
+    'flex-basis',
+    'justify-content',
+    'align-items',
+    'align-content',
+    'order',
+    'float',
+    'clear',
+    'box-sizing',
 
     // Dimensions
-    'width', 'min-width', 'max-width',
-    'height', 'min-height', 'max-height',
+    'width',
+    'min-width',
+    'max-width',
+    'height',
+    'min-height',
+    'max-height',
 
     // Margin
-    'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
-
-    // Border
-    'border', 'border-width', 'border-style', 'border-color', 'border-radius',
-    'border-top', 'border-right', 'border-bottom', 'border-left',
+    'margin',
+    'margin-top',
+    'margin-right',
+    'margin-bottom',
+    'margin-left',
 
     // Padding
-    'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+    'padding',
+    'padding-top',
+    'padding-right',
+    'padding-bottom',
+    'padding-left',
 
-    // Background & Colors
-    'background', 'background-color', 'background-image', 'background-position', 'background-size', 'background-repeat',
-    'color', 'opacity',
+    // Border
+    'border',
+    'border-width',
+    'border-style',
+    'border-color',
+    'border-top',
+    'border-right',
+    'border-bottom',
+    'border-left',
+    'border-radius',
+
+    // Background
+    'background',
+    'background-color',
+    'background-image',
+    'background-repeat',
+    'background-position',
+    'background-size',
 
     // Typography
-    'font', 'font-family', 'font-size', 'font-weight', 'line-height',
-    'text-align', 'text-decoration', 'text-transform', 'white-space',
+    'color',
+    'font',
+    'font-family',
+    'font-size',
+    'font-weight',
+    'line-height',
+    'text-align',
+    'text-decoration',
+    'text-transform',
+    'letter-spacing',
 
-    // Other visual effects
-    'box-shadow', 'text-shadow',
-    'transform', 'transition', 'animation'
+    // Other Visual
+    'opacity',
+    'visibility',
+    'overflow',
+    'box-shadow',
+    'text-shadow',
+    'transform',
+    'transition',
+    'animation',
+
+    // Miscellaneous
+    'cursor',
+    'pointer-events',
+    'user-select',
+    'content'
 ];
 
 /**
