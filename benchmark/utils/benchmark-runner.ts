@@ -20,9 +20,25 @@ function sortPropertiesFallback(properties: string[], options: SortingOptions): 
     return [...properties].sort();
 }
 
+// Add a utility function to handle nested CSS rules
+function processNestedRules(properties: string[], options: SortingOptions): string[] {
+    // Placeholder for handling nested rules
+    // This function will recursively process nested rules if needed
+    return properties.map(property => {
+        // Example: Add logic to handle nested rules here
+        return property;
+    });
+}
+
 // Find the actual sorting function if available
 const sortPropertiesFunction =
-    (typeof shared === 'object' && 'sortProperties' in shared) ? shared.sortProperties :
+    (typeof shared === 'object' && 'sortProperties' in shared) ? (properties: string[], options: SortingOptions) => {
+        const result = shared.sortProperties(properties, options);
+        if (result.success && result.sortedProperties) {
+            return result.sortedProperties;
+        }
+        throw new Error(result.error || 'Sorting failed');
+    } :
         sortPropertiesFallback;
 
 // Log what we found to help with debugging

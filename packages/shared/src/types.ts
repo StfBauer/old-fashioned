@@ -28,6 +28,26 @@ export interface PropertyGroup {
 export type SortingStrategy = 'alphabetical' | 'grouped' | 'concentric' | 'custom';
 
 /**
+ * Context for nested CSS rules
+ */
+export interface NestedRuleContext {
+  /**
+   * The nesting level of the rule
+   */
+  nestingLevel: number;
+
+  /**
+   * The type of the parent rule (e.g., selector, at-rule)
+   */
+  parentType: string;
+
+  /**
+   * Whether the parent rule is an at-rule (e.g., @media, @supports)
+   */
+  isAtRule: boolean;
+}
+
+/**
  * Sorting options
  */
 export interface SortingOptions {

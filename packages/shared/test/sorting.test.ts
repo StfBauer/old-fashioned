@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sortProperties } from '../src/sorting';
+import { sortPropertiesWithCache, sortProperties } from '../src/sorting';
 import { SortingOptions } from '../src/types';
 
 describe('Property Sorting', () => {
@@ -41,5 +41,64 @@ describe('Property Sorting', () => {
         const positionIndex = groupedResult.sortedProperties!.indexOf('position');
         const widthIndex = groupedResult.sortedProperties!.indexOf('width');
         expect(positionIndex).toBeLessThan(widthIndex);
+    });
+});
+
+describe('Property Sorting with Cache', () => {
+    it('should cache results for identical inputs', () => {
+        const properties = ['color', 'margin', 'padding', 'width'];
+        const options: SortingOptions = { strategy: 'alphabetical' };
+
+        const firstResult = sortPropertiesWithCache(properties, options);
+        const secondResult = sortPropertiesWithCache(properties, options);
+
+        expect(firstResult).toEqual(secondResult);
+    });
+
+    it('should handle nested rules correctly', () => {
+        const properties = ['color', 'margin', 'padding', 'width'];
+        const options: SortingOptions = { strategy: 'grouped' };
+
+        const result = sortProperties(properties, options);
+
+        expect(result.success).toBe(true);
+        expect(result.sortedProperties).toEqual([
+            'margin',
+            'padding',
+            '',
+            'color',
+            'width'
+        ]);
+    });
+
+    it('should sort properties alphabetically', () => {
+        const properties = ['z-index', 'color', 'margin', 'display'];
+        const options: SortingOptions = { strategy: 'alphabetical' };
+
+        const result = sortProperties(properties, options);
+
+        expect(result.success).toBe(true);
+        expect(result.sortedProperties).toEqual([
+            'color',
+            'display',
+            'margin',
+            'z-index'
+        ]);
+    });
+
+    it('should sort properties by concentric order', () => {
+        const properties = ['color', 'position', 'padding', 'margin', 'width'];
+        const options: SortingOptions = { strategy: 'concentric' };
+
+        const result = sortProperties(properties, options);
+
+        expect(result.success).toBe(true);
+        expect(result.sortedProperties).toEqual([
+            'position',
+            'margin',
+            'padding',
+            'width',
+            'color'
+        ]);
     });
 });
