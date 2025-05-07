@@ -1,0 +1,53 @@
+// SCSS benchmark test file
+.hello {
+    width: 20px;
+    height: 30px;
+}
+
+body {
+    position: absolute;
+    z-index: 1000;
+    top: 300px;
+    right: 20px;
+    bottom: 100px;
+
+    isolation: isolate;
+
+    display: block;
+    visibility: hidden;
+
+    box-sizing: border-box;
+    width: 100px;
+    height: 20px;
+    padding: 300rem;
+
+    padding-block: 30px;
+    padding-inline: 10px;
+    padding-inline-start: 400px;
+
+    margin: 300px !important;
+
+    font-family: "Courier New", Courier, monospace;
+    font-size: 20px;
+    font-weight: 300;
+
+    transition: all ease-in 1s;
+
+    background-color: lime;
+
+    content: "none";
+}
+
+div {
+    color: lime;
+}
+
+a {
+    a {
+        width: 2px;
+        height: 1px;
+
+        font-size: 2px;
+        font-weight: bold;
+    }
+}

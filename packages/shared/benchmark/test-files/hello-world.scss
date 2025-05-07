@@ -1,0 +1,51 @@
+// SCSS benchmark test file with media queries
+body {
+    position: absolute;
+    top: 300px;
+    right: 20px;
+    bottom: 100px;
+    z-index: 1000;
+
+    display: block;
+    visibility: hidden;
+    isolation: isolate;
+
+    box-sizing: border-box;
+    width: 100px;
+    height: 20px;
+    margin: 300px !important;
+    padding: 300rem;
+    padding-block: 30px;
+    padding-inline: 10px;
+    padding-inline-start: 400px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 20px;
+    font-weight: 300;
+
+    background-color: lime;
+
+    content: "none";
+    transition: all ease-in 1s;
+
+    @media screen and (max-width: 768px) {
+        content: "Hello world";
+    }
+
+    @media screen and (max-width: 1024px) {
+        background-color: magenta;
+        content: "Hello world";
+    }
+}
+
+div {
+    color: lime;
+}
+
+a {
+    a {
+        width: 2px;
+        height: 1px;
+        font-size: 2px;
+        font-weight: bold;
+    }
+}
