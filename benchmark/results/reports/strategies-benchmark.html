@@ -1,0 +1,1129 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Strategies Benchmark Benchmark Results</title>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        h1, h2, h3 {
+          margin-top: 30px;
+        }
+        .chart-container {
+          margin: 40px 0;
+          height: 400px;
+        }
+        .results-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 30px;
+        }
+        .results-table th, .results-table td {
+          padding: 10px;
+          border: 1px solid #ddd;
+          text-align: left;
+        }
+        .results-table th {
+          background-color: #f5f5f5;
+        }
+        .results-table tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+        footer {
+          margin-top: 50px;
+          color: #666;
+          font-size: 14px;
+          text-align: center;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Strategies Benchmark Benchmark Results</h1>
+      <p>Generated on 5/7/2025, 7:17:38 PM</p>
+      
+      <h2>Performance Comparison</h2>
+      <div class="chart-container">
+        <canvas id="performanceChart"></canvas>
+      </div>
+      
+      <h2>Operations Per Second</h2>
+      <div class="chart-container">
+        <canvas id="opsChart"></canvas>
+      </div>
+      
+      <h2>Detailed Results</h2>
+      
+      <h3>Input Size: small properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0005</td>
+              <td>0.0003</td>
+              <td>0.0002</td>
+              <td>0.8771</td>
+              <td>2137928.91</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0011</td>
+              <td>0.0009</td>
+              <td>0.0005</td>
+              <td>0.1810</td>
+              <td>871663.96</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0010</td>
+              <td>0.0009</td>
+              <td>0.0006</td>
+              <td>0.2832</td>
+              <td>987797.25</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0020</td>
+              <td>0.0017</td>
+              <td>0.0015</td>
+              <td>0.1892</td>
+              <td>511830.08</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0005</td>
+              <td>0.0003</td>
+              <td>0.0002</td>
+              <td>0.6416</td>
+              <td>1952448.51</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0012</td>
+              <td>0.0009</td>
+              <td>0.0007</td>
+              <td>0.2079</td>
+              <td>864879.15</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0011</td>
+              <td>0.0009</td>
+              <td>0.0007</td>
+              <td>0.3490</td>
+              <td>947804.59</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0021</td>
+              <td>0.0018</td>
+              <td>0.0016</td>
+              <td>0.2351</td>
+              <td>470821.85</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0005</td>
+              <td>0.0003</td>
+              <td>0.0002</td>
+              <td>0.6792</td>
+              <td>2137567.88</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0011</td>
+              <td>0.0009</td>
+              <td>0.0006</td>
+              <td>0.1339</td>
+              <td>878936.67</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0009</td>
+              <td>0.0010</td>
+              <td>0.0007</td>
+              <td>0.1520</td>
+              <td>1053279.40</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0021</td>
+              <td>0.0019</td>
+              <td>0.0017</td>
+              <td>0.1863</td>
+              <td>477687.16</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: medium properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0008</td>
+              <td>0.0008</td>
+              <td>0.0007</td>
+              <td>0.0139</td>
+              <td>1185204.29</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0016</td>
+              <td>0.0015</td>
+              <td>0.0012</td>
+              <td>0.1256</td>
+              <td>632739.83</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0017</td>
+              <td>0.0016</td>
+              <td>0.0015</td>
+              <td>0.1013</td>
+              <td>595044.71</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0033</td>
+              <td>0.0031</td>
+              <td>0.0028</td>
+              <td>0.1526</td>
+              <td>303233.30</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0011</td>
+              <td>0.0011</td>
+              <td>0.0010</td>
+              <td>0.0095</td>
+              <td>876667.90</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0022</td>
+              <td>0.0020</td>
+              <td>0.0017</td>
+              <td>0.1950</td>
+              <td>461255.42</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0023</td>
+              <td>0.0020</td>
+              <td>0.0017</td>
+              <td>0.2001</td>
+              <td>439863.84</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0043</td>
+              <td>0.0039</td>
+              <td>0.0035</td>
+              <td>0.1835</td>
+              <td>234526.44</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0012</td>
+              <td>0.0011</td>
+              <td>0.0010</td>
+              <td>0.0136</td>
+              <td>849617.96</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0023</td>
+              <td>0.0020</td>
+              <td>0.0018</td>
+              <td>0.2100</td>
+              <td>430202.67</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0022</td>
+              <td>0.0020</td>
+              <td>0.0018</td>
+              <td>0.1586</td>
+              <td>452597.43</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0039</td>
+              <td>0.0038</td>
+              <td>0.0037</td>
+              <td>0.1707</td>
+              <td>253549.28</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: large properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0047</td>
+              <td>0.0043</td>
+              <td>0.0042</td>
+              <td>0.1719</td>
+              <td>215050.57</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0096</td>
+              <td>0.0089</td>
+              <td>0.0082</td>
+              <td>0.2454</td>
+              <td>104351.00</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0097</td>
+              <td>0.0092</td>
+              <td>0.0084</td>
+              <td>0.1513</td>
+              <td>103605.11</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0141</td>
+              <td>0.0138</td>
+              <td>0.0128</td>
+              <td>0.0842</td>
+              <td>70814.65</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0049</td>
+              <td>0.0048</td>
+              <td>0.0048</td>
+              <td>0.0096</td>
+              <td>203422.96</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0097</td>
+              <td>0.0092</td>
+              <td>0.0090</td>
+              <td>0.1855</td>
+              <td>102802.53</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0099</td>
+              <td>0.0095</td>
+              <td>0.0092</td>
+              <td>0.1630</td>
+              <td>101146.28</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0147</td>
+              <td>0.0142</td>
+              <td>0.0138</td>
+              <td>0.2109</td>
+              <td>68190.85</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0046</td>
+              <td>0.0046</td>
+              <td>0.0042</td>
+              <td>0.0495</td>
+              <td>215299.76</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0094</td>
+              <td>0.0090</td>
+              <td>0.0088</td>
+              <td>0.2023</td>
+              <td>106252.93</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0097</td>
+              <td>0.0092</td>
+              <td>0.0091</td>
+              <td>0.1118</td>
+              <td>102631.96</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0152</td>
+              <td>0.0145</td>
+              <td>0.0141</td>
+              <td>0.1559</td>
+              <td>65672.45</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: prefixes properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0004</td>
+              <td>0.0004</td>
+              <td>0.0003</td>
+              <td>0.0098</td>
+              <td>2258622.18</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0015</td>
+              <td>0.0013</td>
+              <td>0.0012</td>
+              <td>0.1849</td>
+              <td>666735.56</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0016</td>
+              <td>0.0015</td>
+              <td>0.0013</td>
+              <td>0.1431</td>
+              <td>628233.83</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0024</td>
+              <td>0.0022</td>
+              <td>0.0020</td>
+              <td>0.1419</td>
+              <td>424802.48</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0005</td>
+              <td>0.0005</td>
+              <td>0.0004</td>
+              <td>0.1770</td>
+              <td>1940709.39</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0016</td>
+              <td>0.0015</td>
+              <td>0.0013</td>
+              <td>0.1802</td>
+              <td>640709.76</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0017</td>
+              <td>0.0015</td>
+              <td>0.0014</td>
+              <td>0.1505</td>
+              <td>591264.59</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0025</td>
+              <td>0.0024</td>
+              <td>0.0021</td>
+              <td>0.2163</td>
+              <td>393493.30</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0005</td>
+              <td>0.0005</td>
+              <td>0.0004</td>
+              <td>0.0816</td>
+              <td>2126682.21</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0015</td>
+              <td>0.0014</td>
+              <td>0.0013</td>
+              <td>0.0975</td>
+              <td>686798.71</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0016</td>
+              <td>0.0015</td>
+              <td>0.0015</td>
+              <td>0.0877</td>
+              <td>628910.01</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0024</td>
+              <td>0.0023</td>
+              <td>0.0022</td>
+              <td>0.0989</td>
+              <td>411915.67</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: properties properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0003</td>
+              <td>0.0002</td>
+              <td>0.0002</td>
+              <td>0.0013</td>
+              <td>3699393.23</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0008</td>
+              <td>0.0008</td>
+              <td>0.0006</td>
+              <td>0.1090</td>
+              <td>1238862.47</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0009</td>
+              <td>0.0009</td>
+              <td>0.0007</td>
+              <td>0.1030</td>
+              <td>1116420.43</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0019</td>
+              <td>0.0018</td>
+              <td>0.0015</td>
+              <td>0.1350</td>
+              <td>523835.32</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0003</td>
+              <td>0.0003</td>
+              <td>0.0002</td>
+              <td>0.0044</td>
+              <td>3703023.44</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0008</td>
+              <td>0.0008</td>
+              <td>0.0007</td>
+              <td>0.1473</td>
+              <td>1181848.97</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0010</td>
+              <td>0.0009</td>
+              <td>0.0007</td>
+              <td>0.1299</td>
+              <td>994769.80</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0020</td>
+              <td>0.0018</td>
+              <td>0.0016</td>
+              <td>0.1745</td>
+              <td>489364.09</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0004</td>
+              <td>0.0003</td>
+              <td>0.0002</td>
+              <td>0.1421</td>
+              <td>2812746.47</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0008</td>
+              <td>0.0008</td>
+              <td>0.0007</td>
+              <td>0.1047</td>
+              <td>1207388.83</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0009</td>
+              <td>0.0009</td>
+              <td>0.0008</td>
+              <td>0.1020</td>
+              <td>1086238.90</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0019</td>
+              <td>0.0018</td>
+              <td>0.0017</td>
+              <td>0.1051</td>
+              <td>532626.15</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: bootstrap properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0005</td>
+              <td>0.0005</td>
+              <td>0.0005</td>
+              <td>0.1245</td>
+              <td>1829094.53</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0016</td>
+              <td>0.0015</td>
+              <td>0.0012</td>
+              <td>0.1519</td>
+              <td>611786.97</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0017</td>
+              <td>0.0015</td>
+              <td>0.0015</td>
+              <td>0.1466</td>
+              <td>586792.34</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0027</td>
+              <td>0.0025</td>
+              <td>0.0024</td>
+              <td>0.1254</td>
+              <td>370054.74</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0006</td>
+              <td>0.0006</td>
+              <td>0.0005</td>
+              <td>0.1240</td>
+              <td>1584118.77</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0016</td>
+              <td>0.0015</td>
+              <td>0.0014</td>
+              <td>0.1034</td>
+              <td>644112.92</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0016</td>
+              <td>0.0015</td>
+              <td>0.0015</td>
+              <td>0.1104</td>
+              <td>627599.40</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0025</td>
+              <td>0.0025</td>
+              <td>0.0023</td>
+              <td>0.1263</td>
+              <td>393445.03</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: ui properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0009</td>
+              <td>0.0008</td>
+              <td>0.0007</td>
+              <td>0.1081</td>
+              <td>1170068.25</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0022</td>
+              <td>0.0020</td>
+              <td>0.0019</td>
+              <td>0.1342</td>
+              <td>464496.27</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0023</td>
+              <td>0.0021</td>
+              <td>0.0018</td>
+              <td>0.1386</td>
+              <td>439107.47</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0038</td>
+              <td>0.0034</td>
+              <td>0.0032</td>
+              <td>0.1846</td>
+              <td>264672.53</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0008</td>
+              <td>0.0008</td>
+              <td>0.0007</td>
+              <td>0.0931</td>
+              <td>1239634.49</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0021</td>
+              <td>0.0020</td>
+              <td>0.0019</td>
+              <td>0.0824</td>
+              <td>477749.58</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0023</td>
+              <td>0.0021</td>
+              <td>0.0020</td>
+              <td>0.1152</td>
+              <td>430408.57</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0033</td>
+              <td>0.0032</td>
+              <td>0.0031</td>
+              <td>0.1274</td>
+              <td>299276.81</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: tailwind properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0010</td>
+              <td>0.0010</td>
+              <td>0.0009</td>
+              <td>0.0015</td>
+              <td>983954.65</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0028</td>
+              <td>0.0027</td>
+              <td>0.0024</td>
+              <td>0.1392</td>
+              <td>355011.42</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0029</td>
+              <td>0.0028</td>
+              <td>0.0027</td>
+              <td>0.1372</td>
+              <td>340629.34</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0041</td>
+              <td>0.0038</td>
+              <td>0.0034</td>
+              <td>0.2419</td>
+              <td>242469.32</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0011</td>
+              <td>0.0010</td>
+              <td>0.0010</td>
+              <td>0.0017</td>
+              <td>935638.20</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0027</td>
+              <td>0.0027</td>
+              <td>0.0026</td>
+              <td>0.1212</td>
+              <td>364690.04</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0029</td>
+              <td>0.0027</td>
+              <td>0.0027</td>
+              <td>0.0947</td>
+              <td>349901.13</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0038</td>
+              <td>0.0037</td>
+              <td>0.0035</td>
+              <td>0.1001</td>
+              <td>261831.10</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: random50 properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0024</td>
+              <td>0.0023</td>
+              <td>0.0022</td>
+              <td>0.0080</td>
+              <td>409085.80</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0064</td>
+              <td>0.0059</td>
+              <td>0.0052</td>
+              <td>0.1891</td>
+              <td>157277.74</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0060</td>
+              <td>0.0058</td>
+              <td>0.0056</td>
+              <td>0.1518</td>
+              <td>166878.27</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0076</td>
+              <td>0.0074</td>
+              <td>0.0071</td>
+              <td>0.0540</td>
+              <td>131028.51</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0026</td>
+              <td>0.0028</td>
+              <td>0.0021</td>
+              <td>0.0037</td>
+              <td>382233.48</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0057</td>
+              <td>0.0051</td>
+              <td>0.0050</td>
+              <td>0.1233</td>
+              <td>174236.82</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0054</td>
+              <td>0.0052</td>
+              <td>0.0052</td>
+              <td>0.1306</td>
+              <td>185325.93</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0069</td>
+              <td>0.0069</td>
+              <td>0.0068</td>
+              <td>0.0092</td>
+              <td>144522.06</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      
+      <footer>
+        Generated by Old Fashioned CSS Property Sorting Benchmarking Tool
+      </footer>
+      
+      <script>
+        // Performance chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(performanceCtx, {
+          type: 'bar',
+          data: {"labels":["small","medium","large","prefixes","properties","bootstrap","ui","tailwind","random50"],"datasets":[{"label":"alphabetical strategy","data":[0.0004825803999999588,0.0010538062666666159,0.004736873999999925,0.00047607976666667087,0.0002986295333333809,0.0005889921999999728,0.00083067020000002,0.0010425481000003287,0.0025303385000004256],"backgroundColor":"#4285F4","borderColor":"#4285F4","borderWidth":1},{"label":"grouped strategy","data":[0.0010763399000000451,0.002039392700000055,0.009667365499999865,0.0015649585999999525,0.0008838571499998892,0.001621158049999893,0.002211684299999908,0.002838139500000389,0.005871446250000105],"backgroundColor":"#34A853","borderColor":"#34A853","borderWidth":1},{"label":"concentric strategy","data":[0.002057046433333472,0.003835236266666792,0.014671060000000105,0.0024410186333331503,0.0019433182333332352,0.002621977000000146,0.003559821000000153,0.003971744599999977,0.007275643000000684],"backgroundColor":"#FBBC05","borderColor":"#FBBC05","borderWidth":1}]},
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Average Time (ms)'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Input Size (number of properties)'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'Average Sorting Time by Strategy and Input Size'
+              },
+              legend: {
+                position: 'top'
+              }
+            }
+          }
+        });
+        
+        // Operations per second chart
+        const opsData = {
+          labels: ["small","medium","large","prefixes","properties","bootstrap","ui","tailwind","random50"],
+          datasets: [{"label":"alphabetical strategy","data":[2075981.7674033765,970496.7180773625,211257.76352273673,2108671.2567858403,3405054.3790040887,1706606.6472611413,1204851.3682074498,959796.4242201378,395659.63874475844],"backgroundColor":"transparent","borderColor":"#4285F4","borderWidth":2,"tension":0.1},{"label":"grouped strategy","data":[934060.169444445,501950.65048473683,103464.96707371248,640442.0771657525,1137588.234702192,617572.9073164845,452940.4743657104,352557.98210393754,170929.6888678218],"backgroundColor":"transparent","borderColor":"#34A853","borderWidth":2,"tension":0.1},{"label":"concentric strategy","data":[486779.69828386843,263769.6754545885,68225.9852324653,410070.484810144,515275.1847724355,381749.88686401944,281974.67080887454,252150.2076771441,137775.2822809082],"backgroundColor":"transparent","borderColor":"#FBBC05","borderWidth":2,"tension":0.1}]
+        };
+        
+        const opsCtx = document.getElementById('opsChart').getContext('2d');
+        new Chart(opsCtx, {
+          type: 'line',
+          data: opsData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Operations per Second'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Input Size (number of properties)'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'Operations per Second by Strategy and Input Size'
+              },
+              legend: {
+                position: 'top'
+              }
+            }
+          }
+        });
+      </script>
+    </body>
+    </html>
+  
