@@ -1,0 +1,13 @@
+/* Randomized CSS properties */
+.example {
+    margin: 10px;
+    color: blue;
+    padding: 20px;
+    display: flex;
+    z-index: 100;
+    background-color: white;
+    font-size: 16px;
+    border: 1px solid black;
+    position: relative;
+    width: 200px;
+}

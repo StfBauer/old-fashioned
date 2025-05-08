@@ -19,4 +19,15 @@ cd packages/vscode-old-fashioned
 npm run build
 cd ../..
 
+# Prelaunch script to copy test samples to a temp folder
+TEMP_DIR="packages/vscode-old-fashioned/temp"
+SAMPLES_DIR="packages/vscode-old-fashioned/test/samples"
+
+# Recreate the temp folder
+rm -rf "$TEMP_DIR"
+mkdir -p "$TEMP_DIR"
+
+# Copy test samples to the temp folder
+cp -r "$SAMPLES_DIR"/* "$TEMP_DIR"/
+
 echo "Setup complete!"
