@@ -1,5 +1,5 @@
 import { SortingOptions, SortingResult } from './types';
-import { DEFAULT_PROPERTY_GROUPS, CONCENTRIC_PROPERTY_ORDER } from './property-groups';
+import { DEFAULT_PROPERTY_GROUPS, CONCENTRIC_PROPERTY_ORDER, IDIOMATIC_PROPERTY_GROUPS } from './property-groups';
 
 /**
  * LRU Cache for frequently sorted property sets
@@ -42,6 +42,7 @@ const propertyCache = new LRUCache<string, SortingResult>(100);
  * - alphabetical: sorts properties alphabetically
  * - grouped: sorts by logical groups (position, layout, visual, etc.)
  * - concentric: sorts from outside in (position → margin → padding → etc.)
+ * - idiomatic: sorts using Nicolas Gallagher's Idiomatic CSS principles
  */
 export function sortProperties(properties: string[], options: SortingOptions): SortingResult {
     try {
@@ -53,6 +54,8 @@ export function sortProperties(properties: string[], options: SortingOptions): S
                     return sortByGroups(properties, DEFAULT_PROPERTY_GROUPS, options);
                 case 'concentric':
                     return sortByConcentricOrder(properties);
+                case 'idiomatic':
+                    return sortByGroups(properties, IDIOMATIC_PROPERTY_GROUPS, options);
                 case 'custom':
                     if (!options.propertyGroups) {
                         return {
@@ -97,55 +100,32 @@ function debugLog(message: string, data: any) {
  * @returns The sorted properties
  */
 function processNestedRules(
-    properties: string[],
+    properties: string[], // This is the already sorted list, possibly with '' markers
     options: SortingOptions,
     context: { nestingLevel: number; parentType: string; isAtRule: boolean }
 ): string[] {
-    debugLog('Processing nested rules', { properties, options, context });
+    // For non-nested CSS (like the current test case), or if not an @-rule context,
+    // this function should be largely a pass-through for top-level properties,
+    // preserving existing '' markers.
+    // The original logic for adding empty lines here is removed to avoid conflicts
+    // with the main sorting function (sortByGroups or optimizedGroupedSort)
+    // which should now be solely responsible for '' markers.
 
-    const sortedProperties: string[] = [];
-
-    properties.forEach(property => {
-        if (context.isAtRule && property.startsWith('@')) {
-            const nestedContext = {
-                ...context,
-                nestingLevel: context.nestingLevel + 1
-            };
-            const nestedSorted = processNestedRules([property], options, nestedContext);
-            sortedProperties.push(...nestedSorted);
-        } else {
-            sortedProperties.push(property);
-        }
-    });
-
-    if (options.emptyLinesBetweenGroups) {
-        // Insert an empty line between groups
-        // Ensure empty strings are inserted correctly between groups in nested rules
-        const groupedProperties: string[] = [];
-        let previousGroupIndex = -1;
-
-        properties.forEach((prop) => {
-            const currentGroupIndex = DEFAULT_PROPERTY_GROUPS.findIndex(group => group.includes(prop));
-
-            if (previousGroupIndex !== -1 && currentGroupIndex !== previousGroupIndex) {
-                groupedProperties.push(''); // Add empty line between groups
-            }
-
-            groupedProperties.push(prop);
-            previousGroupIndex = currentGroupIndex;
-        });
-
-        // Ensure empty strings are preserved in the final output
-        const finalGroupedProperties = groupedProperties.filter((prop, idx) => {
-            return prop !== '' || (idx > 0 && groupedProperties[idx - 1] !== '');
-        });
-
-        debugLog('Debugging nested rules with empty lines', finalGroupedProperties);
-        return finalGroupedProperties;
+    if (!context.isAtRule && context.nestingLevel === 0) { // Simplification for top-level CSS rules
+        return properties; // Pass through the already sorted list with its '' markers
     }
 
-    debugLog('Final sorted properties', sortedProperties);
-    return sortedProperties;
+    // Original logic for handling actual nested structures (e.g., SCSS @media, @nest)
+    // would remain here, but it should also respect and pass through '' markers
+    // if they are part of a flat list of declarations within a nested block.
+    // For now, focusing on the pass-through for the current issue.
+    // A more complete refactor of this function for complex nesting + empty lines
+    // would be needed if SCSS with empty lines between groups inside nested rules
+    // becomes a requirement.
+
+    // Fallback to returning properties as is if complex nesting logic is not fully implemented here
+    // to handle '' markers correctly within truly nested structures.
+    return properties;
 }
 
 /**
@@ -165,11 +145,51 @@ export function sortAlphabetically(properties: string[]): SortingResult {
 export function sortByConcentricOrder(properties: string[]): SortingResult {
     debugLog('Sorting by concentric order', properties);
 
+    // Define the concentric property groups for empty line insertion
+    const concentricGroups = [
+        // Positioning
+        ['position', 'top', 'right', 'bottom', 'left', 'z-index'],
+
+        // Display & Box Model
+        ['display', 'flex', 'flex-direction', 'flex-wrap', 'flex-flow', 'flex-grow',
+            'flex-shrink', 'flex-basis', 'justify-content', 'align-items', 'align-content',
+            'order', 'float', 'clear', 'box-sizing'],
+
+        // Dimensions
+        ['width', 'min-width', 'max-width', 'height', 'min-height', 'max-height'],
+
+        // Margin
+        ['margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left'],
+
+        // Padding
+        ['padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
+
+        // Border
+        ['border', 'border-width', 'border-style', 'border-color', 'border-top',
+            'border-right', 'border-bottom', 'border-left', 'border-radius'],
+
+        // Background
+        ['background', 'background-color', 'background-image', 'background-repeat',
+            'background-position', 'background-size'],
+
+        // Typography
+        ['color', 'font', 'font-family', 'font-size', 'font-weight', 'line-height',
+            'text-align', 'text-decoration', 'text-transform', 'letter-spacing'],
+
+        // Other Visual
+        ['opacity', 'visibility', 'overflow', 'box-shadow', 'text-shadow',
+            'transform', 'transition', 'animation'],
+
+        // Miscellaneous
+        ['cursor', 'pointer-events', 'user-select', 'content']
+    ];
+
     const orderMap = new Map<string, number>();
     CONCENTRIC_PROPERTY_ORDER.forEach((prop, index) => {
         orderMap.set(prop, index);
     });
 
+    // First sort all properties by the concentric order
     const sortedProps = [...properties].sort((a, b) => {
         const indexA = orderMap.get(a) ?? Number.MAX_SAFE_INTEGER;
         const indexB = orderMap.get(b) ?? Number.MAX_SAFE_INTEGER;
@@ -181,94 +201,51 @@ export function sortByConcentricOrder(properties: string[]): SortingResult {
         return indexA - indexB;
     });
 
-    debugLog('Sorted properties by concentric order', sortedProps);
+    // Map each property to its group
+    const propToGroupIndex = new Map<string, number>();
+    concentricGroups.forEach((group, groupIndex) => {
+        group.forEach(prop => {
+            propToGroupIndex.set(prop, groupIndex);
+        });
+    });
 
-    // Refine concentric sorting logic to strictly enforce outside-to-inside order
-    const finalSortedProps = CONCENTRIC_PROPERTY_ORDER.filter(prop => prop === '' || sortedProps.includes(prop));
-    const remainingProps = sortedProps.filter(prop => prop === '' || !finalSortedProps.includes(prop));
-
-    // Adjust placement of `border` between `margin` and `padding`
-    const marginIndex = finalSortedProps.indexOf('margin');
-    const paddingIndex = finalSortedProps.indexOf('padding');
-    const borderIndex = finalSortedProps.indexOf('border');
-
-    if (borderIndex === -1 && marginIndex !== -1 && paddingIndex !== -1) {
-        finalSortedProps.splice(marginIndex + 1, 0, 'border');
-    } else if (borderIndex !== -1 && (borderIndex < marginIndex || borderIndex > paddingIndex)) {
-        finalSortedProps.splice(borderIndex, 1);
-        finalSortedProps.splice(marginIndex + 1, 0, 'border');
-    }
-
-    // Ensure `padding` always follows `border`
-    const updatedPaddingIndex = finalSortedProps.indexOf('padding');
-    const updatedBorderIndex = finalSortedProps.indexOf('border');
-    if (updatedPaddingIndex < updatedBorderIndex) {
-        finalSortedProps.splice(updatedPaddingIndex, 1);
-        finalSortedProps.splice(updatedBorderIndex + 1, 0, 'padding');
-    }
-
-    debugLog('Final concentric sorted properties', finalSortedProps);
-
-    // Sort unknown properties alphabetically
-    const knownProps = finalSortedProps;
-    const unknownProps = remainingProps.sort();
-
-    return {
-        success: true,
-        originalProperties: properties,
-        sortedProperties: [...knownProps, ...unknownProps]
-    };
-}
-
-/**
- * Sort properties by groups
- */
-export function sortByGroups(properties: string[], groups: string[][], options: SortingOptions): SortingResult {
-    const groupedProps: Array<string[]> = groups.map(() => []);
+    // Create groups with the actually used properties
+    const usedGroups: string[][] = concentricGroups.map(() => []);
     const ungrouped: string[] = [];
 
-    properties.forEach(prop => {
-        let found = false;
-
-        for (let i = 0; i < groups.length; i++) {
-            if (groups[i].includes(prop)) {
-                groupedProps[i].push(prop);
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
+    // Place each property in its group
+    sortedProps.forEach(prop => {
+        const groupIndex = propToGroupIndex.get(prop);
+        if (groupIndex !== undefined) {
+            usedGroups[groupIndex].push(prop);
+        } else {
             ungrouped.push(prop);
         }
     });
 
-    if (options.sortPropertiesWithinGroups) {
-        groupedProps.forEach(group => group.sort());
-        ungrouped.sort();
-    }
-
+    // Now build the final result with empty lines between groups
     const result: string[] = [];
+    let firstGroupAdded = false;
 
-    groupedProps.forEach((group, index) => {
+    usedGroups.forEach(group => {
         if (group.length > 0) {
-            result.push(...group);
-
-            if (options.emptyLinesBetweenGroups && index < groupedProps.length - 1) {
-                result.push('');
+            if (firstGroupAdded) {
+                result.push(''); // Add empty line between groups
             }
+            result.push(...group);
+            firstGroupAdded = true;
         }
     });
 
-    if (ungrouped.length > 0) {
-        if (options.sortPropertiesWithinGroups !== null) {
-            ungrouped.sort();
-        }
-        if (result.length > 0 && options.emptyLinesBetweenGroups) {
-            result.push('');
-        }
-        result.push(...ungrouped);
+    // Add ungrouped properties at the end
+    if (ungrouped.length > 0 && firstGroupAdded) {
+        result.push('');
+        result.push(...ungrouped.sort());
+    } else if (ungrouped.length > 0) {
+        result.push(...ungrouped.sort());
     }
+
+    debugLog('Final concentric sorted properties with groups', result);
 
     return {
         success: true,
@@ -278,43 +255,127 @@ export function sortByGroups(properties: string[], groups: string[][], options: 
 }
 
 /**
- * Optimized Grouped Sorting using Bucket Sort
+ * Sort properties by groups
  */
-function optimizedGroupedSort(properties: string[], groups: string[][], options: SortingOptions): SortingResult {
-    const groupMap = new Map<string, number>();
-    groups.forEach((group, index) => {
-        group.forEach(property => groupMap.set(property, index));
-    });
-
-    const buckets: string[][] = Array.from({ length: groups.length }, () => []);
+export function sortByGroups(properties: string[], groupsDefinition: string[][], options: SortingOptions): SortingResult {
+    const groupedProps: Array<string[]> = groupsDefinition.map(() => []);
     const ungrouped: string[] = [];
 
-    properties.forEach(property => {
-        const groupIndex = groupMap.get(property);
-        if (groupIndex !== undefined) {
-            buckets[groupIndex].push(property);
-        } else {
-            ungrouped.push(property);
+    // Ensure group definitions are also normalized (lowercase, trim) for matching
+    const normalizedGroups = groupsDefinition.map(group =>
+        group.map(propDef => propDef.toLowerCase().trim())
+    );
+
+    properties.forEach(p => {
+        const prop = p.toLowerCase().trim(); // Property name is already lowercased and trimmed by caller
+        let found = false;
+        for (let i = 0; i < normalizedGroups.length; i++) {
+            if (normalizedGroups[i].includes(prop)) {
+                groupedProps[i].push(p); // Push the original casing if needed, but for now, use the processed 'prop'
+                // For consistency with stylelint-oldschool-order that sends lowercase, use 'prop'
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            ungrouped.push(p); // Same as above, use 'prop' if caller sends lowercase
         }
     });
 
     if (options.sortPropertiesWithinGroups) {
-        buckets.forEach(bucket => bucket.sort());
-        ungrouped.sort();
+        groupedProps.forEach(group => {
+            if (Array.isArray(group)) {
+                group.sort((a, b) => a.localeCompare(b)); // Explicit localeCompare
+            }
+        });
+        if (Array.isArray(ungrouped)) {
+            ungrouped.sort((a, b) => a.localeCompare(b)); // Explicit localeCompare
+        }
     }
 
     const result: string[] = [];
-    buckets.forEach((bucket, index) => {
-        if (bucket.length > 0) {
-            result.push(...bucket);
-            if (options.emptyLinesBetweenGroups && index < buckets.length - 1) {
+    let firstBlockAdded = false;
+
+    groupedProps.forEach((group) => {
+        if (group.length > 0) {
+            if (firstBlockAdded && options.emptyLinesBetweenGroups) {
                 result.push('');
             }
+            result.push(...group);
+            firstBlockAdded = true;
         }
     });
 
     if (ungrouped.length > 0) {
-        if (result.length > 0 && options.emptyLinesBetweenGroups) {
+        if (firstBlockAdded && options.emptyLinesBetweenGroups && result.length > 0 && result[result.length - 1] !== '') {
+            result.push('');
+        }
+        result.push(...ungrouped);
+        // firstBlockAdded = true; // Not essential here
+    }
+
+    return {
+        success: true,
+        originalProperties: properties, // These are the (lowercase) properties received
+        sortedProperties: result
+    };
+}
+
+/**
+ * Optimized Grouped Sorting using Bucket Sort
+ */
+function optimizedGroupedSort(properties: string[], groupsDefinition: string[][], options: SortingOptions): SortingResult {
+    const groupMap = new Map<string, number>();
+    // Ensure group definitions are also normalized for map creation
+    const normalizedGroups = groupsDefinition.map(group =>
+        group.map(propDef => propDef.toLowerCase().trim())
+    );
+
+    normalizedGroups.forEach((group, index) => {
+        group.forEach(propertyInGroupDefinition => {
+            groupMap.set(propertyInGroupDefinition, index);
+        });
+    });
+
+    const buckets: string[][] = Array.from({ length: normalizedGroups.length }, () => []);
+    const ungrouped: string[] = [];
+
+    properties.forEach(p => { // p is already lowercased and trimmed by caller
+        const prop = p;
+        const groupIndex = groupMap.get(prop);
+        if (groupIndex !== undefined) {
+            buckets[groupIndex].push(prop); // Use 'prop' (lowercase)
+        } else {
+            ungrouped.push(prop); // Use 'prop' (lowercase)
+        }
+    });
+
+    if (options.sortPropertiesWithinGroups) {
+        buckets.forEach(bucket => {
+            if (Array.isArray(bucket)) {
+                bucket.sort((a, b) => a.localeCompare(b)); // Explicit localeCompare
+            }
+        });
+        if (Array.isArray(ungrouped)) {
+            ungrouped.sort((a, b) => a.localeCompare(b)); // Explicit localeCompare
+        }
+    }
+
+    const result: string[] = [];
+    let firstBlockAdded = false;
+
+    buckets.forEach((bucket) => {
+        if (bucket.length > 0) {
+            if (firstBlockAdded && options.emptyLinesBetweenGroups) {
+                result.push('');
+            }
+            result.push(...bucket);
+            firstBlockAdded = true;
+        }
+    });
+
+    if (ungrouped.length > 0) {
+        if (firstBlockAdded && options.emptyLinesBetweenGroups && result.length > 0 && result[result.length - 1] !== '') {
             result.push('');
         }
         result.push(...ungrouped);
@@ -322,7 +383,7 @@ function optimizedGroupedSort(properties: string[], groups: string[][], options:
 
     return {
         success: true,
-        originalProperties: properties,
+        originalProperties: properties, // Lowercase properties
         sortedProperties: result
     };
 }
@@ -402,6 +463,8 @@ export function adaptiveSortProperties(properties: string[], options: SortingOpt
             const orderMap = new Map<string, number>();
             CONCENTRIC_PROPERTY_ORDER.forEach((prop, index) => orderMap.set(prop, index));
             return optimizedConcentricSort(properties, orderMap);
+        case 'idiomatic':
+            return optimizedGroupedSort(properties, IDIOMATIC_PROPERTY_GROUPS, options);
         case 'custom':
             if (!options.propertyGroups) {
                 return {

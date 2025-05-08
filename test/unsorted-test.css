@@ -1,0 +1,67 @@
+.example-element {
+    color: #333;
+    padding: 10px;
+    display: block;
+    font-family: Arial, sans-serif;
+    margin-bottom: 20px;
+    background-color: #f5f5f5;
+    position: relative;
+    width: 100%;
+    z-index: 5;
+    border: 1px solid #ccc;
+    top: 0;
+    height: auto;
+    transition: all 0.3s ease;
+    transform: translateY(0);
+    font-size: 16px;
+    text-align: left;
+}
+
+.another-example {
+    background-image: url('image.jpg');
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    margin: 0;
+    opacity: 0.8;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+/* Commented properties example */
+.commented-example {
+    /* This is a color property */
+    color: #123456;
+    /* Box model properties */
+    width: 200px;
+    display: inline-block;
+    /* Positioning */
+    position: absolute;
+    bottom: 10px;
+    /* Multiple comma-separated values */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Nested selectors */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+
+    .header {
+        background-color: #222;
+        color: white;
+        padding: 20px;
+        font-size: 24px;
+    }
+
+    .content {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        padding: 10px;
+    }
+}

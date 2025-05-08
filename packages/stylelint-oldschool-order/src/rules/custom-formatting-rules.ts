@@ -1,6 +1,17 @@
 import { utils } from 'stylelint';
 import { Root, Result, Declaration, Rule } from 'postcss';
 
+// Define a more complete result options interface that includes the fix property
+interface ExtendedResultOptions {
+    fix?: boolean;
+    [key: string]: any;
+}
+
+// Helper function to access fix option safely
+function hasFixOption(result: Result): boolean {
+    return Boolean(result.opts && (result.opts as ExtendedResultOptions).fix);
+}
+
 // Rule for always-semicolon
 export const alwaysSemicolon = (primaryOption: boolean, secondaryOptions: any) => {
     return (root: Root, result: Result) => {
@@ -22,7 +33,7 @@ export const alwaysSemicolon = (primaryOption: boolean, secondaryOptions: any) =
 // Rule for color-case
 export const colorCase = (primaryOption: 'lower' | 'upper', secondaryOptions: any) => {
     return (root: Root, result: Result) => {
-        const isAutofix = result.opts && result.opts.fix;
+        const isAutofix = hasFixOption(result);
 
         root.walkDecls((decl: Declaration) => {
             if (decl.value && /#[0-9a-fA-F]+/.test(decl.value)) {
@@ -103,7 +114,7 @@ export const quotes = (primaryOption: 'single' | 'double', secondaryOptions: any
 // Rule for color-shorthand
 export const colorShorthand = (primaryOption: boolean, secondaryOptions: any) => {
     return (root: Root, result: Result) => {
-        const isAutofix = result.opts && result.opts.fix;
+        const isAutofix = hasFixOption(result);
 
         root.walkDecls((decl: Declaration) => {
             if (primaryOption) {
@@ -342,7 +353,7 @@ export const spaceBeforeClosingBrace = (primaryOption: string, secondaryOptions:
 // Ensure stripSpaces rule modifies both property names and values correctly
 export const stripSpaces = (primaryOption: boolean, secondaryOptions: any) => {
     return (root: Root, result: Result) => {
-        const isAutofix = result.opts && result.opts.fix;
+        const isAutofix = hasFixOption(result);
 
         root.walkDecls((decl: Declaration) => {
             if (primaryOption) {
@@ -377,7 +388,7 @@ export const stripSpaces = (primaryOption: boolean, secondaryOptions: any) => {
 // Rule for unitless-zero
 export const unitlessZero = (primaryOption: boolean, secondaryOptions: any) => {
     return (root: Root, result: Result) => {
-        const isAutofix = result.opts && result.opts.fix;
+        const isAutofix = hasFixOption(result);
 
         root.walkDecls((decl: Declaration) => {
             if (primaryOption) {
@@ -433,7 +444,7 @@ export const vendorPrefixAlign = (primaryOption: boolean, secondaryOptions: any)
             for (const [baseProp, declarations] of prefixedProps.entries()) {
                 if (declarations.length < 2) continue; // Need at least two versions to align
 
-                const isAutofix = result.opts && result.opts.fix;
+                const isAutofix = hasFixOption(result);
 
                 // Sort declarations by prefix (vendor prefixed first, then standard)
                 const sortedDeclarations = [...declarations].sort((a, b) => {

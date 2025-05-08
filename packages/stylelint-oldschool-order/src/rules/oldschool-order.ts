@@ -1,7 +1,8 @@
 import * as stylelint from 'stylelint';
 import { Root, Node, Rule as PostcssRule } from 'postcss';
-// Use the package name instead of relative path
+// Use the package name instead of relative path - but import directly just the sortProperties we need
 import { sortProperties, SortingOptions } from '@old-fashioned/shared';
+import { DEFAULT_PROPERTY_GROUPS } from '@old-fashioned/shared';
 
 // Define the plugin rule name
 export const ruleName = 'plugin/oldschool-order';
@@ -15,18 +16,29 @@ export const messages = stylelint.utils.ruleMessages(ruleName, {
 // Default options
 const defaultOptions: SortingOptions = {
   strategy: 'grouped',
-  emptyLinesBetweenGroups: false,
+  emptyLinesBetweenGroups: true,
   sortPropertiesWithinGroups: true
 };
 
 /**
  * Main rule function
  */
-const oldschoolOrderRule = function (primaryOption: boolean | SortingOptions, secondaryOption?: Record<string, unknown>) {
-  const actualOptions: SortingOptions =
-    (primaryOption && typeof primaryOption !== 'boolean') ?
-      primaryOption as SortingOptions :
-      defaultOptions;
+const oldschoolOrderRule = function (
+  primaryOption: any,
+  secondaryOption?: object
+) {
+  // Determine actual options, merging plugin defaults with Stylelint config
+  let ruleOptions: Partial<SortingOptions> = {};
+  if (typeof primaryOption === 'object' && primaryOption !== null) {
+    ruleOptions = primaryOption;
+  } else if (typeof secondaryOption === 'object' && secondaryOption !== null) {
+    ruleOptions = secondaryOption;
+  }
+
+  const actualOptions: SortingOptions = {
+    ...defaultOptions,
+    ...ruleOptions
+  };
 
   return (root: Root, result: stylelint.PostcssResult) => {
     // Process CSS rules
@@ -37,68 +49,161 @@ const oldschoolOrderRule = function (primaryOption: boolean | SortingOptions, se
         return;
       }
 
-      // Extract property names
-      const propertyNames = decls
-        .map(decl => (decl as any).prop)
-        .filter(prop => typeof prop === 'string');
+      // Extract and map all declarations with their lowercase property names
+      const declsMap = new Map<string, import('postcss').Declaration[]>();
+      const propNames: string[] = [];
+      decls.forEach(decl => {
+        const prop = (decl as any).prop.toLowerCase();
+        propNames.push(prop);
 
-      // Sort properties
-      const sortingResult = sortProperties(propertyNames, actualOptions);
+        if (!declsMap.has(prop)) {
+          declsMap.set(prop, []);
+        }
+        declsMap.get(prop)!.push(decl as import('postcss').Declaration);
+      });
 
-      if (!sortingResult.success || !sortingResult.sortedProperties) {
-        stylelint.utils.report({
-          ruleName,
-          result,
-          message: messages.rejected(sortingResult.error || 'Unknown error'),
-          node: rule,
-          word: rule.selector
+      // Create a mapping of property name to group number for fast lookups
+      const propertyGroupMap = new Map<string, number>();
+      const groupNames: string[] = [
+        "Positioning",
+        "Box Model",
+        "Dimensions",
+        "Margins",
+        "Padding",
+        "Border",
+        "Visual Properties",
+        "Typography",
+        "Other"
+      ];
+
+      DEFAULT_PROPERTY_GROUPS.forEach((group, groupIndex) => {
+        group.forEach(prop => {
+          propertyGroupMap.set(prop.toLowerCase().trim(), groupIndex);
         });
-        return;
+      });
+
+      // First pass: assign properties to groups
+      const groups: string[][] = Array(DEFAULT_PROPERTY_GROUPS.length)
+        .fill(null)
+        .map(() => [] as string[]);
+      const ungrouped: string[] = [];
+
+      propNames.forEach(prop => {
+        const groupIndex = propertyGroupMap.get(prop);
+        if (groupIndex !== undefined) {
+          groups[groupIndex].push(prop);
+        } else {
+          ungrouped.push(prop);
+        }
+      });
+
+      // Second pass: alphabetically sort within each group if needed
+      if (actualOptions.sortPropertiesWithinGroups) {
+        groups.forEach(group => {
+          group.sort();
+        });
+        ungrouped.sort();
       }
 
-      const sortedPropertyNames = sortingResult.sortedProperties;
+      // Third pass: build the final sorted property list with empty lines
+      const sortedProps: string[] = [];
+      let isFirstNonEmptyGroup = true;
 
-      // Check if properties need reordering
-      const needsReordering = JSON.stringify(propertyNames) !== JSON.stringify(sortedPropertyNames);
+      groups.forEach((group, groupIndex) => {
+        if (group.length > 0) {
+          if (isFirstNonEmptyGroup) {
+            isFirstNonEmptyGroup = false;
+          } else if (actualOptions.emptyLinesBetweenGroups) {
+            sortedProps.push(''); // Empty string marks where a blank line should be
+          }
+          sortedProps.push(...group);
+        }
+      });
 
-      if (needsReordering && sortedPropertyNames) {
+      if (ungrouped.length > 0) {
+        if (!isFirstNonEmptyGroup && actualOptions.emptyLinesBetweenGroups) {
+          sortedProps.push('');
+        }
+        sortedProps.push(...ungrouped);
+      }
+
+      // Check if the order needs to change
+      const needsReordering = JSON.stringify(propNames) !== JSON.stringify(sortedProps);
+
+      if (needsReordering) {
         if (primaryOption === true || (typeof primaryOption === 'object')) {
           // Fix the order
-          const declsCloned = [...decls];
-
-          // Rearrange the declarations
           rule.removeAll();
 
-          // Re-add declarations in the correct order
-          sortedPropertyNames.forEach(propName => {
+          let needsEmptyLine = false;
+          const ruleIndent = typeof rule.raws.indent === 'string' ? rule.raws.indent : '    ';
+          let currentGroupIndex: number | null = null;
+
+          sortedProps.forEach(propName => {
             if (propName === '') {
-              // Add empty line
-              rule.append({ type: 'decl', prop: 'dummy', value: '' });
+              needsEmptyLine = true;
               return;
             }
 
-            const matchingDecls = declsCloned.filter(
-              decl => (decl as any).prop === propName
-            );
+            const groupIndex = propertyGroupMap.get(propName);
+            // Add group comment if this property starts a new group
+            if (groupIndex !== undefined && groupIndex !== currentGroupIndex) {
+              // Create a comment using postcss.comment() instead of stylelint.postcssRoot.comment()
+              const groupComment = {
+                type: 'comment',
+                text: ` ${groupNames[groupIndex]} `,
+                raws: {
+                  before: needsEmptyLine ? '\n\n' + ruleIndent : '\n' + ruleIndent,
+                  after: ''
+                }
+              };
+              rule.append(groupComment);
+              needsEmptyLine = false;
+              currentGroupIndex = groupIndex;
+            }
 
-            matchingDecls.forEach(decl => {
-              rule.append(decl);
-            });
+            // Add the declaration
+            const matchingDecls = declsMap.get(propName);
+            if (matchingDecls && matchingDecls.length > 0) {
+              const decl = matchingDecls.shift();
+              if (decl) {
+                const newDecl = decl.clone();
+
+                let rawsBefore = '\n' + ruleIndent;
+                if (needsEmptyLine) {
+                  rawsBefore = '\n\n' + ruleIndent;
+                  needsEmptyLine = false;
+                } else if (rule.nodes.length === 0) {
+                  rawsBefore = ruleIndent;
+                }
+
+                newDecl.raws.before = rawsBefore;
+                rule.append(newDecl);
+              }
+            }
           });
 
-          // Remove any dummy declarations
-          rule.walkDecls('dummy', decl => {
-            decl.remove();
-            return undefined; // Explicitly return undefined to match the expected return type
-          });
+          // Add a comment for ungrouped properties if any
+          if (ungrouped.length > 0) {
+            const ungroupedComment = {
+              type: 'comment',
+              text: ' Ungrouped Properties ',
+              raws: {
+                before: '\n\n' + ruleIndent,
+                after: ''
+              }
+            };
+            rule.append(ungroupedComment);
+          }
+
         } else {
-          // Report the issue without fixing
+          // Report without fixing
           stylelint.utils.report({
             ruleName,
             result,
             message: messages.expected(
-              propertyNames.join(', '),
-              sortedPropertyNames.join(', ')
+              propNames.join(', '),
+              sortedProps.join(', ')
             ),
             node: rule,
             word: rule.selector

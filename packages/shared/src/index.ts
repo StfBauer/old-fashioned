@@ -9,7 +9,7 @@ export * from './types';
 export * from './property-groups';
 
 // Export sorting functions - only export what's actually available
-export { sortProperties } from './sorting';
+export { sortProperties, adaptiveSortProperties, sortPropertiesWithCache } from './sorting';
 
 // We don't have these functions in utils yet, so let's not export them
 // export {
