@@ -53,9 +53,9 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
       cancellable: false
     }, async () => {
       // Get sorting and formatting configuration, use try/catch to prevent settings UI from opening
-      let sortingOptions; 
+      let sortingOptions;
       let formattingOptions;
-      
+
       try {
         sortingOptions = getSortingOptions();
       } catch (error) {
@@ -67,7 +67,7 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
           sortPropertiesWithinGroups: true
         };
       }
-      
+
       try {
         formattingOptions = getFormattingOptions();
       } catch (error) {
@@ -165,7 +165,7 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
  * @returns Sorted CSS/SCSS text
  */
 function sortCssText(cssText: string, languageId: string, options: any): string {
-  try    {
+  try {
     let root;
     // Choose parser based on language
     if (languageId === 'css') {

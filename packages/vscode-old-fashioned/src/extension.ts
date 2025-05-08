@@ -8,6 +8,7 @@
 import * as vscode from 'vscode';
 import { sortCssProperties } from './sorting';
 import { getFormattingOptions, getSortingOptions } from './utils';
+import { activateDiagnostics } from './diagnostics';
 
 /**
  * Activate the extension
@@ -15,9 +16,10 @@ import { getFormattingOptions, getSortingOptions } from './utils';
 export function activate(context: vscode.ExtensionContext) {
   console.log('Old Fashioned CSS Sorter is now active');
 
-  const command = vscode.commands.registerCommand('old-fashioned.sortProperties', async () => {
+  // Register the command for sorting CSS properties
+  const sortCommand = vscode.commands.registerCommand('old-fashioned.sortProperties', async () => {
     console.log('Sort properties command invoked');
-    
+
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       console.log('No active editor found');
@@ -27,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const document = editor.document;
     console.log('Active document language:', document.languageId);
-    
+
     if (document.languageId !== 'css' && document.languageId !== 'scss' && document.languageId !== 'sass') {
       console.log('Document is not a CSS/SCSS/SASS file:', document.languageId);
       vscode.window.showInformationMessage('Not a CSS, SCSS, or SASS file');
@@ -40,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
       const sortingOptions = getSortingOptions();
       const formattingOptions = getFormattingOptions();
       console.log('Retrieved sorting options:', sortingOptions);
-      
+
       // Use our updated sorting implementation from sorting.ts
       await sortCssProperties(editor);
     } catch (err) {
@@ -49,7 +51,30 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  context.subscriptions.push(command);
+  // Register command to open settings
+  const openSettingsCommand = vscode.commands.registerCommand('old-fashioned.openSettings', () => {
+    vscode.commands.executeCommand('workbench.action.openSettings', 'oldFashioned');
+  });
+
+  // Activate diagnostics (linting)
+  const diagnosticDisposables = activateDiagnostics(context);
+
+  // Add all disposables to the context subscriptions
+  context.subscriptions.push(sortCommand, openSettingsCommand, ...diagnosticDisposables);
+
+  // Show a message when the extension is activated
+  const config = vscode.workspace.getConfiguration('oldFashioned');
+  const showActivationMessage = config.get<boolean>('showActivationMessage', true);
+
+  if (showActivationMessage) {
+    vscode.window.showInformationMessage('Old Fashioned CSS Sorter is now active. Use the command "Sort CSS Properties (Old Fashioned)" to sort your CSS.');
+  }
 }
 
-export function deactivate() { }
+/**
+ * Deactivate the extension
+ * Currently there's no special cleanup needed
+ */
+export function deactivate() {
+  console.log('Old Fashioned CSS Sorter is deactivated');
+}

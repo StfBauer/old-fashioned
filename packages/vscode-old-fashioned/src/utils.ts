@@ -60,9 +60,9 @@ export function getSortingOptions(): SortingOptions {
   const config = vscode.workspace.getConfiguration('oldFashioned');
 
   return {
-    strategy: config.get<SortingStrategy>('sortingStrategy', 'grouped'),
-    emptyLinesBetweenGroups: config.get<boolean>('emptyLinesBetweenGroups', true),
-    sortPropertiesWithinGroups: config.get<boolean>('sortPropertiesWithinGroups', true)
+    strategy: config.get<SortingStrategy>('sorting.strategy', 'grouped'),
+    emptyLinesBetweenGroups: config.get<boolean>('sorting.emptyLinesBetweenGroups', true),
+    sortPropertiesWithinGroups: config.get<boolean>('sorting.sortPropertiesWithinGroups', true)
   };
 }
 
@@ -74,34 +74,50 @@ export function getSortingOptions(): SortingOptions {
 export function getFormattingOptions(): FormattingOptions {
   const config = vscode.workspace.getConfiguration('oldFashioned');
   console.log('Accessed oldFashioned configuration:', config);
-  
-  // Log a specific setting to see if it's accessible
-  const alwaysSemicolon = config.get<boolean>('alwaysSemicolon', true);
-  console.log('alwaysSemicolon setting:', alwaysSemicolon);
-  
+
+  // For backward compatibility, check both old and new paths
+  const getConfigValue = <T>(newPath: string, oldPath: string, defaultValue: T): T => {
+    // Try the new path first
+    const newValue = config.get<T>(newPath);
+    if (newValue !== undefined) {
+      return newValue;
+    }
+    // Fall back to old path
+    const oldValue = config.get<T>(oldPath);
+    if (oldValue !== undefined) {
+      return oldValue;
+    }
+    // If neither exists, return default
+    return defaultValue;
+  };
+
   return {
-    alwaysSemicolon: config.get<boolean>('alwaysSemicolon', true),
-    colorCase: config.get<'lower' | 'upper'>('colorCase', 'lower'),
-    blockIndent: config.get<string>('blockIndent', '\t'),
-    colorShorthand: config.get<boolean>('colorShorthand', true),
-    elementCase: config.get<'lower' | 'upper'>('elementCase', 'lower'),
-    leadingZero: config.get<boolean>('leadingZero', false),
-    quotes: config.get<'double' | 'single'>('quotes', 'double'),
-    sortOrderFallback: config.get<'abc' | 'none'>('sortOrderFallback', 'abc'),
-    spaceBeforeColon: config.get<string>('spaceBeforeColon', ''),
-    spaceAfterColon: config.get<string>('spaceAfterColon', ' '),
-    spaceBeforeCombinator: config.get<string>('spaceBeforeCombinator', ' '),
-    spaceAfterCombinator: config.get<string>('spaceAfterCombinator', ' '),
-    spaceBetweenDeclarations: config.get<string>('spaceBetweenDeclarations', '\n'),
-    spaceBeforeOpeningBrace: config.get<string>('spaceBeforeOpeningBrace', ''),
-    spaceAfterOpeningBrace: config.get<string>('spaceAfterOpeningBrace', '\n'),
-    spaceAfterSelectorDelimiter: config.get<string>('spaceAfterSelectorDelimiter', '\n'),
-    spaceBeforeSelectorDelimiter: config.get<string>('spaceBeforeSelectorDelimiter', ''),
-    spaceBeforeClosingBrace: config.get<string>('spaceBeforeClosingBrace', '\n'),
-    stripSpaces: config.get<boolean>('stripSpaces', true),
-    tabSize: config.get<boolean>('tabSize', true),
-    unitlessZero: config.get<boolean>('unitlessZero', true),
-    vendorPrefixAlign: config.get<boolean>('vendorPrefixAlign', true)
+    alwaysSemicolon: getConfigValue('formatting.alwaysSemicolon', 'alwaysSemicolon', true),
+    colorCase: getConfigValue('formatting.colorCase', 'colorCase', 'lower' as 'lower' | 'upper'),
+    blockIndent: getConfigValue('formatting.blockIndent', 'blockIndent', '\t'),
+    colorShorthand: getConfigValue('formatting.colorShorthand', 'colorShorthand', true),
+    elementCase: getConfigValue('formatting.elementCase', 'elementCase', 'lower' as 'lower' | 'upper'),
+    leadingZero: getConfigValue('formatting.leadingZero', 'leadingZero', false),
+    quotes: getConfigValue('formatting.quotes', 'quotes', 'double' as 'double' | 'single'),
+    sortOrderFallback: getConfigValue('formatting.sortOrderFallback', 'sortOrderFallback', 'abc' as 'abc' | 'none'),
+    unitlessZero: getConfigValue('formatting.unitlessZero', 'unitlessZero', true),
+    vendorPrefixAlign: getConfigValue('formatting.vendorPrefixAlign', 'vendorPrefixAlign', true),
+    stripSpaces: getConfigValue('formatting.stripSpaces', 'stripSpaces', true),
+
+    // Spacing settings
+    spaceBeforeColon: getConfigValue('spacing.spaceBeforeColon', 'spaceBeforeColon', ''),
+    spaceAfterColon: getConfigValue('spacing.spaceAfterColon', 'spaceAfterColon', ' '),
+    spaceBeforeCombinator: getConfigValue('spacing.spaceBeforeCombinator', 'spaceBeforeCombinator', ' '),
+    spaceAfterCombinator: getConfigValue('spacing.spaceAfterCombinator', 'spaceAfterCombinator', ' '),
+    spaceBetweenDeclarations: getConfigValue('spacing.spaceBetweenDeclarations', 'spaceBetweenDeclarations', '\n'),
+    spaceBeforeOpeningBrace: getConfigValue('spacing.spaceBeforeOpeningBrace', 'spaceBeforeOpeningBrace', ''),
+    spaceAfterOpeningBrace: getConfigValue('spacing.spaceAfterOpeningBrace', 'spaceAfterOpeningBrace', '\n'),
+    spaceAfterSelectorDelimiter: getConfigValue('spacing.spaceAfterSelectorDelimiter', 'spaceAfterSelectorDelimiter', '\n'),
+    spaceBeforeSelectorDelimiter: getConfigValue('spacing.spaceBeforeSelectorDelimiter', 'spaceBeforeSelectorDelimiter', ''),
+    spaceBeforeClosingBrace: getConfigValue('spacing.spaceBeforeClosingBrace', 'spaceBeforeClosingBrace', '\n'),
+
+    // General settings
+    tabSize: getConfigValue('general.tabSize', 'tabSize', true)
   };
 }
 

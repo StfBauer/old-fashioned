@@ -95,7 +95,7 @@ export function addEmptyLinesBetweenGroups(css: string, strategy = 'grouped'): s
 
     // Remove existing debug comments to prevent stacking them
     let cleanedCss = css.replace(/\/\* DEBUG: Old Fashioned formatter applied on.*?\*\/\n?/g, '');
-    
+
     // Add a single debug marker comment to the top of the CSS
     const cssWithDebugMarker = `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${strategy}) */\n${cleanedCss}`;
 
@@ -146,7 +146,7 @@ export function addEmptyLinesBetweenGroups(css: string, strategy = 'grouped'): s
             } else {
                 emptyLineAlreadyAdded = false;
             }
-            
+
             result.push(line);
             if (trimmed !== '') {
                 previousLineIsProperty = false;
@@ -172,7 +172,7 @@ export function addEmptyLinesBetweenGroups(css: string, strategy = 'grouped'): s
                 groupIndex !== undefined &&
                 groupIndex !== currentGroupIndex &&
                 !emptyLineAlreadyAdded) {
-                
+
                 result.push(''); // Add only one empty line between different property groups
                 emptyLineAlreadyAdded = true;
             } else {

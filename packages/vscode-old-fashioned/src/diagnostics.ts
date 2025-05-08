@@ -225,19 +225,31 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
     'vendor-prefix-align': formattingOptions.vendorPrefixAlign
   };
 
-  // Run Stylelint with our plugin
-  return stylelint.lint({
-    code: text,
-    codeFilename: document.fileName,
-    config: {
-      plugins: ['stylelint-oldschool-order'],
-      rules: {
-        'plugin/oldschool-order': [
-          true,
-          combinedOptions
-        ]
+  // Get extension path to use as configBasedir
+  const extensionPath = vscode.extensions.getExtension('vscode-old-fashioned')?.extensionPath || __dirname;
+
+  try {
+    console.log('Running stylelint with configBasedir:', extensionPath);
+
+    // Run Stylelint with our plugin
+    return stylelint.lint({
+      code: text,
+      codeFilename: document.fileName,
+      config: {
+        plugins: ['stylelint-oldschool-order'],
+        rules: {
+          'plugin/oldschool-order': [
+            true,
+            combinedOptions
+          ]
+        },
+        customSyntax
       },
-      customSyntax
-    }
-  });
+      // Add configBasedir option to help locate plugins
+      configBasedir: extensionPath
+    });
+  } catch (err) {
+    console.error('Error initializing stylelint:', err);
+    throw err;
+  }
 }
