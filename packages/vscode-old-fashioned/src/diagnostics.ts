@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import * as stylelint from 'stylelint';
-import { getParseSyntax, createDiagnosticFromWarning, isStyleDocument, getSortingOptions } from './utils';
+import { getParseSyntax, createDiagnosticFromWarning, isStyleDocument, getSortingOptions, getFormattingOptions } from './utils';
 
 /**
  * Interface for Stylelint warning object
@@ -186,7 +186,8 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
   const syntax = getParseSyntax(document.languageId);
 
   // Get configuration from user settings
-  const options = getSortingOptions();
+  const sortingOptions = getSortingOptions();
+  const formattingOptions = getFormattingOptions();
 
   // Determine the appropriate custom syntax based on the document type
   let customSyntax: string | undefined;
@@ -195,6 +196,34 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
   } else if (syntax === 'sass') {
     customSyntax = 'postcss-sass';
   }
+
+  // Create combined options for the stylelint plugin
+  const combinedOptions = {
+    ...sortingOptions,
+    // Add formatting options
+    'always-semicolon': formattingOptions.alwaysSemicolon,
+    'color-case': formattingOptions.colorCase,
+    'block-indent': formattingOptions.blockIndent,
+    'color-shorthand': formattingOptions.colorShorthand,
+    'element-case': formattingOptions.elementCase,
+    'leading-zero': formattingOptions.leadingZero,
+    'quotes': formattingOptions.quotes,
+    'sort-order-fallback': formattingOptions.sortOrderFallback,
+    'space-before-colon': formattingOptions.spaceBeforeColon,
+    'space-after-colon': formattingOptions.spaceAfterColon,
+    'space-before-combinator': formattingOptions.spaceBeforeCombinator,
+    'space-after-combinator': formattingOptions.spaceAfterCombinator,
+    'space-between-declarations': formattingOptions.spaceBetweenDeclarations,
+    'space-before-opening-brace': formattingOptions.spaceBeforeOpeningBrace,
+    'space-after-opening-brace': formattingOptions.spaceAfterOpeningBrace,
+    'space-after-selector-delimiter': formattingOptions.spaceAfterSelectorDelimiter,
+    'space-before-selector-delimiter': formattingOptions.spaceBeforeSelectorDelimiter,
+    'space-before-closing-brace': formattingOptions.spaceBeforeClosingBrace,
+    'strip-spaces': formattingOptions.stripSpaces,
+    'tab-size': formattingOptions.tabSize,
+    'unitless-zero': formattingOptions.unitlessZero,
+    'vendor-prefix-align': formattingOptions.vendorPrefixAlign
+  };
 
   // Run Stylelint with our plugin
   return stylelint.lint({
@@ -205,7 +234,7 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
       rules: {
         'plugin/oldschool-order': [
           true,
-          options
+          combinedOptions
         ]
       },
       customSyntax

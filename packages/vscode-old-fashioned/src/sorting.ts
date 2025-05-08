@@ -10,6 +10,7 @@ import { sortProperties } from '@old-fashioned/shared';
 import { SortingStrategy } from '@old-fashioned/shared';
 import { DEFAULT_PROPERTY_GROUPS, IDIOMATIC_PROPERTY_GROUPS } from '@old-fashioned/shared';
 import { addEmptyLinesBetweenGroups } from './formatter';
+import { getSortingOptions, getFormattingOptions } from './utils';
 import * as postcss from 'postcss';
 import * as postcssScss from 'postcss-scss';
 
@@ -51,16 +52,79 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
       title: "Sorting CSS properties...",
       cancellable: false
     }, async () => {
-      // Get configuration
-      const config = vscode.workspace.getConfiguration('oldFashioned');
-      const sortingStrategy = config.get<string>('sortingStrategy', 'grouped');
-      const emptyLinesBetweenGroups = config.get<boolean>('emptyLinesBetweenGroups', false);
+      // Get sorting and formatting configuration, use try/catch to prevent settings UI from opening
+      let sortingOptions; 
+      let formattingOptions;
+      
+      try {
+        sortingOptions = getSortingOptions();
+      } catch (error) {
+        console.error('Error getting sorting options:', error);
+        // Use default values if settings can't be accessed
+        sortingOptions = {
+          strategy: 'grouped' as SortingStrategy,
+          emptyLinesBetweenGroups: true,
+          sortPropertiesWithinGroups: true
+        };
+      }
+      
+      try {
+        formattingOptions = getFormattingOptions();
+      } catch (error) {
+        console.error('Error getting formatting options:', error);
+        // Use default formatting values
+        formattingOptions = {
+          alwaysSemicolon: true,
+          colorCase: 'lower' as 'lower' | 'upper',
+          blockIndent: '\t',
+          colorShorthand: true,
+          elementCase: 'lower' as 'lower' | 'upper',
+          leadingZero: false,
+          quotes: 'double' as 'double' | 'single',
+          sortOrderFallback: 'abc' as 'abc' | 'none',
+          spaceBeforeColon: '',
+          spaceAfterColon: ' ',
+          spaceBeforeCombinator: ' ',
+          spaceAfterCombinator: ' ',
+          spaceBetweenDeclarations: '\n',
+          spaceBeforeOpeningBrace: '',
+          spaceAfterOpeningBrace: '\n',
+          spaceAfterSelectorDelimiter: '\n',
+          spaceBeforeSelectorDelimiter: '',
+          spaceBeforeClosingBrace: '\n',
+          stripSpaces: true,
+          tabSize: true,
+          unitlessZero: true,
+          vendorPrefixAlign: true
+        };
+      }
 
       // Parse and sort the CSS/SCSS
       const sortedText = sortCssText(text, document.languageId, {
-        strategy: sortingStrategy as SortingStrategy,
-        emptyLinesBetweenGroups,
-        sortPropertiesWithinGroups: true
+        ...sortingOptions,
+        // Add formatting options 
+        'always-semicolon': formattingOptions.alwaysSemicolon,
+        'color-case': formattingOptions.colorCase,
+        'block-indent': formattingOptions.blockIndent,
+        'color-shorthand': formattingOptions.colorShorthand,
+        'element-case': formattingOptions.elementCase,
+        'leading-zero': formattingOptions.leadingZero,
+        'quotes': formattingOptions.quotes,
+        'sort-order-fallback': formattingOptions.sortOrderFallback,
+        'space-before-colon': formattingOptions.spaceBeforeColon,
+        'space-after-colon': formattingOptions.spaceAfterColon,
+        'space-before-combinator': formattingOptions.spaceBeforeCombinator,
+        'space-after-combinator': formattingOptions.spaceAfterCombinator,
+        'space-between-declarations': formattingOptions.spaceBetweenDeclarations,
+        'space-before-opening-brace': formattingOptions.spaceBeforeOpeningBrace,
+        'space-after-opening-brace': formattingOptions.spaceAfterOpeningBrace,
+        'space-after-selector-delimiter': formattingOptions.spaceAfterSelectorDelimiter,
+        'space-before-selector-delimiter': formattingOptions.spaceBeforeSelectorDelimiter,
+        'space-before-closing-brace': formattingOptions.spaceBeforeClosingBrace,
+        'strip-spaces': formattingOptions.stripSpaces,
+        'tab-size': formattingOptions.tabSize,
+        'unitless-zero': formattingOptions.unitlessZero,
+        'vendor-prefix-align': formattingOptions.vendorPrefixAlign
       });
 
       if (sortedText !== text) {
@@ -101,7 +165,7 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
  * @returns Sorted CSS/SCSS text
  */
 function sortCssText(cssText: string, languageId: string, options: any): string {
-  try {
+  try    {
     let root;
     // Choose parser based on language
     if (languageId === 'css') {

@@ -35,6 +35,132 @@
           "type": "boolean",
           "default": false,
           "description": "Insert empty lines between property groups"
+        },
+        "oldFashioned.alwaysSemicolon": {
+          "type": "boolean",
+          "default": true,
+          "description": "Always add a semicolon after the last declaration"
+        },
+        "oldFashioned.colorCase": {
+          "type": "string",
+          "enum": [
+            "lower",
+            "upper"
+          ],
+          "default": "lower",
+          "description": "Case for color values (lower or upper)"
+        },
+        "oldFashioned.blockIndent": {
+          "type": "string",
+          "default": "\t",
+          "description": "Character(s) used for indentation inside blocks"
+        },
+        "oldFashioned.colorShorthand": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use shorthand notation for color values when possible"
+        },
+        "oldFashioned.elementCase": {
+          "type": "string",
+          "enum": [
+            "lower",
+            "upper"
+          ],
+          "default": "lower",
+          "description": "Case for element selectors (lower or upper)"
+        },
+        "oldFashioned.leadingZero": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include leading zero in decimal values"
+        },
+        "oldFashioned.quotes": {
+          "type": "string",
+          "enum": [
+            "double",
+            "single"
+          ],
+          "default": "double",
+          "description": "Type of quotes to use (single or double)"
+        },
+        "oldFashioned.sortOrderFallback": {
+          "type": "string",
+          "enum": [
+            "abc",
+            "none"
+          ],
+          "default": "abc",
+          "description": "Fallback method when properties aren't found in sorting groups"
+        },
+        "oldFashioned.spaceBeforeColon": {
+          "type": "string",
+          "default": "",
+          "description": "Space before colon in declarations"
+        },
+        "oldFashioned.spaceAfterColon": {
+          "type": "string",
+          "default": " ",
+          "description": "Space after colon in declarations"
+        },
+        "oldFashioned.spaceBeforeCombinator": {
+          "type": "string",
+          "default": " ",
+          "description": "Space before combinators"
+        },
+        "oldFashioned.spaceAfterCombinator": {
+          "type": "string",
+          "default": " ",
+          "description": "Space after combinators"
+        },
+        "oldFashioned.spaceBetweenDeclarations": {
+          "type": "string",
+          "default": "\n",
+          "description": "Space between declarations"
+        },
+        "oldFashioned.spaceBeforeOpeningBrace": {
+          "type": "string",
+          "default": "",
+          "description": "Space before opening brace"
+        },
+        "oldFashioned.spaceAfterOpeningBrace": {
+          "type": "string",
+          "default": "\n",
+          "description": "Space after opening brace"
+        },
+        "oldFashioned.spaceAfterSelectorDelimiter": {
+          "type": "string",
+          "default": "\n",
+          "description": "Space after selector delimiter"
+        },
+        "oldFashioned.spaceBeforeSelectorDelimiter": {
+          "type": "string",
+          "default": "",
+          "description": "Space before selector delimiter"
+        },
+        "oldFashioned.spaceBeforeClosingBrace": {
+          "type": "string",
+          "default": "\n",
+          "description": "Space before closing brace"
+        },
+        "oldFashioned.stripSpaces": {
+          "type": "boolean",
+          "default": true,
+          "description": "Remove extra spaces"
+        },
+        "oldFashioned.tabSize": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use editor's tab size setting"
+        },
+        "oldFashioned.unitlessZero": {
+          "type": "boolean",
+          "default": true,
+          "description": "Remove units for zero values when possible"
+        },
+        "oldFashioned.vendorPrefixAlign": {
+          "type": "boolean",
+          "default": true,
+          "description": "Align vendor prefixed properties"
         }
       }
     }

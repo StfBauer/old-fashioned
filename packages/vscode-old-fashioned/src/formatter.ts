@@ -93,8 +93,11 @@ function getPropertyGroupMap(strategy: string): Map<string, number> {
 export function addEmptyLinesBetweenGroups(css: string, strategy = 'grouped'): string {
     debugLog('Adding empty lines between groups...');
 
-    // Add a debug marker comment to the top of the CSS
-    const cssWithDebugMarker = `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${strategy}) */\n${css}`;
+    // Remove existing debug comments to prevent stacking them
+    let cleanedCss = css.replace(/\/\* DEBUG: Old Fashioned formatter applied on.*?\*\/\n?/g, '');
+    
+    // Add a single debug marker comment to the top of the CSS
+    const cssWithDebugMarker = `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${strategy}) */\n${cleanedCss}`;
 
     // Skip empty line insertion for alphabetical strategy
     if (strategy === 'alphabetical') {
@@ -110,6 +113,7 @@ export function addEmptyLinesBetweenGroups(css: string, strategy = 'grouped'): s
     let insideRule = false;
     let currentGroupIndex: number | null = null;
     let previousLineIsProperty = false;
+    let emptyLineAlreadyAdded = false;
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -120,6 +124,7 @@ export function addEmptyLinesBetweenGroups(css: string, strategy = 'grouped'): s
             insideRule = true;
             currentGroupIndex = null;
             previousLineIsProperty = false;
+            emptyLineAlreadyAdded = false;
             result.push(line);
             continue;
         }
@@ -129,12 +134,19 @@ export function addEmptyLinesBetweenGroups(css: string, strategy = 'grouped'): s
             insideRule = false;
             currentGroupIndex = null;
             previousLineIsProperty = false;
+            emptyLineAlreadyAdded = false;
             result.push(line);
             continue;
         }
 
         // Handle non-property lines
         if (!insideRule || trimmed === '' || trimmed.startsWith('/*')) {
+            if (trimmed === '') {
+                emptyLineAlreadyAdded = true;
+            } else {
+                emptyLineAlreadyAdded = false;
+            }
+            
             result.push(line);
             if (trimmed !== '') {
                 previousLineIsProperty = false;
@@ -154,11 +166,17 @@ export function addEmptyLinesBetweenGroups(css: string, strategy = 'grouped'): s
             const groupIndex = propertyGroupMap.get(propertyName);
 
             // Only add an empty line when transitioning to a new property group
+            // and we haven't already added an empty line
             if (previousLineIsProperty &&
                 currentGroupIndex !== null &&
                 groupIndex !== undefined &&
-                groupIndex !== currentGroupIndex) {
-                result.push(''); // Add empty line between different property groups
+                groupIndex !== currentGroupIndex &&
+                !emptyLineAlreadyAdded) {
+                
+                result.push(''); // Add only one empty line between different property groups
+                emptyLineAlreadyAdded = true;
+            } else {
+                emptyLineAlreadyAdded = false;
             }
 
             // Update the current group index if this property belongs to a known group
@@ -171,6 +189,7 @@ export function addEmptyLinesBetweenGroups(css: string, strategy = 'grouped'): s
             }
         } else {
             previousLineIsProperty = false;
+            emptyLineAlreadyAdded = false;
         }
 
         result.push(line);
