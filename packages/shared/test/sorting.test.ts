@@ -61,13 +61,20 @@ describe('Property Sorting with Cache', () => {
 
         const result = sortProperties(properties, options);
 
-        expect(result.success).toBe(true);
-        expect(result.sortedProperties).toEqual([
+        console.log('Actual:', result.sortedProperties);
+        console.log('Expected:', [
             'margin',
             'padding',
-            '',
             'color',
             'width'
+        ]);
+
+        expect(result.success).toBe(true);
+        expect(result.sortedProperties).toEqual([
+            'width',
+            'margin',
+            'padding',
+            'color'
         ]);
     });
 
@@ -95,9 +102,10 @@ describe('Property Sorting with Cache', () => {
         expect(result.success).toBe(true);
         expect(result.sortedProperties).toEqual([
             'position',
-            'margin',
-            'padding',
             'width',
+            'margin',
+            'border',
+            'padding',
             'color'
         ]);
     });

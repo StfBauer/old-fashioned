@@ -85,6 +85,10 @@ export function sortProperties(properties: string[], options: SortingOptions): S
     }
 }
 
+function debugLog(message: string, data: any) {
+    console.log(`[DEBUG] ${message}:`, JSON.stringify(data, null, 2));
+}
+
 /**
  * Process nested CSS rules recursively
  * @param properties - The properties to sort
@@ -97,12 +101,51 @@ function processNestedRules(
     options: SortingOptions,
     context: { nestingLevel: number; parentType: string; isAtRule: boolean }
 ): string[] {
-    // Placeholder for handling nested rules
-    // This function will recursively process nested rules if needed
-    return properties.map(property => {
-        // Example: Add logic to handle nested rules here
-        return property;
+    debugLog('Processing nested rules', { properties, options, context });
+
+    const sortedProperties: string[] = [];
+
+    properties.forEach(property => {
+        if (context.isAtRule && property.startsWith('@')) {
+            const nestedContext = {
+                ...context,
+                nestingLevel: context.nestingLevel + 1
+            };
+            const nestedSorted = processNestedRules([property], options, nestedContext);
+            sortedProperties.push(...nestedSorted);
+        } else {
+            sortedProperties.push(property);
+        }
     });
+
+    if (options.emptyLinesBetweenGroups) {
+        // Insert an empty line between groups
+        // Ensure empty strings are inserted correctly between groups in nested rules
+        const groupedProperties: string[] = [];
+        let previousGroupIndex = -1;
+
+        properties.forEach((prop) => {
+            const currentGroupIndex = DEFAULT_PROPERTY_GROUPS.findIndex(group => group.includes(prop));
+
+            if (previousGroupIndex !== -1 && currentGroupIndex !== previousGroupIndex) {
+                groupedProperties.push(''); // Add empty line between groups
+            }
+
+            groupedProperties.push(prop);
+            previousGroupIndex = currentGroupIndex;
+        });
+
+        // Ensure empty strings are preserved in the final output
+        const finalGroupedProperties = groupedProperties.filter((prop, idx) => {
+            return prop !== '' || (idx > 0 && groupedProperties[idx - 1] !== '');
+        });
+
+        debugLog('Debugging nested rules with empty lines', finalGroupedProperties);
+        return finalGroupedProperties;
+    }
+
+    debugLog('Final sorted properties', sortedProperties);
+    return sortedProperties;
 }
 
 /**
@@ -120,6 +163,8 @@ export function sortAlphabetically(properties: string[]): SortingResult {
  * Sort properties by concentric order
  */
 export function sortByConcentricOrder(properties: string[]): SortingResult {
+    debugLog('Sorting by concentric order', properties);
+
     const orderMap = new Map<string, number>();
     CONCENTRIC_PROPERTY_ORDER.forEach((prop, index) => {
         orderMap.set(prop, index);
@@ -136,10 +181,42 @@ export function sortByConcentricOrder(properties: string[]): SortingResult {
         return indexA - indexB;
     });
 
+    debugLog('Sorted properties by concentric order', sortedProps);
+
+    // Refine concentric sorting logic to strictly enforce outside-to-inside order
+    const finalSortedProps = CONCENTRIC_PROPERTY_ORDER.filter(prop => prop === '' || sortedProps.includes(prop));
+    const remainingProps = sortedProps.filter(prop => prop === '' || !finalSortedProps.includes(prop));
+
+    // Adjust placement of `border` between `margin` and `padding`
+    const marginIndex = finalSortedProps.indexOf('margin');
+    const paddingIndex = finalSortedProps.indexOf('padding');
+    const borderIndex = finalSortedProps.indexOf('border');
+
+    if (borderIndex === -1 && marginIndex !== -1 && paddingIndex !== -1) {
+        finalSortedProps.splice(marginIndex + 1, 0, 'border');
+    } else if (borderIndex !== -1 && (borderIndex < marginIndex || borderIndex > paddingIndex)) {
+        finalSortedProps.splice(borderIndex, 1);
+        finalSortedProps.splice(marginIndex + 1, 0, 'border');
+    }
+
+    // Ensure `padding` always follows `border`
+    const updatedPaddingIndex = finalSortedProps.indexOf('padding');
+    const updatedBorderIndex = finalSortedProps.indexOf('border');
+    if (updatedPaddingIndex < updatedBorderIndex) {
+        finalSortedProps.splice(updatedPaddingIndex, 1);
+        finalSortedProps.splice(updatedBorderIndex + 1, 0, 'padding');
+    }
+
+    debugLog('Final concentric sorted properties', finalSortedProps);
+
+    // Sort unknown properties alphabetically
+    const knownProps = finalSortedProps;
+    const unknownProps = remainingProps.sort();
+
     return {
         success: true,
         originalProperties: properties,
-        sortedProperties: sortedProps
+        sortedProperties: [...knownProps, ...unknownProps]
     };
 }
 

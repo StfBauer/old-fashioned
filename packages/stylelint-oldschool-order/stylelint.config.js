@@ -1,3 +1,5 @@
+const { alwaysSemicolon, colorCase, blockIndent, quotes, colorShorthand, elementCase, leadingZero, spaceBeforeColon, spaceAfterColon, spaceBeforeCombinator, spaceAfterCombinator, spaceBetweenDeclarations, spaceBeforeOpeningBrace, spaceAfterOpeningBrace, spaceAfterSelectorDelimiter, spaceBeforeSelectorDelimiter, spaceBeforeClosingBrace, stripSpaces } = require('./src/rules/custom-formatting-rules');
+
 module.exports = {
     "plugins": [
         "stylelint-order",
@@ -57,6 +59,24 @@ module.exports = {
                 "properties": ["content", "transition", "transform", "cursor"]
             }
         ],
-        "scss/at-rule-no-unknown": true
+        "scss/at-rule-no-unknown": true,
+        "custom/always-semicolon": true,
+        "custom/color-case": "lower",
+        "custom/block-indent": "\t",
+        "custom/quotes": "double",
+        "custom/color-shorthand": true,
+        "custom/element-case": "lower",
+        "custom/leading-zero": false,
+        "custom/space-before-colon": "",
+        "custom/space-after-colon": " ",
+        "custom/space-before-combinator": " ",
+        "custom/space-after-combinator": " ",
+        "custom/space-between-declarations": "\n",
+        "custom/space-before-opening-brace": "",
+        "custom/space-after-opening-brace": "\n",
+        "custom/space-after-selector-delimiter": "\n",
+        "custom/space-before-selector-delimiter": "",
+        "custom/space-before-closing-brace": "\n",
+        "custom/strip-spaces": true
     }
 }
