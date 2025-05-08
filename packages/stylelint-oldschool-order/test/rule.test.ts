@@ -30,4 +30,48 @@ describe('Property Sorting', () => {
         const zIndexIndex = result.sortedProperties!.indexOf('z-index');
         expect(Math.abs(positionIndex - zIndexIndex)).toBeLessThanOrEqual(5);
     });
+
+    it('should handle strip-spaces rule', () => {
+        const properties = ['  color  ', '  margin  '];
+        const result = sortProperties(properties, {
+            strategy: 'alphabetical',
+            stripSpaces: true
+        });
+
+        expect(result.success).toBe(true);
+        expect(result.sortedProperties).toEqual(['color', 'margin']);
+    });
+
+    it('should handle tab-size rule', () => {
+        const properties = ['\tcolor', '\tmargin'];
+        const result = sortProperties(properties, {
+            strategy: 'alphabetical',
+            tabSize: true
+        });
+
+        expect(result.success).toBe(true);
+        expect(result.sortedProperties).toEqual(['\tcolor', '\tmargin']);
+    });
+
+    it('should handle unitless-zero rule', () => {
+        const properties = ['margin: 0px;', 'padding: 0em;'];
+        const result = sortProperties(properties, {
+            strategy: 'alphabetical',
+            unitlessZero: true
+        });
+
+        expect(result.success).toBe(true);
+        expect(result.sortedProperties).toEqual(['margin: 0;', 'padding: 0;']);
+    });
+
+    it('should handle vendor-prefix-align rule', () => {
+        const properties = ['-webkit-transform', 'transform'];
+        const result = sortProperties(properties, {
+            strategy: 'alphabetical',
+            vendorPrefixAlign: true
+        });
+
+        expect(result.success).toBe(true);
+        expect(result.sortedProperties).toEqual(['-webkit-transform', 'transform']);
+    });
 });

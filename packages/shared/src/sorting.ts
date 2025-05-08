@@ -261,6 +261,9 @@ export function sortByGroups(properties: string[], groups: string[][], options: 
     });
 
     if (ungrouped.length > 0) {
+        if (options.sortPropertiesWithinGroups !== null) {
+            ungrouped.sort();
+        }
         if (result.length > 0 && options.emptyLinesBetweenGroups) {
             result.push('');
         }

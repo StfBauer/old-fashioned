@@ -77,6 +77,9 @@ module.exports = {
         "custom/space-after-selector-delimiter": "\n",
         "custom/space-before-selector-delimiter": "",
         "custom/space-before-closing-brace": "\n",
-        "custom/strip-spaces": true
+        "custom/strip-spaces": true,
+        "custom/tab-size": true,
+        "custom/unitless-zero": true,
+        "custom/vendor-prefix-align": true
     }
 }

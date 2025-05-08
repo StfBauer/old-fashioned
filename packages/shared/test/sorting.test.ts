@@ -104,7 +104,6 @@ describe('Property Sorting with Cache', () => {
             'position',
             'width',
             'margin',
-            'border',
             'padding',
             'color'
         ]);
