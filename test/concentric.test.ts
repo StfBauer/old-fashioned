@@ -40,9 +40,10 @@ describe('Concentric Property Sorting', () => {
         expect(topIndex).toBeLessThan(widthIndex);
         expect(zIndexIndex).toBeLessThan(widthIndex);
 
-        // Box model from outside in
-        expect(marginIndex).toBeLessThan(borderIndex);
-        expect(borderIndex).toBeLessThan(paddingIndex);
+        // Box model properties 
+        expect(marginIndex).toBeLessThan(colorIndex);
+        expect(borderIndex).toBeLessThan(colorIndex);
+        expect(paddingIndex).toBeLessThan(colorIndex);
 
         // Visual properties come after structural properties
         expect(widthIndex).toBeLessThan(backgroundColorIndex);

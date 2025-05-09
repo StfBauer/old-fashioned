@@ -8,7 +8,8 @@ export default defineConfig({
     environment: 'node',
     include: [
       'packages/**/test/**/*.{test,spec}.ts',
-      'test/**/*.{test,spec}.ts' // Add this line to include tests in the root test directory
+      'test/**/*.{test,spec}.ts', // Add this line to include tests in the root test directory
+      'test/all-properties.test.ts'
     ],
     exclude: ['**/node_modules/**', '**/dist/**'],
     coverage: {

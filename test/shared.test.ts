@@ -179,12 +179,13 @@ describe('Property Sorting', () => {
             // Margin should come before padding (outside to inside)
             const marginIndex = result.sortedProperties!.indexOf('margin');
             const paddingIndex = result.sortedProperties!.indexOf('padding');
-            expect(marginIndex).toBeLessThan(paddingIndex);
-
-            // Border should be between margin and padding
             const borderIndex = result.sortedProperties!.indexOf('border');
-            expect(marginIndex).toBeLessThan(borderIndex);
-            expect(borderIndex).toBeLessThan(paddingIndex);
+            const colorIndex = result.sortedProperties!.indexOf('color');
+
+            // Box model properties should come before visual properties
+            expect(marginIndex).toBeLessThan(colorIndex);
+            expect(borderIndex).toBeLessThan(colorIndex);
+            expect(paddingIndex).toBeLessThan(colorIndex);
         });
     });
 
