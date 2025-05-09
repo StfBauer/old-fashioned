@@ -28,7 +28,7 @@ const vscode = vi.hoisted(() => {
         }
     };
 });
-vi.mock('vscode', () => vscode, { virtual: true });
+vi.mock('vscode', () => vscode);
 
 describe('Config Loader', () => {
     beforeEach(() => {
@@ -47,8 +47,8 @@ describe('Config Loader', () => {
         });
 
         it('should search parent directories for config', () => {
-            vi.mocked(fs.existsSync).mockImplementation((path: string) => {
-                return path.includes('/project/.stylelintrc');
+            vi.mocked(fs.existsSync).mockImplementation((path) => {
+                return String(path).includes('/project/.stylelintrc');
             });
 
             const result = findStylelintConfig('/project/src/components');
@@ -58,8 +58,8 @@ describe('Config Loader', () => {
         });
 
         it('should check package.json for stylelint property', () => {
-            vi.mocked(fs.existsSync).mockImplementation((path: string) => {
-                return path.endsWith('package.json');
+            vi.mocked(fs.existsSync).mockImplementation((path) => {
+                return String(path).endsWith('package.json');
             });
 
             vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
@@ -150,8 +150,8 @@ describe('Config Loader', () => {
             };
 
             // Mock that config file exists
-            vi.mocked(fs.existsSync).mockImplementation((path: string) => {
-                return path.includes('.stylelintrc');
+            vi.mocked(fs.existsSync).mockImplementation((path) => {
+                return String(path).includes('.stylelintrc');
             });
 
             // Mock that config contains the plugin
@@ -192,12 +192,12 @@ describe('Config Loader', () => {
             };
 
             // Mock filesystem operations
-            vi.mocked(fs.existsSync).mockImplementation((filepath: string) => {
-                return Object.keys(mockFileSystem).some(f => filepath.includes(f));
+            vi.mocked(fs.existsSync).mockImplementation((filepath) => {
+                return Object.keys(mockFileSystem).some(f => String(filepath).includes(f));
             });
 
-            vi.mocked(fs.readFileSync).mockImplementation((filepath: string) => {
-                const key = Object.keys(mockFileSystem).find(f => filepath.includes(f));
+            vi.mocked(fs.readFileSync).mockImplementation((filepath, encoding) => {
+                const key = Object.keys(mockFileSystem).find(f => String(filepath).includes(f));
                 return key ? mockFileSystem[key] : '';
             });
 

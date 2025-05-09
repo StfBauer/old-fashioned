@@ -28,7 +28,7 @@ const mockEditBuilder = {
 const vscode = vi.hoisted(() => {
     return {
         window: {
-            activeTextEditor: null,
+            activeTextEditor: null as any, // Using 'any' to allow assignment of editor objects in tests
             showErrorMessage: vi.fn(),
             showInformationMessage: vi.fn(),
             withProgress: vi.fn((options, task) => task())
@@ -61,7 +61,7 @@ const vscode = vi.hoisted(() => {
         }
     };
 });
-vi.mock('vscode', () => vscode, { virtual: true });
+vi.mock('vscode', () => vscode);
 
 describe('Project-Level Configuration Integration Tests', () => {
     // Setup temporary directory for tests
@@ -102,12 +102,12 @@ describe('Project-Level Configuration Integration Tests', () => {
         };
 
         // Mock filesystem operations
-        vi.mocked(fs.existsSync).mockImplementation((path: string) =>
-            Object.keys(mockFiles).some(file => path.includes(file.replace(tempDir, '')))
+        vi.mocked(fs.existsSync).mockImplementation((path) =>
+            Object.keys(mockFiles).some(file => String(path).includes(file.replace(tempDir, '')))
         );
 
-        vi.mocked(fs.readFileSync).mockImplementation((path: any) => {
-            const key = Object.keys(mockFiles).find(file => path.includes(file.replace(tempDir, '')));
+        vi.mocked(fs.readFileSync).mockImplementation((path, encoding) => {
+            const key = Object.keys(mockFiles).find(file => String(path).includes(file.replace(tempDir, '')));
             return key ? mockFiles[key] : '';
         });
 
@@ -165,12 +165,12 @@ describe('Project-Level Configuration Integration Tests', () => {
         };
 
         // Mock filesystem operations
-        vi.mocked(fs.existsSync).mockImplementation((path: string) =>
-            Object.keys(mockFiles).some(file => path.includes(file.replace(tempDir, '')))
+        vi.mocked(fs.existsSync).mockImplementation((path) =>
+            Object.keys(mockFiles).some(file => String(path).includes(file.replace(tempDir, '')))
         );
 
-        vi.mocked(fs.readFileSync).mockImplementation((path: any) => {
-            const key = Object.keys(mockFiles).find(file => path.includes(file.replace(tempDir, '')));
+        vi.mocked(fs.readFileSync).mockImplementation((path, encoding) => {
+            const key = Object.keys(mockFiles).find(file => String(path).includes(file.replace(tempDir, '')));
             return key ? mockFiles[key] : '';
         });
 
@@ -224,13 +224,13 @@ describe('Project-Level Configuration Integration Tests', () => {
         };
 
         // Mock config file existence
-        vi.mocked(fs.existsSync).mockImplementation((path: string) => {
-            return path.includes(`${tempDir}/with-config`) && path.includes('.stylelintrc');
+        vi.mocked(fs.existsSync).mockImplementation((path) => {
+            return String(path).includes(`${tempDir}/with-config`) && String(path).includes('.stylelintrc');
         });
 
         // Mock config file content
-        vi.mocked(fs.readFileSync).mockImplementation((path: any) => {
-            if (path.includes(`${tempDir}/with-config`)) {
+        vi.mocked(fs.readFileSync).mockImplementation((path, encoding) => {
+            if (String(path).includes(`${tempDir}/with-config`)) {
                 return JSON.stringify({
                     plugins: ['stylelint-oldschool-order'],
                     rules: {
