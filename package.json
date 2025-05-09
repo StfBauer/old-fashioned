@@ -43,7 +43,6 @@
     "@vscode/vsce": "^2.22.0",
     "nx": "^16.10.0",
     "@nrwl/eslint-plugin-nx": "^16.10.0",
-    "@nrwl/jest": "^16.10.0",
     "@nrwl/js": "^16.10.0",
     "@nrwl/workspace": "^16.10.0",
     "@nrwl/linter": "^16.10.0",
