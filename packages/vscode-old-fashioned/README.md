@@ -15,6 +15,7 @@ A VS Code extension for sorting CSS properties according to various strategies, 
 - Quick-fix suggestions for ordering issues
 - Format on demand or via Format Document command
 - Context menu integration
+- **Project-level configuration** support via stylelint config files
 
 ![Demo of Old Fashioned sorting CSS properties](images/demo.gif)
 
@@ -49,6 +50,40 @@ This extension provides several configuration options:
   
 - **oldFashioned.showActivationMessage**: Whether to show a message when the extension is activated
   - Default: true
+
+### Project-Level Configuration
+
+Old Fashioned respects project-level stylelint configuration files. If your project has a `.stylelintrc` file (or any standard stylelint config file) with the `stylelint-oldschool-order` plugin configured, the extension will use those settings instead of the VS Code settings.
+
+#### Setup a Project-Level Configuration
+
+1. Install the stylelint and oldschool-order packages:
+   ```bash
+   npm install --save-dev stylelint stylelint-oldschool-order
+   ```
+
+2. Create a `.stylelintrc` file in your project root:
+   ```json
+   {
+     "plugins": [
+       "stylelint-oldschool-order"
+     ],
+     "rules": {
+       "oldschool/order": [true, {
+         "strategy": "grouped",
+         "emptyLinesBetweenGroups": true,
+         "sortPropertiesWithinGroups": true
+       }]
+     }
+   }
+   ```
+
+3. The extension will automatically detect and use this configuration when editing CSS files in your project.
+
+This allows you to:
+- Maintain consistent CSS property ordering across the team
+- Integrate with your build pipeline using the same rules
+- Override the default VS Code settings on a per-project basis
 
 ## Property Groups
 

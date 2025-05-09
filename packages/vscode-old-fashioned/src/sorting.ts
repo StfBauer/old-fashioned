@@ -11,6 +11,7 @@ import { SortingStrategy } from '@old-fashioned/shared';
 import { DEFAULT_PROPERTY_GROUPS, IDIOMATIC_PROPERTY_GROUPS } from '@old-fashioned/shared';
 import { addEmptyLinesBetweenGroups } from './formatter';
 import { getSortingOptions, getFormattingOptions } from './utils';
+import { getDocumentSortingOptions, ConfigSource } from './config-loader';
 import * as postcss from 'postcss';
 import * as postcssScss from 'postcss-scss';
 
@@ -46,27 +47,25 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
   const { selection, text, isEntireDocument } = getTextToProcess(editor);
 
   try {
+    // Check for project-level configuration first
+    const configWithSource = getDocumentSortingOptions(document);
+    const sortingOptions = configWithSource.options;
+
+    // Notify user about configuration source (optional)
+    if (configWithSource.source === ConfigSource.PROJECT) {
+      console.log(`Using project-level stylelint configuration from: ${configWithSource.configPath}`);
+    } else {
+      console.log('Using VS Code extension settings for sorting');
+    }
+
     // Show progress indicator
     await vscode.window.withProgress({
       location: vscode.ProgressLocation.Notification,
       title: "Sorting CSS properties...",
       cancellable: false
     }, async () => {
-      // Get sorting and formatting configuration, use try/catch to prevent settings UI from opening
-      let sortingOptions;
+      // Get formatting configuration, use try/catch to prevent settings UI from opening
       let formattingOptions;
-
-      try {
-        sortingOptions = getSortingOptions();
-      } catch (error) {
-        console.error('Error getting sorting options:', error);
-        // Use default values if settings can't be accessed
-        sortingOptions = {
-          strategy: 'grouped' as SortingStrategy,
-          emptyLinesBetweenGroups: true,
-          sortPropertiesWithinGroups: true
-        };
-      }
 
       try {
         formattingOptions = getFormattingOptions();
@@ -99,9 +98,9 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
         };
       }
 
-      // Parse and sort the CSS/SCSS
+      // Parse and sort the CSS/SCSS - use the project configuration we detected earlier
       const sortedText = sortCssText(text, document.languageId, {
-        ...sortingOptions,
+        ...configWithSource.options, // Use the project-level config if available
         // Add formatting options 
         'always-semicolon': formattingOptions.alwaysSemicolon,
         'color-case': formattingOptions.colorCase,
