@@ -31,7 +31,7 @@ export interface ConfigWithSource {
 /**
  * Configuration file details
  */
-interface ConfigFileDetails {
+export interface ConfigFileDetails {
     path: string;
     exists: boolean;
 }
@@ -39,7 +39,7 @@ interface ConfigFileDetails {
 /**
  * Interface for parsed stylelint configuration
  */
-interface StylelintConfig {
+export interface StylelintConfig {
     plugins?: string[];
     rules?: Record<string, any>;
     extends?: string | string[];
@@ -48,7 +48,7 @@ interface StylelintConfig {
 /**
  * Interface for parsed package.json with stylelint config
  */
-interface PackageJsonWithStylelint {
+export interface PackageJsonWithStylelint {
     stylelint?: StylelintConfig;
     [key: string]: any;
 }
@@ -56,7 +56,7 @@ interface PackageJsonWithStylelint {
 /**
  * Interface for oldschool plugin rule configuration
  */
-interface OldschoolOrderRule {
+export interface OldschoolOrderRule {
     strategy?: SortingStrategy;
     emptyLinesBetweenGroups?: boolean;
     sortPropertiesWithinGroups?: boolean;
@@ -66,7 +66,7 @@ interface OldschoolOrderRule {
 /**
  * Custom error for configuration-related errors
  */
-class ConfigurationError extends Error {
+export class ConfigurationError extends Error {
     constructor(message: string, public readonly code: string) {
         super(message);
         this.name = 'ConfigurationError';
@@ -76,7 +76,7 @@ class ConfigurationError extends Error {
 /**
  * Error codes for configuration errors
  */
-enum ConfigErrorCode {
+export enum ConfigErrorCode {
     FILE_NOT_FOUND = 'FILE_NOT_FOUND',
     INVALID_JSON = 'INVALID_JSON',
     NO_PLUGIN = 'NO_PLUGIN',

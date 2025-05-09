@@ -4,40 +4,54 @@
  * Tests for the stylelint configuration loading functionality
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as fs from 'fs';
-import * as path from 'path';
-import { findStylelintConfig, hasOldschoolOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../config-loader';
+// Import vi first for mocking
+import { vi } from 'vitest';
 
-// Mock Node.js modules
+// Define mocks BEFORE importing modules
 vi.mock('fs', () => ({
     existsSync: vi.fn(),
     readFileSync: vi.fn()
 }));
 
-// Mock VS Code APIs
-const vscode = vi.hoisted(() => {
-    return {
-        workspace: {
-            getConfiguration: vi.fn(() => ({
-                get: (key: string, defaultValue: any) => defaultValue
-            }))
-        },
-        Uri: {
-            file: (path: string) => ({ scheme: 'file', fsPath: path })
-        }
-    };
-});
-vi.mock('vscode', () => vscode);
+// Mock VS Code APIs directly to avoid circular dependencies
+vi.mock('vscode', () => ({
+    workspace: {
+        getConfiguration: vi.fn(() => ({
+            get: (key: string, defaultValue: any) => defaultValue
+        }))
+    },
+    Uri: {
+        file: (path: string) => ({ scheme: 'file', fsPath: path })
+    }
+}));
+
+// Now import the rest
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as vscode from 'vscode'; // Import vscode to access the mock
+import { findStylelintConfig, hasOldschoolOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../config-loader';
+import { VSCodeMockBuilder, FileSystemMockBuilder, resetAllMocks, createTestDocument } from './test-utils';
 
 describe('Config Loader', () => {
+    // Setup mock filesystem for each test
+    let fsMock: FileSystemMockBuilder;
+
     beforeEach(() => {
-        vi.resetAllMocks();
+        resetAllMocks();
+        fsMock = new FileSystemMockBuilder();
+    });
+
+    afterEach(() => {
+        resetAllMocks();
     });
 
     describe('findStylelintConfig', () => {
         it('should find stylelint config in the current directory', () => {
-            vi.mocked(fs.existsSync).mockReturnValue(true);
+            // Setup mock files
+            fsMock.addStylelintConfig('/project/.stylelintrc', {
+                plugins: ['stylelint-oldschool-order']
+            }).build();
 
             const result = findStylelintConfig('/project/src');
 
@@ -47,24 +61,26 @@ describe('Config Loader', () => {
         });
 
         it('should search parent directories for config', () => {
-            vi.mocked(fs.existsSync).mockImplementation((path) => {
-                return String(path).includes('/project/.stylelintrc');
-            });
+            // Setup mock files that only match at parent directory level
+            fsMock.addStylelintConfig('/project/.stylelintrc.json', {
+                plugins: ['stylelint-oldschool-order']
+            }).build();
 
             const result = findStylelintConfig('/project/src/components');
 
             expect(result).not.toBeNull();
-            expect(result?.path).toContain('/project/.stylelintrc');
+            expect(result?.path).toContain('/project/.stylelintrc.json');
         });
 
         it('should check package.json for stylelint property', () => {
-            vi.mocked(fs.existsSync).mockImplementation((path) => {
-                return String(path).endsWith('package.json');
-            });
-
-            vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
-                stylelint: { rules: {} }
-            }));
+            // Setup mock package.json with stylelint config
+            fsMock.addPackageJson('/project/package.json', {
+                name: 'test-project',
+                stylelint: {
+                    plugins: ['stylelint-oldschool-order'],
+                    rules: {}
+                }
+            }).build();
 
             const result = findStylelintConfig('/project');
 
@@ -74,7 +90,8 @@ describe('Config Loader', () => {
         });
 
         it('should return null if no config is found', () => {
-            vi.mocked(fs.existsSync).mockReturnValue(false);
+            // Empty mock filesystem
+            fsMock.build();
 
             const result = findStylelintConfig('/project');
 
@@ -84,9 +101,10 @@ describe('Config Loader', () => {
 
     describe('hasOldschoolOrderPlugin', () => {
         it('should detect oldschool-order plugin in JSON config', () => {
-            vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
+            // Setup mock files
+            fsMock.addStylelintConfig('/project/.stylelintrc.json', {
                 plugins: ['stylelint-oldschool-order']
-            }));
+            }).build();
 
             const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
 
@@ -94,9 +112,10 @@ describe('Config Loader', () => {
         });
 
         it('should detect plugin with partial name match', () => {
-            vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
+            // Setup mock files
+            fsMock.addStylelintConfig('/project/.stylelintrc.json', {
                 plugins: ['@some-scope/oldschool-order']
-            }));
+            }).build();
 
             const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
 
@@ -104,9 +123,10 @@ describe('Config Loader', () => {
         });
 
         it('should return false if plugin is not in config', () => {
-            vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
+            // Setup mock files
+            fsMock.addStylelintConfig('/project/.stylelintrc.json', {
                 plugins: ['some-other-plugin']
-            }));
+            }).build();
 
             const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
 
@@ -114,12 +134,13 @@ describe('Config Loader', () => {
         });
 
         it('should handle package.json with stylelint property', () => {
-            vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
+            // Setup mock files
+            fsMock.addPackageJson('/project/package.json', {
                 name: 'my-project',
                 stylelint: {
                     plugins: ['stylelint-oldschool-order']
                 }
-            }));
+            }).build();
 
             const result = hasOldschoolOrderPlugin('/project/package.json');
 
@@ -129,46 +150,72 @@ describe('Config Loader', () => {
 
     describe('getDocumentSortingOptions', () => {
         it('should use VS Code settings when no project config exists', () => {
-            // Mock document
-            const document = {
-                uri: { scheme: 'file', fsPath: '/project/src/style.css' }
-            };
+            // Setup VS Code mock with settings
+            const vscodeWithSettings = new VSCodeMockBuilder()
+                .withSettings({
+                    oldFashioned: {
+                        sorting: {
+                            strategy: 'grouped',
+                            emptyLinesBetweenGroups: true,
+                            sortPropertiesWithinGroups: true
+                        }
+                    }
+                })
+                .build();
 
-            // Mock that no config file exists
-            vi.mocked(fs.existsSync).mockReturnValue(false);
+            // Replace the mock
+            Object.assign(vscode, vscodeWithSettings);
+
+            // Setup empty filesystem - no config files
+            fsMock.build();
+
+            // Mock document without using createTestDocument
+            const document = {
+                uri: { scheme: 'file', fsPath: '/project/src/style.css' },
+                languageId: 'css',
+                getText: () => '.test { color: red; }'
+            };
 
             const result = getDocumentSortingOptions(document as any);
 
             expect(result.source).toBe(ConfigSource.VSCODE);
             expect(result.options).toBeDefined();
+            expect(result.options.strategy).toBe('grouped');
         });
 
         it('should use project config when it exists with oldschool-order plugin', () => {
-            // Mock document
+            // Setup mock files with project config
+            fsMock.addStylelintConfig('/project/.stylelintrc.json', {
+                plugins: ['stylelint-oldschool-order'],
+                rules: {
+                    'oldschool/order': [true, { strategy: 'alphabetical' }]
+                }
+            }).build();
+
+            // Mock document without using createTestDocument
             const document = {
-                uri: { scheme: 'file', fsPath: '/project/src/style.css' }
+                uri: { scheme: 'file', fsPath: '/project/src/style.css' },
+                languageId: 'css',
+                getText: () => '.test { color: red; }'
             };
-
-            // Mock that config file exists
-            vi.mocked(fs.existsSync).mockImplementation((path) => {
-                return String(path).includes('.stylelintrc');
-            });
-
-            // Mock that config contains the plugin
-            vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
-                plugins: ['stylelint-oldschool-order']
-            }));
 
             const result = getDocumentSortingOptions(document as any);
 
             expect(result.source).toBe(ConfigSource.PROJECT);
             expect(result.configPath).toBeDefined();
+            // In a real implementation, we would check that the options.strategy is 'alphabetical'
         });
 
         it('should fallback to VS Code settings for non-file documents', () => {
+            // Setup mock files with project config (that shouldn't be used)
+            fsMock.addStylelintConfig('/project/.stylelintrc.json', {
+                plugins: ['stylelint-oldschool-order']
+            }).build();
+
             // Mock document with non-file scheme
             const document = {
-                uri: { scheme: 'untitled' }
+                uri: { scheme: 'untitled', fsPath: '/project/untitled.css' },
+                languageId: 'css'
             };
 
             const result = getDocumentSortingOptions(document as any);
@@ -180,39 +227,58 @@ describe('Config Loader', () => {
     describe('Integration Tests for Project Config Detection', () => {
         it('should correctly detect and use project config in a nested directory structure', () => {
             // Set up mock filesystem structure
-            const mockFileSystem = {
-                '/project/.stylelintrc.json': JSON.stringify({
-                    plugins: ['stylelint-oldschool-order'],
-                    rules: {
-                        'oldschool/order': [true, { strategy: 'alphabetical' }]
-                    }
-                }),
-                '/project/src/styles.css': 'body { color: red; }',
-                '/project/src/components/Button/Button.css': '.button { background: blue; }'
-            };
+            fsMock.addStylelintConfig('/project/.stylelintrc.json', {
+                plugins: ['stylelint-oldschool-order'],
+                rules: {
+                    'oldschool/order': [true, { strategy: 'alphabetical' }]
+                }
+            })
+                .addMockFile('/project/src/styles.css', 'body { color: red; }')
+                .addMockFile('/project/src/components/Button/Button.css', '.button { background: blue; }')
+                .build();
 
-            // Mock filesystem operations
-            vi.mocked(fs.existsSync).mockImplementation((filepath) => {
-                return Object.keys(mockFileSystem).some(f => String(filepath).includes(f));
+            // Mock document in a deeply nested location
+            const document = createTestDocument({
+                languageId: 'css',
+                content: '.button { background: blue; }',
+                uri: 'file:///project/src/components/Button/Button.css'
             });
-
-            vi.mocked(fs.readFileSync).mockImplementation((filepath, encoding) => {
-                const key = Object.keys(mockFileSystem).find(f => String(filepath).includes(f));
-                return key ? mockFileSystem[key] : '';
-            });
-
-            // Test with a deeply nested file
-            const document = {
-                uri: { scheme: 'file', fsPath: '/project/src/components/Button/Button.css' }
-            };
 
             const result = getDocumentSortingOptions(document as any);
 
             expect(result.source).toBe(ConfigSource.PROJECT);
             expect(result.configPath).toContain('.stylelintrc.json');
-
             // In a real implementation, we would check that the strategy is 'alphabetical'
-            // as specified in the mock config
+        });
+
+        it('should handle multiple config files correctly', () => {
+            // Set up mock filesystem with multiple configs at different levels
+            fsMock.addStylelintConfig('/project/.stylelintrc.json', {
+                plugins: ['stylelint-oldschool-order'],
+                rules: {
+                    'oldschool/order': [true, { strategy: 'alphabetical' }]
+                }
+            })
+                .addStylelintConfig('/project/src/components/.stylelintrc.json', {
+                    plugins: ['stylelint-oldschool-order'],
+                    rules: {
+                        'oldschool/order': [true, { strategy: 'concentric' }]
+                    }
+                })
+                .build();
+
+            // Mock document that should use the nested config
+            const document = createTestDocument({
+                languageId: 'css',
+                content: '.button { background: blue; }',
+                uri: 'file:///project/src/components/Button/Button.css'
+            });
+
+            const result = getDocumentSortingOptions(document as any);
+
+            expect(result.source).toBe(ConfigSource.PROJECT);
+            expect(result.configPath).toContain('/project/src/components/.stylelintrc.json');
+            // The config from the closest parent directory should be used
         });
     });
 });

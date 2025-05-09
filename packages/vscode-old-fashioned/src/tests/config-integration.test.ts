@@ -1,252 +1,317 @@
 /**
- * Config Integration Tests
+ * Configuration Integration Tests - Consolidated Version
  * 
- * Integration tests for project-level stylelint configuration handling
+ * This file tests the integration between project-level configuration
+ * and VS Code extension settings.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as fs from 'fs';
+// Import vi first for mocking
+import { vi } from 'vitest';
 import * as path from 'path';
 import * as os from 'os';
+import { ConfigSource } from '../config-loader';
+
+// Define mocks with hoisting to prevent initialization errors
+const mockFS = vi.hoisted(() => ({
+    existsSync: vi.fn(),
+    readFileSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    writeFileSync: vi.fn()
+}));
+
+const mockStylelint = vi.hoisted(() => ({
+    default: {
+        lint: vi.fn().mockImplementation(() => {
+            return Promise.resolve({
+                results: [{ warnings: [] }],
+                output: 'sorted-css'
+            });
+        })
+    }
+}));
+
+// Mock VS Code APIs directly to avoid circular dependencies
+const mockVSCode = vi.hoisted(() => ({
+    window: {
+        activeTextEditor: undefined,
+        showErrorMessage: vi.fn(),
+        showInformationMessage: vi.fn(),
+        showWarningMessage: vi.fn(),
+        withProgress: vi.fn().mockImplementation((options, task) => task())
+    },
+    commands: {
+        registerCommand: vi.fn(),
+        executeCommand: vi.fn()
+    },
+    workspace: {
+        getConfiguration: vi.fn().mockReturnValue({
+            get: vi.fn().mockImplementation((key: string, defaultValue: any) => {
+                if (key === 'sorting.strategy') return 'grouped';
+                if (key === 'sorting.emptyLinesBetweenGroups') return true;
+                if (key === 'sorting.sortPropertiesWithinGroups') return true;
+                if (key === 'showActivationMessage') return true;
+                return defaultValue;
+            })
+        }),
+        onDidOpenTextDocument: vi.fn(),
+        onDidChangeTextDocument: vi.fn(),
+        onDidSaveTextDocument: vi.fn(),
+        onDidCloseTextDocument: vi.fn(),
+        textDocuments: [],
+        applyEdit: vi.fn().mockResolvedValue(true)
+    },
+    languages: {
+        registerCodeActionsProvider: vi.fn(),
+        registerDocumentFormattingEditProvider: vi.fn(),
+        createDiagnosticCollection: vi.fn(() => ({
+            set: vi.fn(),
+            delete: vi.fn(),
+            clear: vi.fn(),
+            dispose: vi.fn()
+        }))
+    },
+    Range: class {
+        constructor(
+            public start: { line: number; character: number },
+            public end: { line: number; character: number }
+        ) { }
+    },
+    Position: class {
+        constructor(public line: number, public character: number) { }
+    },
+    DiagnosticSeverity: { Error: 0, Warning: 1, Information: 2, Hint: 3 },
+    TextEdit: { replace: vi.fn((range, newText) => ({ range, newText })) },
+    Uri: {
+        file: (path: string) => ({ scheme: 'file', fsPath: path, toString: () => `file://${path}` })
+    },
+    Diagnostic: class {
+        constructor(
+            public range: any,
+            public message: string,
+            public severity: number
+        ) { }
+        source: string = '';
+        code: string = '';
+    }
+}));
+
+// Apply mocks
+vi.mock('fs', () => mockFS);
+vi.mock('stylelint', () => mockStylelint);
+vi.mock('vscode', () => mockVSCode);
+
+// Now import the rest
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import * as vscode from 'vscode';
 import { sortCssProperties } from '../sorting';
-import { ConfigSource, getDocumentSortingOptions } from '../config-loader';
-
-// Mock filesystem operations
-vi.mock('fs', () => {
-    return {
-        existsSync: vi.fn(),
-        readFileSync: vi.fn()
-    };
-});
-
-// Mock VS Code APIs
-const mockTextEdit = vi.fn();
-const mockEditBuilder = {
-    replace: mockTextEdit
-};
-
-const vscode = vi.hoisted(() => {
-    return {
-        window: {
-            activeTextEditor: null as any, // Using 'any' to allow assignment of editor objects in tests
-            showErrorMessage: vi.fn(),
-            showInformationMessage: vi.fn(),
-            withProgress: vi.fn((options, task) => task())
-        },
-        workspace: {
-            getConfiguration: vi.fn(() => ({
-                get: (key: string, defaultValue: any) => {
-                    // Default VS Code settings - these would be overridden by project config
-                    if (key === 'sortingStrategy') return 'concentric';
-                    return defaultValue;
-                }
-            })),
-            applyEdit: vi.fn(),
-            WorkspaceEdit: class {
-                replace() { }
-            }
-        },
-        Uri: {
-            file: (path: string) => ({ scheme: 'file', fsPath: path })
-        },
-        Range: class {
-            constructor(public start: any, public end: any) { }
-        },
-        Position: class {
-            constructor(public line: number, public character: number) { }
-        },
-        WorkspaceEdit: class {
-            constructor() { }
-            replace() { }
-        }
-    };
-});
-vi.mock('vscode', () => vscode);
+import { getSortingOptions } from '../utils';
+import { getDocumentSortingOptions } from '../config-loader';
 
 describe('Project-Level Configuration Integration Tests', () => {
-    // Setup temporary directory for tests
-    let tempDir: string;
+    const tempDir = path.join(os.tmpdir(), `oldschool-test-${Date.now()}`);
+    let testFilePath: string;
 
     beforeEach(() => {
-        // Reset mocks
+        // Reset all mocks
         vi.resetAllMocks();
-        mockTextEdit.mockClear();
 
-        // Create temp directory for test files if needed
-        // In Vitest, we're mocking the filesystem, so this is just for representational purposes
-        tempDir = path.join(os.tmpdir(), `oldschool-test-${Date.now()}`);
+        testFilePath = path.join(tempDir, 'style.css');
+
+        // Setup base mock for file existence
+        mockFS.existsSync.mockReturnValue(true);
     });
 
     afterEach(() => {
-        // Clean up temp directory if needed
-        // Again, with mocked fs this is representational
+        vi.resetAllMocks();
     });
 
     it('should respect project-level alphabetical sorting strategy over VS Code settings', async () => {
-        // Set up mock filesystem with project-level config
-        const mockFiles = {
-            [`${tempDir}/.stylelintrc.json`]: JSON.stringify({
-                plugins: ['stylelint-oldschool-order'],
-                rules: {
-                    'oldschool/order': [true, { strategy: 'alphabetical' }]
-                }
-            }),
-            [`${tempDir}/style.css`]: `
-        .element {
-          width: 100px;
-          color: red;
-          background: blue;
-          animation: fade 1s;
-        }
-      `
-        };
-
-        // Mock filesystem operations
-        vi.mocked(fs.existsSync).mockImplementation((path) =>
-            Object.keys(mockFiles).some(file => String(path).includes(file.replace(tempDir, '')))
-        );
-
-        vi.mocked(fs.readFileSync).mockImplementation((path, encoding) => {
-            const key = Object.keys(mockFiles).find(file => String(path).includes(file.replace(tempDir, '')));
-            return key ? mockFiles[key] : '';
+        // Mock file system for project config
+        const configPath = path.join(tempDir, '.stylelintrc.json');
+        mockFS.existsSync.mockImplementation((filePath: string) => {
+            if (filePath === configPath) return true;
+            return false;
         });
 
-        // Mock document and editor
-        const document = {
-            uri: { scheme: 'file', fsPath: `${tempDir}/style.css` },
-            getText: () => mockFiles[`${tempDir}/style.css`],
-            lineCount: 7,
-            lineAt: (idx: number) => {
-                const lines = mockFiles[`${tempDir}/style.css`].split('\n');
-                return { text: lines[idx], range: new vscode.Range(new vscode.Position(idx, 0), new vscode.Position(idx, lines[idx].length)) };
-            },
-            languageId: 'css'
-        };
-
-        const editor = {
-            document,
-            selection: {
-                isEmpty: true,
-                start: new vscode.Position(0, 0),
-                end: new vscode.Position(7, 0)
-            },
-            edit: async (callback: Function) => {
-                callback(mockEditBuilder);
-                return true;
+        // Define a project config with alphabetical strategy
+        const projectConfig = JSON.stringify({
+            plugins: ['stylelint-oldschool-order'],
+            rules: {
+                'plugin/oldschool-order': [true, { strategy: 'alphabetical' }]
             }
-        };
-
-        // Set active editor
-        vscode.window.activeTextEditor = editor;
-
-        // First, check the detected config source directly
-        const config = getDocumentSortingOptions(document as any);
-        expect(config.source).toBe(ConfigSource.PROJECT);
-        expect(config.options.strategy).toBe('alphabetical');
-
-        // Call function under test
-        await sortCssProperties(editor as any);
-
-        // Check if sorting was called
-        expect(mockTextEdit).toHaveBeenCalled();
-    });
-
-    it('should respect VS Code settings when no project config exists', async () => {
-        // Set up mock filesystem without project-level config
-        const mockFiles = {
-            [`${tempDir}/style.css`]: `
-        .element {
-          width: 100px;
-          color: red;
-          background: blue;
-          animation: fade 1s;
-        }
-      `
-        };
-
-        // Mock filesystem operations
-        vi.mocked(fs.existsSync).mockImplementation((path) =>
-            Object.keys(mockFiles).some(file => String(path).includes(file.replace(tempDir, '')))
-        );
-
-        vi.mocked(fs.readFileSync).mockImplementation((path, encoding) => {
-            const key = Object.keys(mockFiles).find(file => String(path).includes(file.replace(tempDir, '')));
-            return key ? mockFiles[key] : '';
         });
 
-        // Mock document and editor
-        const document = {
-            uri: { scheme: 'file', fsPath: `${tempDir}/style.css` },
-            getText: () => mockFiles[`${tempDir}/style.css`],
-            lineCount: 7,
-            lineAt: (idx: number) => {
-                const lines = mockFiles[`${tempDir}/style.css`].split('\n');
-                return { text: lines[idx], range: new vscode.Range(new vscode.Position(idx, 0), new vscode.Position(idx, lines[idx].length)) };
-            },
-            languageId: 'css'
-        };
-
-        const editor = {
-            document,
-            selection: {
-                isEmpty: true,
-                start: new vscode.Position(0, 0),
-                end: new vscode.Position(7, 0)
-            },
-            edit: async (callback: Function) => {
-                callback(mockEditBuilder);
-                return true;
-            }
-        };
-
-        // Set active editor
-        vscode.window.activeTextEditor = editor;
-
-        // First, check the detected config source directly
-        const config = getDocumentSortingOptions(document as any);
-        expect(config.source).toBe(ConfigSource.VSCODE);
-
-        // Call function under test
-        await sortCssProperties(editor as any);
-
-        // Check if sorting was called
-        expect(mockTextEdit).toHaveBeenCalled();
-    });
-
-    it('should provide information about what configuration source is being used', () => {
-        // Create mock documents
-        const docWithProjectConfig = {
-            uri: { scheme: 'file', fsPath: `${tempDir}/with-config/style.css` }
-        };
-
-        const docWithoutProjectConfig = {
-            uri: { scheme: 'file', fsPath: `${tempDir}/no-config/style.css` }
-        };
-
-        // Mock config file existence
-        vi.mocked(fs.existsSync).mockImplementation((path) => {
-            return String(path).includes(`${tempDir}/with-config`) && String(path).includes('.stylelintrc');
-        });
-
-        // Mock config file content
-        vi.mocked(fs.readFileSync).mockImplementation((path, encoding) => {
-            if (String(path).includes(`${tempDir}/with-config`)) {
-                return JSON.stringify({
-                    plugins: ['stylelint-oldschool-order'],
-                    rules: {
-                        'oldschool/order': [true, { strategy: 'alphabetical' }]
-                    }
-                });
-            }
+        // Return the project config when readFileSync is called
+        mockFS.readFileSync.mockImplementation((filePath: string) => {
+            if (filePath === configPath) return projectConfig;
             return '';
         });
 
-        // Check config source for document with project config
-        const resultWithConfig = getDocumentSortingOptions(docWithProjectConfig as any);
-        expect(resultWithConfig.source).toBe(ConfigSource.PROJECT);
+        // Create a mock document
+        const mockDocument = {
+            languageId: 'css',
+            getText: () => '.foo { color: red; display: block; }',
+            uri: { fsPath: testFilePath, scheme: 'file' },
+            lineCount: 1,
+            lineAt: (line: number) => ({ text: '.foo { color: red; display: block; }' }),
+            fileName: testFilePath
+        };
 
-        // Check config source for document without project config
-        const resultWithoutConfig = getDocumentSortingOptions(docWithoutProjectConfig as any);
-        expect(resultWithoutConfig.source).toBe(ConfigSource.VSCODE);
+        // Create a mock editor
+        const mockEditor = {
+            document: mockDocument,
+            selection: { isEmpty: true, start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+            edit: vi.fn().mockResolvedValue(true)
+        };
+
+        // Set as active editor
+        vscode.window.activeTextEditor = mockEditor as any;
+
+        // Check config loading logic
+        const config = getDocumentSortingOptions(mockDocument as any);
+        expect(config.source).toBe(ConfigSource.PROJECT);
+        expect(config.options.strategy).toBe('alphabetical');
+
+        // Call sort function
+        await sortCssProperties(mockEditor as any);
+
+        // Verify that stylelint was called (indicating sorting took place)
+        expect(mockStylelint.default.lint).toHaveBeenCalled();
+        expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('CSS properties sorted successfully');
+    });
+
+    it('should respect VS Code settings when no project config exists', async () => {
+        // Setup VS Code settings for concentric strategy
+        vscode.workspace.getConfiguration = vi.fn().mockReturnValue({
+            get: vi.fn().mockImplementation((key: string, defaultValue: any) => {
+                if (key === 'sorting.strategy') return 'concentric';
+                if (key === 'sorting.emptyLinesBetweenGroups') return true;
+                if (key === 'sorting.sortPropertiesWithinGroups') return true;
+                return defaultValue;
+            })
+        });
+
+        // No stylelint config files exist in project
+        mockFS.existsSync.mockReturnValue(false);
+
+        // Create mock document in a folder with no project config
+        const noConfigFilePath = path.join(tempDir, 'no-config', 'style.css');
+        const mockDocument = {
+            languageId: 'css',
+            getText: () => '.foo { color: red; display: block; }',
+            uri: { fsPath: noConfigFilePath, scheme: 'file' },
+            lineCount: 1,
+            lineAt: (line: number) => ({ text: '.foo { color: red; display: block; }' }),
+            fileName: noConfigFilePath
+        };
+
+        // Verify config loading logic
+        const config = getDocumentSortingOptions(mockDocument as any);
+        expect(config.source).toBe(ConfigSource.VSCODE);
+        expect(config.options.strategy).toBe('concentric');
+
+        // Create a mock editor
+        const mockEditor = {
+            document: mockDocument,
+            selection: { isEmpty: true },
+            edit: vi.fn().mockResolvedValue(true)
+        };
+
+        // Set as active editor
+        vscode.window.activeTextEditor = mockEditor as any;
+
+        // Call sort function
+        await sortCssProperties(mockEditor as any);
+
+        // Verify stylelint was called with VS Code settings
+        expect(mockStylelint.default.lint).toHaveBeenCalled();
+    });
+
+    it('should handle errors gracefully when config file exists but is invalid', async () => {
+        // Mock an invalid project config file
+        const configPath = path.join(tempDir, '.stylelintrc.json');
+        mockFS.existsSync.mockImplementation((filePath: string) => {
+            if (filePath === configPath) return true;
+            return false;
+        });
+
+        // Return invalid JSON when readFileSync is called
+        mockFS.readFileSync.mockImplementation((filePath: string) => {
+            if (filePath === configPath) return `{ 
+        "plugins": ["stylelint-oldschool-order"],
+        "rules": {
+          plugin/oldschool-order": [true, { "strategy": "alphabetical" }]
+        }
+      }`;  // Note the missing quote before plugin
+            return '';
+        });
+
+        // Create mock document
+        const mockDocument = {
+            languageId: 'css',
+            getText: () => '.foo { color: red; display: block; }',
+            uri: { fsPath: testFilePath, scheme: 'file' },
+            lineCount: 1,
+            lineAt: (line: number) => ({ text: '.foo { color: red; display: block; }' }),
+            fileName: testFilePath
+        };
+
+        // Should fall back to VS Code settings when project config is invalid
+        const config = getDocumentSortingOptions(mockDocument as any);
+        expect(config.source).toBe(ConfigSource.VSCODE);
+
+        // Create a mock editor
+        const mockEditor = {
+            document: mockDocument,
+            selection: { isEmpty: true },
+            edit: vi.fn().mockResolvedValue(true)
+        };
+
+        // Set as active editor
+        vscode.window.activeTextEditor = mockEditor as any;
+
+        // Should not throw an error when sorting
+        await expect(sortCssProperties(mockEditor as any)).resolves.not.toThrow();
+    });
+
+    it('should provide information about what configuration source is being used', async () => {
+        // Mock file system for project config
+        const configDir = path.join(tempDir, 'with-config');
+        const configPath = path.join(configDir, '.stylelintrc.json');
+
+        mockFS.existsSync.mockImplementation((filePath: string) => {
+            if (filePath === configPath) return true;
+            return false;
+        });
+
+        // Create valid config file
+        const projectConfig = JSON.stringify({
+            plugins: ['stylelint-oldschool-order'],
+            rules: {
+                'plugin/oldschool-order': [true, { strategy: 'alphabetical' }]
+            }
+        });
+
+        // Return valid config
+        mockFS.readFileSync.mockImplementation((filePath: string) => {
+            if (filePath === configPath) return projectConfig;
+            return '';
+        });
+
+        // Create mock document in the config folder
+        const testFilePath = path.join(configDir, 'style.css');
+        const mockDocument = {
+            languageId: 'css',
+            getText: () => '.foo { color: red; display: block; }',
+            uri: { fsPath: testFilePath, scheme: 'file' },
+            lineCount: 1,
+            lineAt: (line: number) => ({ text: '.foo { color: red; display: block; }' }),
+            fileName: testFilePath
+        };
+
+        // Verify that config source info is provided
+        const configResult = getDocumentSortingOptions(mockDocument as any);
+        expect(configResult.source).toBe(ConfigSource.PROJECT);
+        expect(configResult.configPath).toBe(configPath);
     });
 });
