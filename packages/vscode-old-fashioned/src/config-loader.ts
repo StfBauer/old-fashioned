@@ -8,7 +8,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SortingOptions } from '@old-fashioned/shared';
+import { SortingOptions, SortingStrategy } from '@old-fashioned/shared';
 
 /**
  * Configuration source for tracking where settings came from
@@ -37,6 +37,53 @@ interface ConfigFileDetails {
 }
 
 /**
+ * Interface for parsed stylelint configuration
+ */
+interface StylelintConfig {
+    plugins?: string[];
+    rules?: Record<string, any>;
+    extends?: string | string[];
+}
+
+/**
+ * Interface for parsed package.json with stylelint config
+ */
+interface PackageJsonWithStylelint {
+    stylelint?: StylelintConfig;
+    [key: string]: any;
+}
+
+/**
+ * Interface for oldschool plugin rule configuration
+ */
+interface OldschoolOrderRule {
+    strategy?: SortingStrategy;
+    emptyLinesBetweenGroups?: boolean;
+    sortPropertiesWithinGroups?: boolean;
+    [key: string]: any;
+}
+
+/**
+ * Custom error for configuration-related errors
+ */
+class ConfigurationError extends Error {
+    constructor(message: string, public readonly code: string) {
+        super(message);
+        this.name = 'ConfigurationError';
+    }
+}
+
+/**
+ * Error codes for configuration errors
+ */
+enum ConfigErrorCode {
+    FILE_NOT_FOUND = 'FILE_NOT_FOUND',
+    INVALID_JSON = 'INVALID_JSON',
+    NO_PLUGIN = 'NO_PLUGIN',
+    INVALID_CONFIG = 'INVALID_CONFIG'
+}
+
+/**
  * Default stylelint configuration file names
  */
 const CONFIG_FILE_NAMES = [
@@ -56,6 +103,11 @@ const CONFIG_FILE_NAMES = [
  * @returns Details about the found configuration file or null
  */
 export function findStylelintConfig(startDir: string): ConfigFileDetails | null {
+    if (!startDir || typeof startDir !== 'string') {
+        console.error('Invalid directory path provided to findStylelintConfig');
+        return null;
+    }
+
     try {
         let currentDir = startDir;
 
@@ -68,12 +120,21 @@ export function findStylelintConfig(startDir: string): ConfigFileDetails | null 
                     // For package.json, check if it contains a stylelint property
                     if (fileName === 'package.json') {
                         try {
-                            const packageJson = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                            const fileContent = fs.readFileSync(filePath, 'utf8');
+                            if (!fileContent) {
+                                continue;
+                            }
+
+                            const packageJson = JSON.parse(fileContent) as PackageJsonWithStylelint;
                             if (packageJson.stylelint) {
                                 return { path: filePath, exists: true };
                             }
                         } catch (error) {
-                            console.error('Error reading package.json:', error);
+                            const errorMessage = error instanceof Error ? error.message : String(error);
+                            console.error(`Error reading package.json at ${filePath}: ${errorMessage}`);
+
+                            // Continue checking other files instead of failing completely
+                            continue;
                         }
                     } else {
                         return { path: filePath, exists: true };
@@ -91,7 +152,8 @@ export function findStylelintConfig(startDir: string): ConfigFileDetails | null 
 
         return null;
     } catch (error) {
-        console.error('Error finding stylelint config:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`Error finding stylelint config: ${errorMessage}`);
         return null;
     }
 }
@@ -104,6 +166,10 @@ export function findStylelintConfig(startDir: string): ConfigFileDetails | null 
  */
 export function hasOldschoolOrderPlugin(configPath: string): boolean {
     try {
+        if (!fs.existsSync(configPath)) {
+            throw new ConfigurationError(`Configuration file not found: ${configPath}`, ConfigErrorCode.FILE_NOT_FOUND);
+        }
+
         if (configPath.endsWith('.js')) {
             // We can't directly require JS files in VS Code extension
             // This would need a more complex solution involving worker processes
@@ -112,17 +178,24 @@ export function hasOldschoolOrderPlugin(configPath: string): boolean {
         }
 
         // For JSON/YAML files or package.json
-        let config;
         const content = fs.readFileSync(configPath, 'utf8');
+        let config: StylelintConfig | undefined;
 
-        if (configPath.endsWith('package.json')) {
-            const packageJson = JSON.parse(content);
-            config = packageJson.stylelint;
-        } else if (configPath.endsWith('.json') || configPath.endsWith('.stylelintrc')) {
-            config = JSON.parse(content);
-        } else {
-            // YAML parsing would need a dependency - for now assume it might have the plugin
-            return true;
+        try {
+            if (configPath.endsWith('package.json')) {
+                const packageJson = JSON.parse(content) as PackageJsonWithStylelint;
+                config = packageJson.stylelint;
+            } else if (configPath.endsWith('.json') || configPath.endsWith('.stylelintrc')) {
+                config = JSON.parse(content) as StylelintConfig;
+            } else {
+                // YAML parsing would need a dependency - for now assume it might have the plugin
+                return true;
+            }
+        } catch (parseError) {
+            throw new ConfigurationError(
+                `Failed to parse configuration file: ${configPath}. ${parseError instanceof Error ? parseError.message : ''}`,
+                ConfigErrorCode.INVALID_JSON
+            );
         }
 
         if (!config) {
@@ -134,14 +207,100 @@ export function hasOldschoolOrderPlugin(configPath: string): boolean {
             Array.isArray(config.plugins) &&
             (
                 config.plugins.includes('stylelint-oldschool-order') ||
-                config.plugins.some((p: string) => p.includes('oldschool'))
+                config.plugins.some((plugin) => plugin.includes('oldschool'))
             )
         );
 
     } catch (error) {
-        console.error('Error checking for oldschool-order plugin:', error);
+        // Log the error with detailed information
+        if (error instanceof ConfigurationError) {
+            console.error(`${error.name} (${error.code}): ${error.message}`);
+        } else {
+            console.error('Error checking for oldschool-order plugin:', error);
+        }
         return false;
     }
+}
+
+/**
+ * Safely parse a JSON file with type checking
+ * 
+ * @param filePath - Path to the JSON file
+ * @returns Parsed content with specified type or null on error
+ */
+function parseJsonFile<T>(filePath: string): T | null {
+    try {
+        if (!fs.existsSync(filePath)) {
+            throw new ConfigurationError(`File not found: ${filePath}`, ConfigErrorCode.FILE_NOT_FOUND);
+        }
+
+        const content = fs.readFileSync(filePath, 'utf8');
+        if (!content) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(content) as T;
+        } catch (parseError) {
+            throw new ConfigurationError(
+                `Invalid JSON in ${filePath}: ${parseError instanceof Error ? parseError.message : ''}`,
+                ConfigErrorCode.INVALID_JSON
+            );
+        }
+    } catch (error) {
+        if (error instanceof ConfigurationError) {
+            console.error(`${error.name} (${error.code}): ${error.message}`);
+        } else {
+            console.error(`Error parsing file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+        return null;
+    }
+}
+
+/**
+ * Validate and convert a string to a valid SortingStrategy
+ * 
+ * @param strategy - The strategy string to validate
+ * @returns A valid SortingStrategy
+ */
+function validateSortingStrategy(strategy: string | unknown): SortingStrategy {
+    const validStrategies: SortingStrategy[] = ['alphabetical', 'grouped', 'concentric', 'idiomatic', 'custom'];
+
+    if (typeof strategy === 'string' && validStrategies.includes(strategy as SortingStrategy)) {
+        return strategy as SortingStrategy;
+    }
+
+    // Default to 'grouped' if invalid
+    return 'grouped';
+}
+
+/**
+ * Interface for VS Code settings
+ */
+interface OldFashionedSettings {
+    'sorting.strategy': SortingStrategy;
+    'sorting.emptyLinesBetweenGroups': boolean;
+    'sorting.sortPropertiesWithinGroups': boolean;
+}
+
+/**
+ * Get VS Code extension settings with type safety
+ * 
+ * @param section - The settings section to get
+ * @param defaultValue - Default value if setting not found
+ * @returns The setting value or default
+ */
+function getSetting<T>(
+    section: string,
+    defaultValue: T
+): T {
+    const settings = vscode.workspace.getConfiguration('oldFashioned');
+    if (!settings || typeof settings.get !== 'function') {
+        return defaultValue;
+    }
+
+    const value = settings.get<T>(section, defaultValue);
+    return value;
 }
 
 /**
@@ -151,24 +310,13 @@ export function hasOldschoolOrderPlugin(configPath: string): boolean {
  * @returns The sorting options with information about their source
  */
 export function getDocumentSortingOptions(document: vscode.TextDocument): ConfigWithSource {
-    // Get the VS Code extension settings first as default
-    const vscodeSettings = vscode.workspace.getConfiguration('oldFashioned');
-
-    // Safely access configuration settings with fallbacks
-    const strategy = vscodeSettings && typeof vscodeSettings.get === 'function'
-        ? vscodeSettings.get('sortingStrategy', 'grouped')
-        : 'grouped';
-
-    const emptyLinesBetweenGroups = vscodeSettings && typeof vscodeSettings.get === 'function'
-        ? vscodeSettings.get('emptyLinesBetweenGroups', true)
-        : true;
-
-    const sortPropertiesWithinGroups = vscodeSettings && typeof vscodeSettings.get === 'function'
-        ? vscodeSettings.get('sortPropertiesWithinGroups', true)
-        : true;
+    // Get settings using our type-safe utility
+    const strategy = getSetting<string>('sorting.strategy', 'grouped');
+    const emptyLinesBetweenGroups = getSetting<boolean>('sorting.emptyLinesBetweenGroups', true);
+    const sortPropertiesWithinGroups = getSetting<boolean>('sorting.sortPropertiesWithinGroups', true);
 
     const defaultOptions: SortingOptions = {
-        strategy: strategy as any,
+        strategy: validateSortingStrategy(strategy),
         emptyLinesBetweenGroups,
         sortPropertiesWithinGroups
     };
@@ -190,17 +338,56 @@ export function getDocumentSortingOptions(document: vscode.TextDocument): Config
 
         // If project config has the plugin, it takes precedence over VS Code settings
         if (hasPlugin) {
-            console.log(`Project configuration found at ${configDetails.path} with oldschool-order plugin`);
-
-            // In a real implementation, we would parse the stylelint config
-            // For now, we'll simulate extracting the strategy and options
-            // by reading the file and checking for strategy settings
+            console.log(`Project configuration found at ${configDetails.path} with oldschool-order plugin`);            // Parse the stylelint config and extract oldschool-order options
             try {
                 const content = fs.readFileSync(configDetails.path, 'utf8');
                 let projectOptions = { ...defaultOptions };
 
-                // Attempt to extract plugin configuration
-                if (content.includes('"strategy"') || content.includes("'strategy'")) {
+                // Parse the configuration content based on file type
+                let config: StylelintConfig | undefined;
+                let oldschoolRuleConfig: OldschoolOrderRule | undefined;
+
+                if (configDetails.path.endsWith('package.json')) {
+                    try {
+                        const packageJson = JSON.parse(content) as PackageJsonWithStylelint;
+                        config = packageJson.stylelint;
+                    } catch (parseError) {
+                        console.error(`Error parsing package.json: ${parseError instanceof Error ? parseError.message : ''}`);
+                    }
+                } else if (configDetails.path.endsWith('.json') || configDetails.path.endsWith('.stylelintrc')) {
+                    try {
+                        config = JSON.parse(content) as StylelintConfig;
+                    } catch (parseError) {
+                        console.error(`Error parsing .stylelintrc: ${parseError instanceof Error ? parseError.message : ''}`);
+                    }
+                }
+
+                // Extract rule configuration if available
+                if (config?.rules) {
+                    // Check for oldschool/order rule
+                    const oldschoolRule = config.rules['oldschool/order'];
+                    if (Array.isArray(oldschoolRule) && oldschoolRule.length >= 2) {
+                        // Extract configuration object from rule
+                        oldschoolRuleConfig = oldschoolRule[1] as OldschoolOrderRule;
+                    }
+                }
+
+                // Apply configuration if found
+                if (oldschoolRuleConfig) {
+                    if (oldschoolRuleConfig.strategy) {
+                        projectOptions.strategy = validateSortingStrategy(oldschoolRuleConfig.strategy);
+                    }
+
+                    if (typeof oldschoolRuleConfig.emptyLinesBetweenGroups === 'boolean') {
+                        projectOptions.emptyLinesBetweenGroups = oldschoolRuleConfig.emptyLinesBetweenGroups;
+                    }
+
+                    if (typeof oldschoolRuleConfig.sortPropertiesWithinGroups === 'boolean') {
+                        projectOptions.sortPropertiesWithinGroups = oldschoolRuleConfig.sortPropertiesWithinGroups;
+                    }
+                }
+                // Fallback to simple string matching if parsing fails
+                else if (content.includes('"strategy"') || content.includes("'strategy'")) {
                     if (content.includes('"alphabetical"') || content.includes("'alphabetical'")) {
                         projectOptions.strategy = 'alphabetical';
                     } else if (content.includes('"concentric"') || content.includes("'concentric'")) {
