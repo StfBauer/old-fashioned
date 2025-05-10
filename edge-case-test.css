@@ -1,0 +1,11 @@
+/* Edge Case 6: CSS variables mixed with properties - they should always appear first */
+.css-variables {
+    width: 100%;
+    height: 200px;
+
+    margin: var(--spacing);
+    color: var(--primary-color);
+    --primary-color: #333;
+    --secondary-color: #666;
+    --spacing: 10px;
+}

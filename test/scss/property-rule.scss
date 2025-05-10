@@ -1,0 +1,91 @@
+/**
+ * Test file for @property at-rules
+ */
+
+@use 'sass:math';
+@forward 'some-module';
+
+@property --my-color {
+    syntax: '<color>';
+    initial-value: #c0ffee;
+    inherits: false;
+}
+
+@property --animation-duration {
+    syntax: '<time>';
+    initial-value: 2s;
+    inherits: true;
+}
+
+@property --spacing {
+    syntax: '<length>';
+    initial-value: 10px;
+    inherits: false;
+}
+
+:root {
+    --primary-color: #333;
+    --secondary-color: #666;
+    --spacing: 20px;
+}
+
+.example {
+    width: 100%;
+    height: 200px;
+    margin: var(--spacing);
+    padding: 1rem;
+    color: var(--my-color);
+    transition: --my-color 1s;
+    animation-duration: var(--animation-duration);
+}
+
+display: flex;
+
+@use 'sass:color';
+
+justify-content: center;
+}
+}
+
+/* Expected result:
+.container {
+  @use 'sass:math';
+  @forward 'src/variables';
+  
+  @property --my-color {
+    syntax: '<color>';
+    initial-value: #c0ffee;
+    inherits: false;
+  }
+  
+  @property --my-length {
+    syntax: '<length>';
+    initial-value: 10px;
+    inherits: true;
+  }
+  
+  $variable: 16px;
+  
+  @include my-mixin();
+  
+  width: 100%;
+  height: 200px;
+  margin: 20px;
+  padding: 10px;
+  background: blue;
+  color: red;
+  
+  .nested {
+    @use 'sass:color';
+    
+    @property --nested-color {
+      syntax: '<color>';
+      initial-value: #333;
+      inherits: false;
+    }
+    
+    display: flex;
+    justify-content: center;
+  }
+}
+*/

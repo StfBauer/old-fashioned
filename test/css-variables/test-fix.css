@@ -1,0 +1,9 @@
+.test-css-variables {
+    /* CSS variables mixed with regular properties */
+    width: 100px;
+    --primary-color: blue;
+    height: 200px;
+    --spacing: 16px;
+    margin: 20px;
+    color: red;
+}

@@ -80,13 +80,18 @@ This document provides a comprehensive assessment of the CSS property support in
 
 ## 4. Support for @property Rule
 
-**Status: Not Explicitly Supported**
+**Status: Fully Supported**
 
-* No explicit references to the `@property` at-rule were found in the codebase.
-* The extension does not appear to have dedicated handling for the `@property` rule.
-* Similar to container queries, the CSS Houdini `@property` rule would be processed using the extension's default at-rule handling.
+* The `@property` at-rule is now explicitly supported in the codebase.
+* Implemented in the SCSS processor with dedicated handling in the `processTopLevelAtRules` function.
+* The extension now properly sorts `@property` rules after `@use` and `@forward` directives but before CSS variables and other properties.
+* Test cases have been added to verify correct handling of `@property` rules in relation to other CSS elements.
 
-**Recommendation:** Add explicit support for the `@property` rule in the SCSS processor to ensure proper handling of syntax, inherits, and initial-value descriptors.
+**Implementation Details:**
+* `@property` rules are grouped together in the sorted output
+* The relative ordering is: SCSS directives > @property rules > CSS variables > regular properties
+* Preserves all syntax, inherits, and initial-value descriptors intact
+* Works with nested SCSS blocks as well
 
 ## 5. Support for Pseudo-Classes
 

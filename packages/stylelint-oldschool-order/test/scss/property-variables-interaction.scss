@@ -1,0 +1,43 @@
+
+.example {
+  /* Regular properties */
+  color: blue;
+  width: 100%;
+  
+  /* CSS Variables */
+  --primary-color: #ff0000;
+  --base-size: 16px;
+  
+  /* @property rules */
+  @property --animated-color {
+    syntax: '<color>';
+    initial-value: blue;
+    inherits: false;
+  }
+  
+  /* More regular properties */
+  background: var(--primary-color);
+  font-size: var(--base-size);
+  
+  /* CSS directives */
+  @use 'sass:math';
+  @forward 'base/variables';
+  
+  /* More CSS Variables */
+  --secondary-color: green;
+  
+  /* SCSS Variables */
+  $fontSize: 16px;
+  
+  /* Another @property rule */
+  @property --animation-duration {
+    syntax: '<time>';
+    initial-value: 2s;
+    inherits: true;
+  }
+  
+  /* Regular properties using custom properties */
+  transition: background-color var(--animation-duration) ease;
+  margin: 20px;
+  padding: 10px;
+}

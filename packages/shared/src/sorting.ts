@@ -46,22 +46,30 @@ const propertyCache = new LRUCache<string, SortingResult>(100);
  */
 export function sortProperties(properties: string[], options: SortingOptions): SortingResult {
     try {
+        // Special handling for CSS variables - extract them first
+        const cssVariables = properties.filter(prop => prop.trim().startsWith('--'));
+        const nonVariableProps = properties.filter(prop => !prop.trim().startsWith('--'));
+
+        // Sort CSS variables alphabetically
+        const sortedCssVariables = [...cssVariables].sort((a, b) => a.localeCompare(b));
+
+        // Process the remaining properties according to the selected strategy
         const sortedResult = (() => {
             switch (options.strategy) {
                 case 'alphabetical':
-                    return sortAlphabetically(properties);
+                    return sortAlphabetically(nonVariableProps);
                 case 'grouped':
                     // Use optimized grouped sort for all grouped sorting
-                    return optimizedGroupedSort(properties, DEFAULT_PROPERTY_GROUPS, options);
+                    return optimizedGroupedSort(nonVariableProps, DEFAULT_PROPERTY_GROUPS, options);
                 case 'concentric':
-                    return sortByConcentricOrder(properties);
+                    return sortByConcentricOrder(nonVariableProps);
                 case 'idiomatic':
                     // Special handling for idiomatic sorting to ensure properties like width and aspect-ratio stay together
                     const specialOptions = {
                         ...options,
                         sortPropertiesWithinGroups: false // Don't sort within box-sizing group to preserve order
                     };
-                    return optimizedGroupedSort(properties, IDIOMATIC_PROPERTY_GROUPS, specialOptions);
+                    return optimizedGroupedSort(nonVariableProps, IDIOMATIC_PROPERTY_GROUPS, specialOptions);
                 case 'custom':
                     if (!options.propertyGroups) {
                         return {
@@ -69,7 +77,7 @@ export function sortProperties(properties: string[], options: SortingOptions): S
                             error: 'Custom strategy requires propertyGroups option'
                         };
                     }
-                    return optimizedGroupedSort(properties, options.propertyGroups, options);
+                    return optimizedGroupedSort(nonVariableProps, options.propertyGroups, options);
                 default:
                     return {
                         success: false,
@@ -80,7 +88,24 @@ export function sortProperties(properties: string[], options: SortingOptions): S
 
         // Process nested rules if applicable
         const context = { nestingLevel: 0, parentType: 'root', isAtRule: false };
-        const sortedProperties = processNestedRules(sortedResult.sortedProperties || [], options, context);
+        let sortedProperties = processNestedRules(sortedResult.sortedProperties || [], options, context);
+
+        // Place CSS variables at the beginning of the sorted properties
+        if (sortedCssVariables.length > 0) {
+            // ALWAYS add an empty line after CSS variables when there are other properties
+            // CSS variables should always be visually separated from regular properties with an empty line
+            // This is required regardless of the sorting strategy or emptyLinesBetweenGroups option
+
+            // Check if there's already an empty line at the start of sorted properties
+            if (sortedProperties.length > 0 && sortedProperties[0] === '') {
+                // Remove the first empty line to avoid double empty lines
+                sortedProperties = sortedProperties.slice(1);
+            }
+
+            // Always add an empty line after CSS variables if there are other properties
+            const emptyLineAfterVars = (sortedProperties.length > 0) ? [''] : [];
+            sortedProperties = [...sortedCssVariables, ...emptyLineAfterVars, ...sortedProperties];
+        }
 
         return {
             ...sortedResult,
@@ -670,22 +695,12 @@ function optimizedGroupedSort(properties: string[], groupsDefinition: string[][]
         }
 
         // 5. Special handling for CSS variables
+        // With the new approach, CSS variables should be handled outside this function
+        // This code block is kept for backwards compatibility but should not be reached
         if (prop.startsWith('--')) {
-            let variableGroupFound = false;
-
-            // Try to match the variable to a known prefix pattern
-            for (const [prefix, groupIdx] of Object.entries(cssVariablePrefixes)) {
-                if (prop.startsWith(prefix.toLowerCase())) {
-                    buckets[groupIdx].push(originalProp);
-                    variableGroupFound = true;
-                    break;
-                }
-            }
-
-            // If no specific group was found, place it in ungrouped
-            if (!variableGroupFound) {
-                ungrouped.push(originalProp);
-            }
+            // This code should no longer be executed since CSS variables are now extracted
+            // at the top level of sortProperties
+            ungrouped.push(originalProp);
             return;
         }
 

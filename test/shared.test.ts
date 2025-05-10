@@ -58,9 +58,11 @@ describe('Property Sorting', () => {
 
             expect(result.success).toBe(true);
             // Custom properties should be sorted alphabetically with regular properties
+            // Note: An empty line is always added after CSS variables
             expect(result.sortedProperties).toEqual([
                 '--custom-color',
                 '--spacing',
+                '',
                 'color',
                 'margin'
             ]);

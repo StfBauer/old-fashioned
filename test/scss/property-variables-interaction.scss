@@ -1,0 +1,60 @@
+/**
+ * CSS file demonstrating @property and CSS variables interaction
+ * 
+ * This test ensures that @property rules, CSS variables, and regular
+ * properties are sorted in the correct order.
+ */
+
+/* CSS directives should come first */
+@use 'sass:math';
+@forward 'base/variables';
+
+/* @property rules should come next */
+@property --animated-color {
+    syntax: '<color>';
+    initial-value: blue;
+    inherits: false;
+}
+
+@property --animation-duration {
+    syntax: '<time>';
+    initial-value: 2s;
+    inherits: true;
+}
+
+/* CSS Variables should come after @property rules but before regular props */
+:root {
+    --primary-color: #ff0000;
+    --base-size: 16px;
+    --secondary-color: green;
+}
+
+.example {
+    /* Regular properties */
+    width: 100%;
+    color: blue;
+    background: var(--primary-color);
+    font-size: var(--base-size);
+
+    /* SCSS Variables */
+    $fontSize: 16px;
+
+    /* Regular property using the @property-defined custom property */
+    transition: background-color var(--animation-duration) ease;
+    animation: pulse var(--animation-duration) infinite alternate;
+}
+
+/* Example of gradient using @property-defined custom property */
+background: linear-gradient(to right, var(--animated-color), var(--secondary-color));
+margin: 20px;
+padding: 10px;
+}
+
+/* 
+Expected sorted order:
+1. @use, @forward directives
+2. @property rules
+3. CSS custom properties (--variables)
+4. SCSS variables ($variables)
+5. Regular CSS properties
+*/

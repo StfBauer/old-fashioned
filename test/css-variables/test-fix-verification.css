@@ -1,0 +1,13 @@
+/* Test CSS Variables Empty Line Fix */
+.test-css-variables {
+    width: 100%;
+    --color-primary: blue;
+    height: 200px;
+    --border-radius: 4px;
+    padding: 10px;
+    --spacing: 16px;
+    margin: var(--spacing);
+    color: var(--color-primary);
+    background: white;
+    border-radius: var(--border-radius);
+}

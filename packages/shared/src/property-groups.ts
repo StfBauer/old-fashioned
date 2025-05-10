@@ -7,8 +7,8 @@
  */
 export const DEFAULT_PROPERTY_GROUPS: string[][] = [
     // Positioning
-    ['position', 'top', 'right', 'bottom', 'left', 'z-index', 'inset', 'inset-block', 'inset-block-start',
-        'inset-block-end', 'inset-inline', 'inset-inline-start', 'inset-inline-end'],
+    ['position', 'inset', 'inset-block', 'inset-block-start', 'inset-block-end', 'inset-inline',
+        'inset-inline-start', 'inset-inline-end', 'top', 'right', 'bottom', 'left', 'z-index'],
 
     // Container
     ['container', 'container-type', 'container-name'],

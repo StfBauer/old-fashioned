@@ -1,0 +1,13 @@
+
+/* Test file for CSS variables with concentric sorting */
+.test-variables-concentric {
+    color: blue;
+    --primary-color: #007bff;
+    position: relative;
+    --spacing: 8px;
+    margin: var(--spacing);
+    --border-radius: 4px;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    background-color: var(--primary-color);
+}

@@ -165,6 +165,15 @@ describe('CSS Property Sorting - Edge Cases', () => {
             // CSS variables should be preserved
             expect(result.sortedProperties!.filter(p => p.startsWith('--')).length).toBe(4);
 
+            // There should be an empty line after CSS variables
+            const emptyLineIndex = result.sortedProperties!.findIndex(p => p === '');
+            expect(emptyLineIndex).toBeGreaterThan(0);
+
+            // CSS variables should all come before the empty line
+            for (let i = 0; i < emptyLineIndex; i++) {
+                expect(result.sortedProperties![i].startsWith('--')).toBe(true);
+            }
+
             // Position should still come before color in grouped sorting
             const positionIndex = result.sortedProperties!.indexOf('position');
             const colorIndex = result.sortedProperties!.indexOf('color');
@@ -189,10 +198,12 @@ describe('CSS Property Sorting - Edge Cases', () => {
 
             // CSS variables should be sorted alphabetically with other properties
             const customProps = result.sortedProperties!.filter(p => p.startsWith('--'));
-            const regularProps = result.sortedProperties!.filter(p => !p.startsWith('--'));
+            const regularProps = result.sortedProperties!.filter(p => !p.startsWith('--') && p !== '');
+            const emptyLines = result.sortedProperties!.filter(p => p === '');
 
             expect(customProps.length).toBe(3);
             expect(regularProps.length).toBe(4);
+            expect(emptyLines.length).toBe(1); // Should have one empty line after CSS variables
             expect(result.sortedProperties![0].startsWith('--')).toBe(true);
         });
     });
@@ -264,7 +275,8 @@ describe('CSS Property Sorting - Edge Cases', () => {
             const result = sortProperties(properties, { strategy: 'alphabetical' });
 
             expect(result.success).toBe(true);
-            expect(result.sortedProperties!.length).toEqual(properties.length);
+            // When CSS variables are present, expect an extra empty line
+            expect(result.sortedProperties!.length).toEqual(properties.length + 1);
 
             // Unicode variables should be sorted correctly
             const unicodeVarIndex = result.sortedProperties!.indexOf('--测试');

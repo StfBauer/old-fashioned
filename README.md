@@ -19,6 +19,10 @@ The project consists of three main components:
   - **Grouped** - Sort properties by functional groups (position, display, etc.)
   - **Concentric** - Sort properties from outside to inside
   - **Custom** - Use custom property groups
+- Modern CSS support:
+  - **CSS Variables** - Support for CSS custom properties
+  - **@property** - Support for CSS `@property` at-rules
+  - **Modern properties** - Support for modern CSS properties like `aspect-ratio`, `gap`, etc.
 
 - Support for CSS, SCSS, and SASS syntax
 - Handling of SCSS variables, directives, and nested rules

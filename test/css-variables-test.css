@@ -1,0 +1,82 @@
+/**
+ * CSS Variables/Custom Properties Sorting Test
+ * This file tests the sorting of CSS custom properties (variables) in different scenarios
+ */
+
+/* Test 1: Basic variable sorting - variables should always appear first and be alphabetically sorted */
+.basic-variables {
+    width: 100%;
+    --z-index: 10;
+    height: 200px;
+    --color-primary: blue;
+    margin: 20px;
+    --border-radius: 4px;
+    padding: 10px;
+    --animation-duration: 0.3s;
+    color: var(--color-primary);
+}
+
+/* Test 2: Variables with values that reference other variables */
+.variable-references {
+    display: flex;
+    --spacing-base: 8px;
+    flex-direction: column;
+    --spacing-large: calc(var(--spacing-base) * 2);
+    margin: var(--spacing-large);
+    --spacing-small: calc(var(--spacing-base) / 2);
+    padding: var(--spacing-small);
+}
+
+/* Test 3: Variables in complex selectors and media queries */
+@media (min-width: 768px) {
+    .complex-selector:hover {
+        transform: scale(1.05);
+        --transition-duration: 0.3s;
+        transition: transform var(--transition-duration);
+        --hover-scale: 1.05;
+    }
+}
+
+/* Test 4: Many variables mixed with properties */
+.many-variables {
+    /* Layout properties */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    height: auto;
+
+    /* Variables scattered throughout */
+    --grid-gap: 20px;
+    --border-color: #ddd;
+    --text-color: #333;
+    --heading-color: #111;
+    --link-color: blue;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --border-radius-sm: 4px;
+    --border-radius-lg: 8px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    /* Properties using variables */
+    gap: var(--grid-gap);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Test 5: Verifying alphabetical order of variables */
+.alphabetical-order {
+    --zebra: #000;
+    --apple: red;
+    --banana: yellow;
+    --cherry: purple;
+    --delta: blue;
+    color: var(--cherry);
+    background: var(--banana);
+    border-color: var(--apple);
+}
