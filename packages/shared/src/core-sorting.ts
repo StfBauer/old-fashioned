@@ -29,7 +29,7 @@ function debugLog(message: string, data: any): void {
 export function sortProperties(properties: string[], options: SortingOptions): SortingResult {
     try {
         // Special handling for CSS variables - extract them first
-        const { cssVariables: sortedCssVariables, nonVariableProps } = 
+        const { cssVariables: sortedCssVariables, nonVariableProps } =
             extractAndSortCssVariables(properties);
 
         // Process the remaining properties according to the selected strategy
@@ -63,7 +63,7 @@ export function sortProperties(properties: string[], options: SortingOptions): S
         // Process nested rules if applicable
         const context = { nestingLevel: 0, parentType: 'root', isAtRule: false };
         let sortedProperties = sortedResult.sortedProperties || [];
-        
+
         sortedProperties = processNestedRules(sortedProperties, options, context);
 
         // Place CSS variables at the beginning of the sorted properties
@@ -89,19 +89,19 @@ export function sortProperties(properties: string[], options: SortingOptions): S
 export function sortPropertiesWithCache(properties: string[], options: SortingOptions): SortingResult {
     // Generate a cache key
     const cacheKey = generateCacheKey(properties, options.strategy);
-    
+
     // Check if we have a cached result
     const cachedResult = propertyCache.get(cacheKey);
     if (cachedResult) {
         return cachedResult;
     }
-    
+
     // Sort properties
     const result = sortProperties(properties, options);
-    
+
     // Cache the result
     propertyCache.set(cacheKey, result);
-    
+
     return result;
 }
 
@@ -113,7 +113,7 @@ export function adaptiveSortProperties(properties: string[], options: SortingOpt
     if (properties.length < 10) {
         return sortProperties(properties, options);
     }
-    
+
     // For larger sets, use cached results when possible
     return sortPropertiesWithCache(properties, options);
 }

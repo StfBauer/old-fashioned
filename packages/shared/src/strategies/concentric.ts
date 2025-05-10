@@ -166,7 +166,7 @@ export function sortByConcentricOrder(properties: string[]): SortingResult {
  * @returns The sorting result
  */
 export function optimizedConcentricSort(
-    properties: string[], 
+    properties: string[],
     orderMap: Map<string, number>
 ): SortingResult {
     // Define property groups for concentric ordering (similar to the detailed groups in sortByConcentricOrder)

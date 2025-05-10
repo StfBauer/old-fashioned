@@ -13,8 +13,8 @@ import { VENDOR_PREFIXES } from '../vendor-prefixes';
  * @returns The sorting result
  */
 export function sortByGroups(
-    properties: string[], 
-    groupsDefinition: string[][], 
+    properties: string[],
+    groupsDefinition: string[][],
     options: SortingOptions
 ): SortingResult {
     const groupedProps: Array<string[]> = groupsDefinition.map(() => []);
@@ -89,8 +89,8 @@ export function sortByGroups(
  * @returns The sorting result
  */
 export function optimizedGroupedSort(
-    properties: string[], 
-    groupsDefinition: string[][], 
+    properties: string[],
+    groupsDefinition: string[][],
     options: SortingOptions
 ): SortingResult {
     const groupMap = new Map<string, number>();

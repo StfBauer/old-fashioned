@@ -45,6 +45,6 @@ export function mergeCssVariablesWithProperties(
 
     // Always add an empty line after CSS variables if there are other properties
     const emptyLineAfterVars = (properties.length > 0) ? [''] : [];
-    
+
     return [...sortedCssVariables, ...emptyLineAfterVars, ...properties];
 }

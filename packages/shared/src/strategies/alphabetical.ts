@@ -28,7 +28,7 @@ export function sortAlphabetically(properties: string[]): SortingResult {
             ]
         };
     }
-    
+
     // For all other cases, use standard alphabetical sorting with vendor prefix grouping
     const prefixMap = groupPropertiesByBase(properties);
 

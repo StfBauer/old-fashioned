@@ -17,6 +17,6 @@ export function sortByIdiomatic(properties: string[], options: SortingOptions): 
         ...options,
         sortPropertiesWithinGroups: false // Don't sort within box-sizing group to preserve order
     };
-    
+
     return optimizedGroupedSort(properties, IDIOMATIC_PROPERTY_GROUPS, idiomaticOptions);
 }

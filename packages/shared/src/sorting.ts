@@ -2,26 +2,26 @@
  * Main sorting module that re-exports functionality from the refactored modules
  * This file maintains backward compatibility with existing code
  */
-export { 
+export {
     sortProperties,
-    sortPropertiesWithCache, 
-    adaptiveSortProperties 
+    sortPropertiesWithCache,
+    adaptiveSortProperties
 } from './core-sorting';
 
 // Re-export some strategy functions for backward compatibility
-export { 
+export {
     sortAlphabetically,
-    optimizedAlphabeticalSort 
+    optimizedAlphabeticalSort
 } from './strategies/alphabetical';
 
-export { 
+export {
     sortByGroups,
-    optimizedGroupedSort 
+    optimizedGroupedSort
 } from './strategies/grouped';
 
-export { 
+export {
     sortByConcentricOrder,
-    optimizedConcentricSort 
+    optimizedConcentricSort
 } from './strategies/concentric';
 
 export { sortByIdiomatic } from './strategies/idiomatic';

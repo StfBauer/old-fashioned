@@ -12,12 +12,12 @@ export const VENDOR_PREFIXES = ['-webkit-', '-moz-', '-ms-', '-o-'];
  * @param property - The CSS property name
  * @returns Object with base property name and prefix if found
  */
-export function extractBaseProperty(property: string): { 
+export function extractBaseProperty(property: string): {
     baseProp: string;
     prefix: string | null;
 } {
     const normalizedProp = property.toLowerCase().trim();
-    
+
     for (const prefix of VENDOR_PREFIXES) {
         if (normalizedProp.startsWith(prefix)) {
             return {
@@ -26,7 +26,7 @@ export function extractBaseProperty(property: string): {
             };
         }
     }
-    
+
     return {
         baseProp: normalizedProp,
         prefix: null
@@ -40,16 +40,16 @@ export function extractBaseProperty(property: string): {
  */
 export function groupPropertiesByBase(properties: string[]): Map<string, string[]> {
     const prefixMap = new Map<string, string[]>();
-    
+
     for (const prop of properties) {
         const { baseProp } = extractBaseProperty(prop);
-        
+
         if (!prefixMap.has(baseProp)) {
             prefixMap.set(baseProp, []);
         }
         prefixMap.get(baseProp)!.push(prop);
     }
-    
+
     return prefixMap;
 }
 

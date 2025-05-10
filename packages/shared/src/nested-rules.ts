@@ -27,7 +27,7 @@ export function processNestedRules(
     // For non-nested CSS (like the current test case), or if not an @-rule context,
     // this function should be largely a pass-through for top-level properties,
     // preserving existing '' markers.
-    
+
     if (!context.isAtRule && context.nestingLevel === 0) {
         return properties; // Pass through the already sorted list with its '' markers
     }
@@ -35,6 +35,6 @@ export function processNestedRules(
     // Original logic for handling actual nested structures (e.g., SCSS @media, @nest)
     // would remain here, but it should also respect and pass through '' markers
     // if they are part of a flat list of declarations within a nested block.
-    
+
     return properties;
 }

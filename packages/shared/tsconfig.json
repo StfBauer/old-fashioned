@@ -6,7 +6,9 @@
     "composite": true,
     "baseUrl": ".",
     "paths": {
-      "./strategies/*": ["src/strategies/*"]
+      "./strategies/*": [
+        "src/strategies/*"
+      ]
     }
   },
   "include": [
