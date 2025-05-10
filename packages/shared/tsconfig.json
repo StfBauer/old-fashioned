@@ -3,7 +3,11 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "composite": true
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "./strategies/*": ["src/strategies/*"]
+    }
   },
   "include": [
     "src/**/*.ts"

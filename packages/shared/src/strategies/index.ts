@@ -1,7 +1,7 @@
 /**
  * Export strategy implementations
  */
-export * from './alphabetical';
-export * from './grouped';
-export * from './concentric';
-export * from './idiomatic';
+export * from '../strategies/alphabetical';
+export * from '../strategies/grouped';
+export * from '../strategies/concentric';
+export * from '../strategies/idiomatic';
