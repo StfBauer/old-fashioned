@@ -4,7 +4,8 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { sortProperties, SortingOptions } from '../../packages/shared/src/sorting';
+import { sortProperties } from '../../packages/shared/src/sorting';
+import { SortingOptions } from '../../packages/shared/src/types';
 
 interface TestCase {
     name: string;
@@ -84,11 +85,13 @@ for (const testCase of testCases) {
             continue;
         }
 
+        const sortedProps = result.sortedProperties;
+
         // Find the empty line
-        const emptyLineIndex = result.sortedProperties.findIndex(p => p === '');
+        const emptyLineIndex = sortedProps.findIndex(p => p === '');
 
         // Detect variables in the sorted output
-        const variablesCount = result.sortedProperties.filter(p => p.startsWith('--')).length;
+        const variablesCount = sortedProps.filter(p => p.startsWith('--')).length;
 
         console.log(`Strategy ${strategy}:`);
         console.log(`  Variables count: ${variablesCount}`);
@@ -112,7 +115,7 @@ for (const testCase of testCases) {
         }
 
         // Log the full result for verification
-        console.log(`  Sorted properties: [${result.sortedProperties.map(p => p === '' ? '""' : p).join(', ')}]`);
+        console.log(`  Sorted properties: [${sortedProps.map(p => p === '' ? '""' : p).join(', ')}]`);
     }
 }
 

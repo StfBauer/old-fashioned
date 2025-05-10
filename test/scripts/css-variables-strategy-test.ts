@@ -1,7 +1,8 @@
 /**
  * Testing CSS variables sorting with different strategies
  */
-import { sortProperties, SortingOptions } from '../../packages/shared/src/sorting';
+import { sortProperties } from '../../packages/shared/src/sorting';
+import { SortingOptions } from '../../packages/shared/src/types';
 
 // Example properties with CSS variables
 const properties = [
@@ -30,7 +31,7 @@ console.log('Testing sorting with different strategies:');
         const result = sortProperties(properties, options);
 
         console.log(`  Empty lines between groups: ${emptyLines}`);
-        console.log('  Result:', result.sortedProperties);
+        console.log('  Result:', result.sortedProperties || []);
 
         // Check for empty line after variables
         const varsEnd = result.sortedProperties?.findIndex(p => p === '') ?? -1;

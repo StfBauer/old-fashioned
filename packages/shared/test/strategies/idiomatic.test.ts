@@ -19,20 +19,22 @@ describe('Idiomatic Property Sorting', () => {
         ];
 
         const result = sortProperties(properties, { strategy: 'idiomatic' });
+        expect(result.success).toBe(true);
+        const sortedProps = result.sortedProperties || [];
 
         // Position-related properties should come before sizing
-        const positionIndex = result.sortedProperties.indexOf('position');
-        const widthIndex = result.sortedProperties.indexOf('width');
+        const positionIndex = sortedProps.indexOf('position');
+        const widthIndex = sortedProps.indexOf('width');
         expect(positionIndex).toBeLessThan(widthIndex);
 
         // Font properties should come after spacing properties
-        const fontSizeIndex = result.sortedProperties.indexOf('font-size');
-        const marginIndex = result.sortedProperties.indexOf('margin');
+        const fontSizeIndex = sortedProps.indexOf('font-size');
+        const marginIndex = sortedProps.indexOf('margin');
         expect(marginIndex).toBeLessThan(fontSizeIndex);
 
         // Check that color is in the color/appearance group
-        const colorIndex = result.sortedProperties.indexOf('color');
-        const backgroundColorIndex = result.sortedProperties.indexOf('background-color');
+        const colorIndex = sortedProps.indexOf('color');
+        const backgroundColorIndex = sortedProps.indexOf('background-color');
         // Should be near each other in the appearance group
         expect(Math.abs(colorIndex - backgroundColorIndex)).toBeLessThan(3);
     });
@@ -49,9 +51,11 @@ describe('Idiomatic Property Sorting', () => {
             strategy: 'idiomatic',
             emptyLinesBetweenGroups: true
         });
+        expect(result.success).toBe(true);
+        const sortedProps = result.sortedProperties || [];
 
         // Empty lines should separate logical groups
-        expect(result.sortedProperties.includes('')).toBe(true);
+        expect(sortedProps.includes('')).toBe(true);
     });
 
     it('should not add empty lines when emptyLinesBetweenGroups is false', () => {
@@ -66,8 +70,10 @@ describe('Idiomatic Property Sorting', () => {
             strategy: 'idiomatic',
             emptyLinesBetweenGroups: false
         });
+        expect(result.success).toBe(true);
+        const sortedProps = result.sortedProperties || [];
 
         // No empty lines should be present between groups
-        expect(result.sortedProperties.includes('')).toBe(false);
+        expect(sortedProps.includes('')).toBe(false);
     });
 });

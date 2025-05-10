@@ -26,23 +26,24 @@ export function verifyCssVariables(properties: string[], options: Partial<Sortin
         });
 
         // Find CSS variables in the result
-        const cssVars = result.sortedProperties.filter(p => p.startsWith('--'));
+        const sortedProps = result.sortedProperties || [];
+        const cssVars = sortedProps.filter(p => p.startsWith('--'));
         const cssVarCount = cssVars.length;
 
         let hasEmptyLineAfterVars = false;
         let passes = true;
 
         if (cssVarCount > 0) {
-            const lineAfterVarsIndex = result.sortedProperties.indexOf(cssVars[cssVarCount - 1]) + 1;
+            const lineAfterVarsIndex = sortedProps.indexOf(cssVars[cssVarCount - 1]) + 1;
             hasEmptyLineAfterVars =
-                lineAfterVarsIndex < result.sortedProperties.length &&
-                result.sortedProperties[lineAfterVarsIndex] === '';
+                lineAfterVarsIndex < sortedProps.length &&
+                sortedProps[lineAfterVarsIndex] === '';
 
             passes = hasEmptyLineAfterVars;
         }
 
         results[strategy] = {
-            sortedProperties: result.sortedProperties,
+            sortedProperties: result.sortedProperties || [],
             cssVarCount,
             hasEmptyLineAfterVars,
             passes

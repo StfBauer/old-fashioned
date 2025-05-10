@@ -838,13 +838,23 @@ function optimizedConcentricSort(properties: string[], orderMap: Map<string, num
     });
 
     // Now merge with the provided orderMap, favoring the detailed mappings
-    const finalOrderMap = new Map([...orderMap, ...detailedOrderMap]);
+    // Create a new map from both maps (avoiding spread operator for compatibility)
+    const finalOrderMap = new Map();
+    // Copy entries from orderMap
+    orderMap.forEach((value, key) => {
+        finalOrderMap.set(key, value);
+    });
+    // Add entries from detailedOrderMap (these will overwrite any duplicates)
+    detailedOrderMap.forEach((value, key) => {
+        finalOrderMap.set(key, value);
+    });
 
     // Sort properties using the enhanced map
     properties.forEach(property => {
         const index = finalOrderMap.get(property);
         if (index !== undefined) {
-            buckets[index].push(property);
+            // Use type assertion to avoid the unknown type error
+            buckets[index as number].push(property);
         } else {
             ungrouped.push(property);
         }

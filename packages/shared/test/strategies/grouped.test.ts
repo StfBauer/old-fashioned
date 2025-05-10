@@ -19,20 +19,24 @@ describe('Grouped Property Sorting', () => {
         ];
 
         const result = sortProperties(properties, { strategy: 'grouped' });
+        expect(result.success).toBe(true);
+        const sortedProps = result.sortedProperties || [];
 
         // Verify that positioning properties come before others
-        const positionIndex = result.sortedProperties.indexOf('position');
-        const colorIndex = result.sortedProperties.indexOf('color');
+        const positionIndex = sortedProps.indexOf('position');
+        const colorIndex = sortedProps.indexOf('color');
         expect(positionIndex).toBeLessThan(colorIndex);
 
         // Width/height should be in box model group
-        const widthIndex = result.sortedProperties.indexOf('width');
-        const marginIndex = result.sortedProperties.indexOf('margin');
+        const widthIndex = sortedProps.indexOf('width');
+        const marginIndex = sortedProps.indexOf('margin');
         expect(widthIndex).toBeLessThan(marginIndex);
 
         // Check group separation with options that would create empty lines
         const resultWithEmptyLines = sortProperties(properties, { strategy: 'grouped', emptyLinesBetweenGroups: true });
-        const emptyLineCount = resultWithEmptyLines.sortedProperties.filter(p => p === '').length;
+        expect(resultWithEmptyLines.success).toBe(true);
+        const withEmptyLinesProps = resultWithEmptyLines.sortedProperties || [];
+        const emptyLineCount = withEmptyLinesProps.filter(p => p === '').length;
         expect(emptyLineCount).toBeGreaterThan(0);
     });
 
@@ -48,9 +52,11 @@ describe('Grouped Property Sorting', () => {
             strategy: 'grouped',
             emptyLinesBetweenGroups: true
         });
+        expect(result.success).toBe(true);
+        const sortedProps = result.sortedProperties || [];
 
         // Empty lines should separate logical groups
-        expect(result.sortedProperties.includes('')).toBe(true);
+        expect(sortedProps.includes('')).toBe(true);
     });
 
     it('should not add empty lines when emptyLinesBetweenGroups is false', () => {
@@ -65,8 +71,10 @@ describe('Grouped Property Sorting', () => {
             strategy: 'grouped',
             emptyLinesBetweenGroups: false
         });
+        expect(result.success).toBe(true);
+        const sortedProps = result.sortedProperties || [];
 
         // No empty lines should be present between groups
-        expect(result.sortedProperties.includes('')).toBe(false);
+        expect(sortedProps.includes('')).toBe(false);
     });
 });

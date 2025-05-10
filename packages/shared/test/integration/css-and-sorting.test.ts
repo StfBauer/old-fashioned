@@ -58,23 +58,27 @@ describe('Integration: CSS Variables and Sorting Strategies', () => {
                         sortPropertiesWithinGroups: true
                     });
 
+                    // Ensure sortedProperties exists
+                    expect(result.success).toBe(true);
+                    const sortedProps = result.sortedProperties || [];
+
                     // CSS variables should be at the top
-                    const cssVars = result.sortedProperties.filter(p => p.startsWith('--'));
-                    const firstNonVarIndex = result.sortedProperties.findIndex(p => p !== '' && !p.startsWith('--'));
+                    const cssVars = sortedProps.filter(p => p.startsWith('--'));
+                    const firstNonVarIndex = sortedProps.findIndex(p => p !== '' && !p.startsWith('--'));
 
                     // All CSS vars should be before the first non-var property
                     cssVars.forEach(cssVar => {
-                        const cssVarIndex = result.sortedProperties.indexOf(cssVar);
+                        const cssVarIndex = sortedProps.indexOf(cssVar);
                         expect(cssVarIndex).toBeLessThan(firstNonVarIndex);
                     });
 
                     // Empty line should be added after CSS variables
                     if (cssVars.length > 0) {
-                        const lastVarIndex = result.sortedProperties.lastIndexOf(cssVars[cssVars.length - 1]);
+                        const lastVarIndex = sortedProps.lastIndexOf(cssVars[cssVars.length - 1]);
                         const nextIndex = lastVarIndex + 1;
 
-                        if (nextIndex < result.sortedProperties.length) {
-                            expect(result.sortedProperties[nextIndex]).toBe('');
+                        if (nextIndex < sortedProps.length) {
+                            expect(sortedProps[nextIndex]).toBe('');
                         }
                     }
                 });
@@ -97,19 +101,23 @@ describe('Integration: CSS Variables and Sorting Strategies', () => {
 
         // Test with grouped strategy
         const groupedResult = sortProperties(testProperties, { strategy: 'grouped' });
-        const firstNonVar = groupedResult.sortedProperties.find(p => p !== '' && !p.startsWith('--'));
+        expect(groupedResult.success).toBe(true);
+        const groupedProps = groupedResult.sortedProperties || [];
+        const firstNonVar = groupedProps.find(p => p !== '' && !p.startsWith('--'));
 
         // In grouped strategy, position should be before display, and both before margin/padding
-        const positionIndex = groupedResult.sortedProperties.indexOf('position');
-        const displayIndex = groupedResult.sortedProperties.indexOf('display');
-        const marginIndex = groupedResult.sortedProperties.indexOf('margin');
+        const positionIndex = groupedProps.indexOf('position');
+        const displayIndex = groupedProps.indexOf('display');
+        const marginIndex = groupedProps.indexOf('margin');
 
         expect(positionIndex).toBeLessThan(displayIndex);
         expect(displayIndex).toBeLessThan(marginIndex);
 
         // Test with alphabetical strategy
         const alphaResult = sortProperties(testProperties, { strategy: 'alphabetical' });
-        const nonVarProps = alphaResult.sortedProperties.filter(p => p !== '' && !p.startsWith('--'));
+        expect(alphaResult.success).toBe(true);
+        const alphaProps = alphaResult.sortedProperties || [];
+        const nonVarProps = alphaProps.filter(p => p !== '' && !p.startsWith('--'));
 
         // In alphabetical, properties should be in alphabetical order
         expect(nonVarProps).toEqual([...nonVarProps].sort());
