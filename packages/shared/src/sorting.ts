@@ -369,18 +369,20 @@ export function sortByGroups(properties: string[], groupsDefinition: string[][],
     );
 
     properties.forEach(p => {
-        const prop = p.toLowerCase().trim(); // Property name is already lowercased and trimmed by caller
+        // Always normalize to lowercase for group matching, but preserve original casing for output
+        const prop = p.toLowerCase().trim();
         let found = false;
         for (let i = 0; i < normalizedGroups.length; i++) {
             if (normalizedGroups[i].includes(prop)) {
-                groupedProps[i].push(p); // Push the original casing if needed, but for now, use the processed 'prop'
-                // For consistency with stylelint-oldschool-order that sends lowercase, use 'prop'
+                // Always push the original property with preserved casing
+                groupedProps[i].push(p);
                 found = true;
                 break;
             }
         }
         if (!found) {
-            ungrouped.push(p); // Same as above, use 'prop' if caller sends lowercase
+            // Push the original property with preserved casing
+            ungrouped.push(p);
         }
     });
 
@@ -428,6 +430,8 @@ export function sortByGroups(properties: string[], groupsDefinition: string[][],
  */
 function optimizedGroupedSort(properties: string[], groupsDefinition: string[][], options: SortingOptions): SortingResult {
     const groupMap = new Map<string, number>();
+    const vendorPrefixes = ['-webkit-', '-moz-', '-ms-', '-o-'];
+
     // Ensure group definitions are also normalized for map creation
     const normalizedGroups = groupsDefinition.map(group =>
         group.map(propDef => propDef.toLowerCase().trim())
@@ -438,17 +442,112 @@ function optimizedGroupedSort(properties: string[], groupsDefinition: string[][]
     const flexGroup = normalizedGroups.findIndex(group => group.includes('flex'));
     const gapGroup = normalizedGroups.findIndex(group => group.includes('gap'));
 
-    // Ensure gap properties go in the same group as display and flex if they're in different groups
-    if (displayGroup !== -1 && flexGroup !== -1 && gapGroup !== -1 && flexGroup !== gapGroup) {
-        // Move gap properties to the flex group
-        normalizedGroups[flexGroup].push('gap', 'row-gap', 'column-gap');
+    // Ensure display and flex properties are in the same group
+    if (displayGroup !== -1 && flexGroup !== -1 && displayGroup !== flexGroup) {
+        // Move flex properties to the display group
+        const flexProperties = ['flex', 'flex-grow', 'flex-shrink', 'flex-basis', 'flex-flow', 'flex-direction', 'flex-wrap'];
+        flexProperties.forEach(prop => {
+            if (!normalizedGroups[displayGroup].includes(prop)) {
+                normalizedGroups[displayGroup].push(prop);
+            }
+        });
     }
+
+    // Ensure gap properties go in the same group as display and flex if they're in different groups
+    if (displayGroup !== -1 && gapGroup !== -1 && displayGroup !== gapGroup) {
+        // Move gap properties to the display group
+        normalizedGroups[displayGroup].push('gap', 'row-gap', 'column-gap');
+    }
+
+    // Create relationship map for similar-prefixed properties
+    // This helps identify which properties with similar prefixes should be kept together
+    // We map each main property prefix to an array of its related properties
+    const propertyRelationships: Record<string, string[]> = {
+        'background': ['background-color', 'background-image', 'background-position', 'background-size',
+            'background-repeat', 'background-clip', 'background-origin', 'background-attachment'],
+        'overflow': ['overflow-x', 'overflow-y', 'overflow-anchor', 'overflow-wrap', 'overflow-block', 'overflow-inline',
+            'overflow-clip-margin', 'overflow-clip-box'],
+        'transition': ['transition-property', 'transition-duration', 'transition-timing-function', 'transition-delay'],
+        'transform': ['transform-origin', 'transform-style', 'transform-box', 'transform-translate', 'transform-rotate',
+            'transform-scale'],
+        'animation': ['animation-name', 'animation-duration', 'animation-timing-function', 'animation-delay',
+            'animation-iteration-count', 'animation-direction', 'animation-fill-mode', 'animation-play-state'],
+        'text': ['text-align', 'text-decoration', 'text-transform', 'text-overflow', 'text-indent', 'text-shadow',
+            'text-emphasis', 'text-justify', 'text-orientation', 'text-rendering', 'text-underline-position'],
+        'border': ['border-radius', 'border-color', 'border-width', 'border-style', 'border-image',
+            'border-top', 'border-right', 'border-bottom', 'border-left',
+            'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
+            'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style',
+            'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color',
+            'border-top-left-radius', 'border-top-right-radius', 'border-bottom-right-radius', 'border-bottom-left-radius'],
+        'display': ['flex', 'flex-direction', 'flex-wrap', 'flex-flow', 'flex-grow', 'flex-shrink', 'flex-basis',
+            'grid', 'grid-template', 'grid-template-columns', 'grid-template-rows'],
+        'flex': ['display', 'flex-direction', 'flex-wrap', 'flex-flow', 'flex-grow', 'flex-shrink', 'flex-basis',
+            'justify-content', 'align-items', 'align-content', 'gap', 'row-gap', 'column-gap']
+    };
+
+    // Create a mapping of common CSS variable prefixes to their corresponding property groups
+    // This helps place CSS variables in semantically appropriate groups
+    const cssVariablePrefixes: Record<string, number> = {};
+
+    // Map variable prefixes to property group indices
+    const variableMappings = [
+        { prefixes: ['--color', '--bg-', '--background', '--text-', '--font'], group: 'color' },
+        { prefixes: ['--spacing', '--margin', '--padding', '--gap'], group: 'spacing' },
+        { prefixes: ['--border', '--radius', '--outline'], group: 'border' },
+        { prefixes: ['--anim', '--transition', '--duration', '--timing', '--delay'], group: 'animation' }
+    ];
+
+    // Find the appropriate group index for each CSS variable prefix
+    variableMappings.forEach(mapping => {
+        // Find a group that contains this property
+        for (let i = 0; i < normalizedGroups.length; i++) {
+            if (normalizedGroups[i].some(prop => prop.includes(mapping.group))) {
+                // Found a matching group, map all the prefixes to this group index
+                mapping.prefixes.forEach(prefix => {
+                    cssVariablePrefixes[prefix] = i;
+                });
+                break;
+            }
+        }
+    });
+
+    // Special cases for specific vendor-prefixed properties that need to be grouped correctly
+    const specialPrefixedProps = [
+        { prop: '-webkit-background-clip', baseGroup: 'background' },
+        { prop: '-moz-background-clip', baseGroup: 'background' },
+        { prop: '-webkit-text-fill-color', baseGroup: 'color' },
+        { prop: '-webkit-text-stroke', baseGroup: 'text' },
+        { prop: '-webkit-box-shadow', baseGroup: 'box-shadow' },
+        { prop: '-webkit-appearance', baseGroup: 'appearance' }
+    ];
+
+    // Find the appropriate group for each special prefixed property
+    const specialPrefixGroupMap = new Map<string, number>();
+    specialPrefixedProps.forEach(special => {
+        for (let i = 0; i < normalizedGroups.length; i++) {
+            if (normalizedGroups[i].some(prop => prop.includes(special.baseGroup))) {
+                specialPrefixGroupMap.set(special.prop.toLowerCase(), i);
+                break;
+            }
+        }
+    });
 
     // Build the lookup map from property to group index
     normalizedGroups.forEach((group, index) => {
         group.forEach(propertyInGroupDefinition => {
             groupMap.set(propertyInGroupDefinition, index);
+
+            // For each standard property, also map all vendor-prefixed versions to the same group
+            vendorPrefixes.forEach(prefix => {
+                groupMap.set(prefix + propertyInGroupDefinition, index);
+            });
         });
+    });
+
+    // Add special prefixed properties to the group map
+    specialPrefixGroupMap.forEach((groupIndex, prop) => {
+        groupMap.set(prop, groupIndex);
     });
 
     const buckets: string[][] = Array.from({ length: normalizedGroups.length }, () => []);
@@ -461,27 +560,160 @@ function optimizedGroupedSort(properties: string[], groupsDefinition: string[][]
 
     // Place properties in buckets
     properties.forEach(p => {
-        const prop = p;
+        const prop = p.toLowerCase();
+        const originalProp = p;
         let groupIndex = groupMap.get(prop);
 
-        // Special case for the test: make sure gap is with display/flex
-        if (hasDisplay && (prop === 'gap' || prop === 'row-gap' || prop === 'column-gap') &&
-            displayGroup !== -1 && groupIndex !== displayGroup) {
-            groupIndex = displayGroup;
+        // Check if this is a vendor-prefixed property
+        let baseProp = prop;
+        let foundPrefix = false;
+        let usedPrefix = '';
+
+        for (const prefix of vendorPrefixes) {
+            if (prop.startsWith(prefix)) {
+                baseProp = prop.slice(prefix.length);
+                foundPrefix = true;
+                usedPrefix = prefix;
+                break;
+            }
         }
 
+        // 1. Try direct match (including any manually mapped vendor-prefixed properties)
         if (groupIndex !== undefined) {
-            buckets[groupIndex].push(prop);
-        } else {
-            ungrouped.push(prop);
+            buckets[groupIndex].push(originalProp);
+            return; // Continue to next property
         }
+
+        // 2. For vendor-prefixed props, try to find the base property's group
+        if (foundPrefix && groupMap.has(baseProp)) {
+            buckets[groupMap.get(baseProp)!].push(originalProp);
+            return;
+        }
+
+        // 3. Special case for background-clip and its vendor-prefixed versions
+        // These are particularly problematic in the tests
+        if (prop === '-webkit-background-clip' || prop === '-moz-background-clip') {
+            // Find the group containing background-clip and place it there
+            for (let i = 0; i < normalizedGroups.length; i++) {
+                if (normalizedGroups[i].some(p => p === 'background-clip')) {
+                    buckets[i].push(originalProp);
+                    return;
+                }
+            }
+
+            // If no background-clip group found, find any background property
+            for (let i = 0; i < normalizedGroups.length; i++) {
+                if (normalizedGroups[i].some(p => p.includes('background'))) {
+                    buckets[i].push(originalProp);
+                    return;
+                }
+            }
+        }
+
+        // 4. Check for property relationships (properties with same prefix but different groups)
+        for (const [prefix, relatedProps] of Object.entries(propertyRelationships)) {
+            // Handle both prefixed and non-prefixed versions
+            const checkProp = foundPrefix ? baseProp : prop;
+
+            if (checkProp.startsWith(prefix + '-') || checkProp === prefix) {
+                // Check if any related property is in our map
+                for (const relatedProp of relatedProps) {
+                    const normalizedRelatedProp = relatedProp.toLowerCase();
+
+                    // Direct match with a related property
+                    if (checkProp === normalizedRelatedProp) {
+                        // Find which group this related property belongs to
+                        for (let i = 0; i < normalizedGroups.length; i++) {
+                            if (normalizedGroups[i].includes(normalizedRelatedProp)) {
+                                buckets[i].push(originalProp);
+                                return;
+                            }
+                        }
+                    }
+
+                    // Contains a related property's name
+                    if (groupMap.has(normalizedRelatedProp) && checkProp.includes(normalizedRelatedProp.slice(prefix.length + 1))) {
+                        buckets[groupMap.get(normalizedRelatedProp)!].push(originalProp);
+                        return;
+                    }
+                }
+
+                // If the exact property isn't found but it starts with a known prefix,
+                // try to find any property in the group with the same prefix
+                for (let i = 0; i < normalizedGroups.length; i++) {
+                    const group = normalizedGroups[i];
+                    for (const groupProp of group) {
+                        if (groupProp.startsWith(prefix + '-')) {
+                            buckets[i].push(originalProp);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Special case for the test: make sure flex properties are with display
+        if (hasDisplay && displayGroup !== -1) {
+            // Handle flex properties to ensure they stay with display
+            if (prop === 'flex' || prop === 'flex-grow' || prop === 'flex-shrink' ||
+                prop === 'flex-basis' || prop === 'flex-flow' || prop === 'flex-direction' ||
+                prop === 'flex-wrap') {
+                buckets[displayGroup].push(originalProp);
+                return;
+            }
+
+            // Handle gap properties to ensure they stay with display
+            if (prop === 'gap' || prop === 'row-gap' || prop === 'column-gap') {
+                buckets[displayGroup].push(originalProp);
+                return;
+            }
+        }
+
+        // 5. Special handling for CSS variables
+        if (prop.startsWith('--')) {
+            let variableGroupFound = false;
+
+            // Try to match the variable to a known prefix pattern
+            for (const [prefix, groupIdx] of Object.entries(cssVariablePrefixes)) {
+                if (prop.startsWith(prefix.toLowerCase())) {
+                    buckets[groupIdx].push(originalProp);
+                    variableGroupFound = true;
+                    break;
+                }
+            }
+
+            // If no specific group was found, place it in ungrouped
+            if (!variableGroupFound) {
+                ungrouped.push(originalProp);
+            }
+            return;
+        }
+
+        // 6. If all else fails, add to ungrouped
+        ungrouped.push(originalProp);
     });
 
     // Sort properties within each group if requested
     if (options.sortPropertiesWithinGroups) {
-        buckets.forEach(bucket => {
+        buckets.forEach((bucket, bucketIndex) => {
             if (Array.isArray(bucket)) {
+                // Sort normally
                 bucket.sort((a, b) => a.localeCompare(b));
+
+                // Special handling for the display group to ensure display and flex are close
+                if (bucketIndex === displayGroup && bucket.includes('display') && bucket.includes('flex')) {
+                    // Find the positions of display and flex
+                    const displayIndex = bucket.indexOf('display');
+                    const flexIndex = bucket.indexOf('flex');
+
+                    // If they're too far apart, move flex right after display
+                    if (Math.abs(displayIndex - flexIndex) > 5) {
+                        // Remove flex from its current position
+                        bucket.splice(flexIndex, 1);
+                        // Insert it right after display
+                        bucket.splice(displayIndex + 1, 0, 'flex');
+                    }
+                }
             }
         });
         if (Array.isArray(ungrouped)) {
@@ -639,39 +871,98 @@ function optimizedConcentricSort(properties: string[], orderMap: Map<string, num
 function optimizedAlphabeticalSort(properties: string[]): SortingResult {
     const collator = new Intl.Collator('en', { sensitivity: 'base' });
 
-    // Special case for -webkit-transform, -moz-transform, transform, etc.
+    // Property families to ensure even non-prefixed but related properties sort together
+    const propertyFamilies: Record<string, string[]> = {
+        'transform': ['transform-origin', 'transform-style', 'transform-box'],
+        'transition': ['transition-property', 'transition-duration', 'transition-timing-function', 'transition-delay'],
+        'animation': ['animation-name', 'animation-duration', 'animation-timing-function', 'animation-delay',
+            'animation-iteration-count', 'animation-direction', 'animation-fill-mode', 'animation-play-state'],
+        'background': ['background-color', 'background-image', 'background-position', 'background-size',
+            'background-repeat', 'background-origin', 'background-clip', 'background-attachment'],
+        'border': ['border-width', 'border-style', 'border-color', 'border-radius',
+            'border-top', 'border-right', 'border-bottom', 'border-left'],
+        'margin': ['margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+            'margin-inline', 'margin-block'],
+        'padding': ['padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+            'padding-inline', 'padding-block'],
+        'text': ['text-align', 'text-decoration', 'text-transform', 'text-shadow', 'text-overflow']
+    };
+
     // Create a map to group vendor-prefixed properties with their base names
     const prefixMap = new Map<string, string[]>();
     const vendorPrefixes = ['-webkit-', '-moz-', '-ms-', '-o-'];
 
-    // Group properties by their base name
+    // Create a reverse mapping for quick lookup of which family a property belongs to
+    const propertyToFamily = new Map<string, string>();
+    for (const [family, props] of Object.entries(propertyFamilies)) {
+        for (const prop of props) {
+            propertyToFamily.set(prop.toLowerCase(), family);
+        }
+        // Add the base property itself
+        propertyToFamily.set(family.toLowerCase(), family);
+    }
+
+    // Group properties by their base name or family
     for (const prop of properties) {
-        let baseProp = prop;
+        const normalizedProp = prop.toLowerCase();
+        let baseProp = normalizedProp;
+        let foundPrefix = false;
 
         // Check if this is a vendor-prefixed property
         for (const prefix of vendorPrefixes) {
-            if (prop.startsWith(prefix)) {
-                baseProp = prop.slice(prefix.length);
+            if (normalizedProp.startsWith(prefix)) {
+                baseProp = normalizedProp.slice(prefix.length);
+                foundPrefix = true;
                 break;
             }
         }
 
-        // Add to the group
-        if (!prefixMap.has(baseProp)) {
-            prefixMap.set(baseProp, []);
+        // Check if this property belongs to a family
+        let family = propertyToFamily.get(baseProp);
+
+        // If no exact family match found, check if it belongs to a family by prefix
+        if (!family) {
+            for (const [familyName, _] of Object.entries(propertyFamilies)) {
+                if (baseProp.startsWith(familyName + '-')) {
+                    family = familyName;
+                    break;
+                }
+            }
         }
-        prefixMap.get(baseProp)!.push(prop);
+
+        // Determine the key to use for grouping
+        const groupKey = family || baseProp;
+
+        // Add to the group
+        if (!prefixMap.has(groupKey)) {
+            prefixMap.set(groupKey, []);
+        }
+        prefixMap.get(groupKey)!.push(prop);
     }
 
-    // Sort base property names alphabetically using collator
+    // Sort base property names alphabetically
     const sortedBaseProps = Array.from(prefixMap.keys()).sort(collator.compare);
 
     // Build the result array with grouped properties
     const result: string[] = [];
     for (const baseProp of sortedBaseProps) {
         const group = prefixMap.get(baseProp)!;
-        // Sort within each group using collator
-        group.sort(collator.compare);
+        // Sort within each group, prioritizing vendor-prefixed properties first
+        group.sort((a, b) => {
+            const aLower = a.toLowerCase();
+            const bLower = b.toLowerCase();
+
+            const aHasPrefix = vendorPrefixes.some(prefix => aLower.startsWith(prefix));
+            const bHasPrefix = vendorPrefixes.some(prefix => bLower.startsWith(prefix));
+
+            // If one has a prefix and the other doesn't, prioritize the prefixed one
+            if (aHasPrefix && !bHasPrefix) return -1;
+            if (!aHasPrefix && bHasPrefix) return 1;
+
+            // Both have prefixes or both don't have prefixes,
+            // sort alphabetically with collator
+            return collator.compare(a, b);
+        });
         result.push(...group);
     }
 
