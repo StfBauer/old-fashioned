@@ -213,8 +213,8 @@ describe('Comprehensive property sorting across all strategies', () => {
         // Display should come before margin
         expect(displayIndex).toBeLessThan(marginIndex);
 
-        // Width should be in box sizing section - allow for some flexibility
-        expect(Math.abs(widthIndex - result.sortedProperties!.indexOf('height'))).toBeLessThanOrEqual(7);
+        // Width should be in box sizing section
+        expect(Math.abs(widthIndex - result.sortedProperties!.indexOf('height'))).toBeLessThanOrEqual(5);
 
         // Aspect ratio should be with other dimension properties
         expect(Math.abs(

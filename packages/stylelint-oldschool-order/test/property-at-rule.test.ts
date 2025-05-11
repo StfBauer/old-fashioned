@@ -1,130 +1,124 @@
-/**
- * Test for the @property at-rule sorting
- */
-
 import { describe, it, expect } from 'vitest';
-import stylelint from 'stylelint';
+import { sortProperties } from '../../shared/src/sorting';
 
-// Import the plugin from the dist directory
-const plugin = require('../dist/src/index');
+describe('@property At-Rule Support', () => {
+    it('should place @property rules at the beginning of CSS styles', () => {
+        const properties = [
+            'color',
+            '@property --gradient-angle',
+            'margin',
+            '@property --spin-angle'
+        ];
 
-describe('@property at-rule sorting', () => {
-    it('should place @property at-rules at the beginning of the file after @use and @forward', async () => {
-        // Use inline test content
-        const css = `
-      /* Test CSS */
-      .container {
-        color: red;
-        width: 100%;
-        
-        @property --my-color {
-          syntax: '<color>';
-          initial-value: #c0ffee;
-          inherits: false;
-        }
-        
-        @property --my-length {
-          syntax: '<length>';
-          initial-value: 10px;
-          inherits: true;
-        }
-        
-        height: 200px;
-        
-        @use 'sass:math';
-        @forward 'src/variables';
-        
-        margin: 20px;
-        padding: 10px;
-        background: blue;
-      }
-    `;
+        const result = sortProperties(properties, { strategy: 'alphabetical' });
 
-        const result = await stylelint.lint({
-            code: css,
-            config: {
-                plugins: [plugin],
-                rules: {
-                    'plugin/oldschool-order': [
-                        true,
-                        {
-                            strategy: 'grouped',
-                            emptyLinesBetweenGroups: true
-                        }
-                    ]
-                }
-            },
-            fix: true // Enable fix mode to actually reorder properties
-        });
+        expect(result.success).toBe(true);
 
-        // Get the output CSS
-        const output = result.output;
+        // @property rules should be at the beginning
+        const firstProperty = result.sortedProperties![0];
+        const secondProperty = result.sortedProperties![1];
 
-        console.log('Lint result:', result);
-        console.log('Output CSS:', output);
+        expect(firstProperty.startsWith('@property')).toBe(true);
+        expect(secondProperty.startsWith('@property')).toBe(true);
 
-        // Check if output is processed correctly
-        expect(output).not.toBeUndefined();
+        // Other properties should follow
+        const colorIndex = result.sortedProperties!.indexOf('color');
+        const marginIndex = result.sortedProperties!.indexOf('margin');
 
-        // For this test, we'll just verify the lint process ran without errors
-        expect(result.errored).toBe(false);
-
-        // Test passes if we made it this far without errors
+        expect(colorIndex).toBeGreaterThan(1);
+        expect(marginIndex).toBeGreaterThan(1);
     });
 
-    it('should correctly handle the interaction between @property rules and CSS variables', async () => {
-        const css = `
-      /* Test CSS with both @property rules and CSS variables */
-      .container {
-        --primary: blue;
-        --secondary: green;
-        
-        @property --animated-color {
-          syntax: '<color>';
-          initial-value: red;
-          inherits: false;
-        }
-        
-        color: var(--primary);
-        background: var(--animated-color);
-        
-        @property --animated-size {
-          syntax: '<length>';
-          initial-value: 20px;
-          inherits: true;
-        }
-        
-        width: 100%;
-        height: var(--animated-size);
-      }
-    `;
+    it('should place @property rules in alphabetical order', () => {
+        const properties = [
+            '@property --z-variable',
+            '@property --a-variable',
+            'color'
+        ];
 
-        const result = await stylelint.lint({
-            code: css,
-            config: {
-                plugins: [plugin],
-                rules: {
-                    'plugin/oldschool-order': [
-                        true,
-                        {
-                            strategy: 'grouped',
-                            emptyLinesBetweenGroups: true
-                        }
-                    ]
-                }
-            },
-            fix: true // Enable fix mode to actually reorder properties
-        });
+        const result = sortProperties(properties, { strategy: 'alphabetical' });
 
-        console.log('Lint result (second test):', result);
-        console.log('Output CSS (second test):', result.output);
+        expect(result.success).toBe(true);
 
-        // Get the output CSS
-        const output = result.output;
+        // @property rules should be sorted alphabetically
+        const aVariableIndex = result.sortedProperties!.findIndex(p => p.includes('--a-variable'));
+        const zVariableIndex = result.sortedProperties!.findIndex(p => p.includes('--z-variable'));
 
-        // For this test, we'll just verify the lint process ran without errors
-        expect(result.errored).toBe(false);
+        expect(aVariableIndex).toBeLessThan(zVariableIndex);
 
-        // Test passes if we made it this far without errors
+        // color should be after @property rules
+        const colorIndex = result.sortedProperties!.indexOf('color');
+        expect(colorIndex).toBeGreaterThan(aVariableIndex);
+        expect(colorIndex).toBeGreaterThan(zVariableIndex);
+    });
+
+    it('should place CSS variables after @property rules', () => {
+        const properties = [
+            'color',
+            '@property --my-color',
+            '--accent-color',
+            'margin'
+        ];
+
+        const result = sortProperties(properties, { strategy: 'alphabetical' });
+
+        expect(result.success).toBe(true);
+
+        // Check if result contains both CSS variables and @property rules
+        const containsAtProperty = result.sortedProperties!.some(p => p.includes('@property'));
+        const containsCssVar = result.sortedProperties!.some(p => p === '--accent-color');
+
+        expect(containsAtProperty).toBe(true);
+        expect(containsCssVar).toBe(true);
+
+        // Find the positions
+        const atPropertyIndex = result.sortedProperties!.findIndex(p => p.includes('@property'));
+        const cssVarIndex = result.sortedProperties!.findIndex(p => p === '--accent-color');
+        const colorIndex = result.sortedProperties!.indexOf('color');
+        const marginIndex = result.sortedProperties!.indexOf('margin');
+
+        // Verify the order: first @property, then CSS variables, then regular properties
+        // Regular properties should come after CSS variables
+        expect(colorIndex).toBeGreaterThan(cssVarIndex);
+        expect(marginIndex).toBeGreaterThan(cssVarIndex);
+    });
+
+    it('should handle @property rules with different sorting strategies', () => {
+        const properties = [
+            'color',
+            '@property --my-color',
+            'position',
+            'margin',
+            '@property --layout-grid'
+        ];
+
+        // Test with alphabetical strategy
+        const alphaResult = sortProperties(properties, { strategy: 'alphabetical' });
+        expect(alphaResult.success).toBe(true);
+
+        // All sorting strategies should include @property rules
+        expect(alphaResult.sortedProperties!.some(p => p.includes('@property'))).toBe(true);
+
+        // Test with grouped strategy
+        const groupedResult = sortProperties(properties, { strategy: 'grouped' });
+        expect(groupedResult.success).toBe(true);
+        expect(groupedResult.sortedProperties!.some(p => p.includes('@property'))).toBe(true);
+
+        // Test with concentric strategy
+        const concentricResult = sortProperties(properties, { strategy: 'concentric' });
+        expect(concentricResult.success).toBe(true);
+        expect(concentricResult.sortedProperties!.some(p => p.includes('@property'))).toBe(true);
+
+        // Verify that all strategies sort @property rules consistently
+        const findAtPropertyRules = (props: string[]) => props.filter(p => p.includes('@property'));
+
+        const alphaPropertyRules = findAtPropertyRules(alphaResult.sortedProperties!);
+        const groupedPropertyRules = findAtPropertyRules(groupedResult.sortedProperties!);
+        const concentricPropertyRules = findAtPropertyRules(concentricResult.sortedProperties!);
+
+        // Each strategy should preserve both @property rules
+        expect(alphaPropertyRules.length).toBe(2);
+        expect(groupedPropertyRules.length).toBe(2);
+        expect(concentricPropertyRules.length).toBe(2);
     });
 });

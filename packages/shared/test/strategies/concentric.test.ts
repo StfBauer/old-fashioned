@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { sortProperties } from '../../src/sorting';
-import { SortingOptions } from '../../src/types';
+import type { SortingOptions } from '../../src/types';
 
 describe('Concentric Property Sorting', () => {
     it('should sort properties from outside to inside', () => {

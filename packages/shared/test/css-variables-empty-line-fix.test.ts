@@ -8,10 +8,6 @@ import { sortProperties } from '../src/sorting';
  * 1. CSS variables should always appear at the top of sorted properties
  * 2. CSS variables should be alphabetically sorted
  * 3. There should always be an empty line after CSS variables to separate them from regular properties
- * 
- * KNOWN ISSUE: Empty lines are always added between CSS variables and other properties,
- * even when `emptyLinesBetweenGroups` is set to `false`. This behavior is currently
- * expected and tests are written accordingly. Future updates may address this inconsistency.
  */
 describe('CSS Variables Empty Line Tests', () => {
     // Test cases with different property arrangements

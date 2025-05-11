@@ -5,7 +5,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { sortProperties } from '../../packages/shared/src/sorting';
-import { SortingOptions } from '../../packages/shared/src/types';
+import type { SortingOptions } from '../../packages/shared/src/types';
 
 // Read the test file
 const cssContent = fs.readFileSync(path.join(__dirname, '../css-variables/test-empty-line.css'), 'utf8');
@@ -35,13 +35,14 @@ for (const strategy of strategies) {
     console.log('Sorted properties:', result.sortedProperties);
 
     // Check for empty line between CSS variables and regular properties
-    const sortedProps = result.sortedProperties || [];
-    const emptyLineIndex = sortedProps.findIndex(p => p === '');
-    if (emptyLineIndex >= 0) {
-        console.log(`Empty line found at index ${emptyLineIndex}`);
-        console.log(`Properties before empty line: ${sortedProps.slice(0, emptyLineIndex).join(', ')}`);
-        console.log(`Properties after empty line: ${sortedProps.slice(emptyLineIndex + 1).join(', ')}`);
-    } else {
-        console.log('No empty line found');
+    if (result.sortedProperties) {
+        const emptyLineIndex = result.sortedProperties.findIndex(p => p === '');
+        if (emptyLineIndex >= 0) {
+            console.log(`Empty line found at index ${emptyLineIndex}`);
+            console.log(`Properties before empty line: ${result.sortedProperties.slice(0, emptyLineIndex).join(', ')}`);
+            console.log(`Properties after empty line: ${result.sortedProperties.slice(emptyLineIndex + 1).join(', ')}`);
+        } else {
+            console.log('No empty line found');
+        }
     }
 }

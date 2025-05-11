@@ -221,7 +221,7 @@ describe('CSS Property Sorting - Comprehensive Tests', () => {
             const colorIndex = result.sortedProperties!.indexOf('color');
 
             // Positioning properties should be grouped together
-            expect(Math.abs(positionIndex - insetIndex)).toBeLessThanOrEqual(12); // Increased tolerance to account for modern CSS property expansion
+            expect(Math.abs(positionIndex - insetIndex)).toBeLessThanOrEqual(10);
 
             // Container properties should be in their own group
             expect(Math.abs(containerIndex - result.sortedProperties!.indexOf('container-type'))).toBeLessThanOrEqual(2);

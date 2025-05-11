@@ -1,5 +1,4 @@
 import { sortProperties } from './packages/shared/src/sorting';
-import { SortingOptions } from './packages/shared/src/types';
 
 // Example properties with CSS variables
 const properties = [

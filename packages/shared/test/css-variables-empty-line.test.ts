@@ -1,104 +1,130 @@
+/**
+ * Test for CSS variables empty line behavior
+ */
 import { describe, it, expect } from 'vitest';
 import { sortProperties } from '../src/sorting';
+import type { SortingOptions } from '../src/types';
 
-/**
- * CSS Variables Empty Line Test Suite
- * 
- * This test suite verifies that CSS variables are properly handled in the sorting functionality:
- * 1. CSS variables should always appear at the top of sorted properties
- * 2. CSS variables should be alphabetically sorted
- * 3. There should always be an empty line after CSS variables to separate them from regular properties
- * 
- * KNOWN ISSUE: Empty lines are always added between CSS variables and other properties,
- * even when `emptyLinesBetweenGroups` is set to `false`. This behavior is currently
- * expected and tests are written accordingly. Future updates may address this inconsistency.
- */
-describe('CSS Variables Empty Line Tests', () => {
-    // Test cases with different property arrangements
-    const testCases = [
-        {
-            name: "Basic CSS variables and properties",
-            properties: [
-                '--primary-color',
-                '--secondary-color',
-                '--spacing',
-                'width',
-                'height',
-                'margin',
-                'color'
-            ]
-        },
-        {
-            name: "Edge case with CSS variables mixed with properties",
-            properties: [
-                'width',
-                'height',
-                'margin',
-                'color',
-                '--primary-color',
-                '--secondary-color',
-                '--spacing'
-            ]
-        },
-        {
-            name: "Single CSS variable with properties",
-            properties: [
-                'width',
-                '--single-var',
-                'height',
-                'color'
-            ]
+describe('CSS Variables Empty Line Handling', () => {
+    // Test properties with CSS variables
+    const properties = [
+        '--primary-color',
+        '--secondary-color',
+        '--spacing',
+        'width',
+        'height',
+        'margin',
+        'color'
+    ];
+
+    it('should add an empty line after CSS variables when emptyLinesBetweenGroups is true', () => {
+        const options: SortingOptions = {
+            strategy: 'grouped',
+            emptyLinesBetweenGroups: true,
+            sortPropertiesWithinGroups: true
+        };
+
+        const result = sortProperties(properties, options);
+
+        expect(result.success).toBe(true);
+        expect(result.sortedProperties).toBeDefined();
+
+        // Get the index of the first empty line
+        const emptyLineIndex = result.sortedProperties?.indexOf('');
+
+        // Check that we have an empty line
+        expect(emptyLineIndex).not.toBe(-1);
+
+        // Check that all CSS variables are before the empty line
+        const beforeEmptyLine = result.sortedProperties?.slice(0, emptyLineIndex);
+        const afterEmptyLine = result.sortedProperties?.slice(emptyLineIndex! + 1);
+
+        expect(beforeEmptyLine?.every(prop => prop.startsWith('--'))).toBe(true);
+        expect(afterEmptyLine?.some(prop => prop.startsWith('--'))).toBe(false);
+    });
+
+    it('should add an empty line after CSS variables even when emptyLinesBetweenGroups is false', () => {
+        const options: SortingOptions = {
+            strategy: 'grouped',
+            emptyLinesBetweenGroups: false,
+            sortPropertiesWithinGroups: true
+        };
+
+        const result = sortProperties(properties, options);
+
+        expect(result.success).toBe(true);
+        expect(result.sortedProperties).toBeDefined();
+
+        // As per project requirements, empty lines must be added after CSS variables
+        // regardless of emptyLinesBetweenGroups setting
+        expect(result.sortedProperties?.includes('')).toBe(true);
+
+        // CSS variables should be followed by an empty line
+        const cssVars = result.sortedProperties?.filter(p => p.startsWith('--'));
+        const cssVarsEnd = cssVars ? cssVars.length - 1 : -1;
+        if (cssVarsEnd >= 0 && result.sortedProperties) {
+            const cssVarsEndIndex = result.sortedProperties?.indexOf(cssVars![cssVarsEnd]);
+            expect(result.sortedProperties[cssVarsEndIndex + 1]).toBe('');
         }
-    ];
+    });
 
-    // Test each strategy and emptyLinesBetweenGroups setting combination
-    const strategies: ('alphabetical' | 'grouped' | 'concentric' | 'idiomatic')[] = [
-        'alphabetical', 'grouped', 'concentric', 'idiomatic'
-    ];
-    const emptyLinesSettings = [true, false];
+    it('should handle the case with no CSS variables', () => {
+        const nonVarProps = ['width', 'height', 'margin', 'color'];
+        const options: SortingOptions = {
+            strategy: 'grouped',
+            emptyLinesBetweenGroups: true,
+            sortPropertiesWithinGroups: true
+        };
 
-    // Generate tests for all combinations
-    testCases.forEach(testCase => {
-        describe(testCase.name, () => {
-            strategies.forEach(strategy => {
-                emptyLinesSettings.forEach(emptyLines => {
-                    it(`should add an empty line after CSS variables (strategy: ${strategy}, emptyLinesBetweenGroups: ${emptyLines})`, () => {
-                        const result = sortProperties(testCase.properties, {
-                            strategy,
-                            emptyLinesBetweenGroups: emptyLines,
-                            sortPropertiesWithinGroups: true
-                        });
+        const result = sortProperties(nonVarProps, options);
 
-                        // Verify the result was successful
-                        expect(result.success).toBe(true);
+        expect(result.success).toBe(true);
+        // There should be no empty lines specifically for CSS variables grouping
+        // Note: There might be empty lines for other groups depending on strategy
+    });
 
-                        // Find all CSS variables in the result
-                        const cssVars = result.sortedProperties!.filter(p => p.startsWith('--'));
+    it('should handle the case with only CSS variables', () => {
+        const onlyVarProps = ['--primary-color', '--secondary-color', '--spacing'];
+        const options: SortingOptions = {
+            strategy: 'grouped',
+            emptyLinesBetweenGroups: true,
+            sortPropertiesWithinGroups: true
+        };
 
-                        // Only test if we have CSS variables and other properties
-                        if (cssVars.length > 0) {
-                            const nonVarProperties = result.sortedProperties!.filter(p => !p.startsWith('--') && p !== '');
+        const result = sortProperties(onlyVarProps, options);
 
-                            // Skip test if there are no non-variable properties
-                            if (nonVarProperties.length === 0) return;
+        expect(result.success).toBe(true);
+        // No empty line should be added if there are only CSS variables
+        expect(result.sortedProperties?.filter(p => p === '').length).toBe(0);
+    });
 
-                            // The line after all variables should be an empty string
-                            const lineAfterVarsIndex = cssVars.length;
+    // Test with different sorting strategies
+    describe('Empty line consistency across strategies', () => {
+        const strategies = ['alphabetical', 'grouped', 'concentric', 'idiomatic'] as const;
 
-                            // There should always be an empty line after CSS variables
-                            expect(result.sortedProperties![lineAfterVarsIndex]).toBe('');
+        strategies.forEach(strategy => {
+            it(`should consistently handle CSS variables with ${strategy} strategy`, () => {
+                const options: SortingOptions = {
+                    strategy,
+                    emptyLinesBetweenGroups: true,
+                    sortPropertiesWithinGroups: true
+                };
 
-                            // CSS variables should be at the top
-                            for (let i = 0; i < cssVars.length; i++) {
-                                expect(result.sortedProperties![i].startsWith('--')).toBe(true);
-                            }
+                const result = sortProperties(properties, options);
 
-                            // CSS variables should be alphabetically sorted
-                            const sortedVars = [...cssVars].sort((a, b) => a.localeCompare(b));
-                            expect(cssVars).toEqual(sortedVars);
-                        }
-                    });
-                });
+                expect(result.success).toBe(true);
+
+                // All CSS variables should be grouped together at the beginning
+                const varProps = result.sortedProperties?.filter(p => p.startsWith('--'));
+                const firstNonVarIndex = result.sortedProperties?.findIndex(p => !p.startsWith('--') && p !== '');
+
+                expect(varProps?.length).toBe(3); // We have 3 CSS variables
+
+                // Check that all variables come before any non-variables (excluding empty lines)
+                if (firstNonVarIndex !== -1 && firstNonVarIndex !== undefined) {
+                    const beforeFirstNonVar = result.sortedProperties?.slice(0, firstNonVarIndex).filter(p => p !== '');
+                    expect(beforeFirstNonVar?.every(p => p.startsWith('--'))).toBe(true);
+                }
             });
         });
     });

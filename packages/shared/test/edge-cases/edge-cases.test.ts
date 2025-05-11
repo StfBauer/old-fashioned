@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { sortProperties } from '../../src/sorting';
-import { SortingOptions } from '../../src/types';
+import type { SortingOptions } from '../../src/types';
 
 describe('CSS Property Sorting - Edge Cases', () => {
     // Test case 1: Property Name Case Sensitivity
@@ -512,3 +512,8 @@ describe('CSS Property Sorting - Edge Cases', () => {
         });
     });
 });
+
+
+
+
+
