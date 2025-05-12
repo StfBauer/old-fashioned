@@ -54,9 +54,9 @@ export interface PackageJsonWithStylelint {
 }
 
 /**
- * Interface for oldschool plugin rule configuration
+ * Interface for oldfashioned plugin rule configuration
  */
-export interface OldschoolOrderRule {
+export interface OldfashionedOrderRule {
     strategy?: SortingStrategy;
     emptyLinesBetweenGroups?: boolean;
     sortPropertiesWithinGroups?: boolean;
@@ -159,12 +159,12 @@ export function findStylelintConfig(startDir: string): ConfigFileDetails | null 
 }
 
 /**
- * Check if a stylelint configuration includes oldschool-order plugin
+ * Check if a stylelint configuration includes oldfashioned-order plugin
  * 
  * @param configPath - Path to the stylelint configuration file
- * @returns True if the configuration includes oldschool-order plugin
+ * @returns True if the configuration includes oldfashioned-order plugin
  */
-export function hasOldschoolOrderPlugin(configPath: string): boolean {
+export function hasOldfashionedOrderPlugin(configPath: string): boolean {
     try {
         if (!fs.existsSync(configPath)) {
             throw new ConfigurationError(`Configuration file not found: ${configPath}`, ConfigErrorCode.FILE_NOT_FOUND);
@@ -206,8 +206,8 @@ export function hasOldschoolOrderPlugin(configPath: string): boolean {
         return (
             Array.isArray(config.plugins) &&
             (
-                config.plugins.includes('stylelint-oldschool-order') ||
-                config.plugins.some((plugin) => plugin.includes('oldschool'))
+                config.plugins.includes('stylelint-oldfashioned-order') ||
+                config.plugins.some((plugin) => plugin.includes('oldfashioned'))
             )
         );
 
@@ -216,7 +216,7 @@ export function hasOldschoolOrderPlugin(configPath: string): boolean {
         if (error instanceof ConfigurationError) {
             console.error(`${error.name} (${error.code}): ${error.message}`);
         } else {
-            console.error('Error checking for oldschool-order plugin:', error);
+            console.error('Error checking for oldfashioned-order plugin:', error);
         }
         return false;
     }
@@ -334,18 +334,18 @@ export function getDocumentSortingOptions(document: vscode.TextDocument): Config
     const configDetails = findStylelintConfig(docDir);
 
     if (configDetails && configDetails.exists) {
-        const hasPlugin = hasOldschoolOrderPlugin(configDetails.path);
+        const hasPlugin = hasOldfashionedOrderPlugin(configDetails.path);
 
         // If project config has the plugin, it takes precedence over VS Code settings
         if (hasPlugin) {
-            console.log(`Project configuration found at ${configDetails.path} with oldschool-order plugin`);            // Parse the stylelint config and extract oldschool-order options
+            console.log(`Project configuration found at ${configDetails.path} with oldfashioned-order plugin`);            // Parse the stylelint config and extract oldfashioned-order options
             try {
                 const content = fs.readFileSync(configDetails.path, 'utf8');
                 let projectOptions = { ...defaultOptions };
 
                 // Parse the configuration content based on file type
                 let config: StylelintConfig | undefined;
-                let oldschoolRuleConfig: OldschoolOrderRule | undefined;
+                let oldfashionedRuleConfig: OldfashionedOrderRule | undefined;
 
                 if (configDetails.path.endsWith('package.json')) {
                     try {
@@ -364,26 +364,26 @@ export function getDocumentSortingOptions(document: vscode.TextDocument): Config
 
                 // Extract rule configuration if available
                 if (config?.rules) {
-                    // Check for oldschool/order rule
-                    const oldschoolRule = config.rules['oldschool/order'];
-                    if (Array.isArray(oldschoolRule) && oldschoolRule.length >= 2) {
+                    // Check for oldfashioned/order rule
+                    const oldfashionedRule = config.rules['oldfashioned/order'];
+                    if (Array.isArray(oldfashionedRule) && oldfashionedRule.length >= 2) {
                         // Extract configuration object from rule
-                        oldschoolRuleConfig = oldschoolRule[1] as OldschoolOrderRule;
+                        oldfashionedRuleConfig = oldfashionedRule[1] as OldfashionedOrderRule;
                     }
                 }
 
                 // Apply configuration if found
-                if (oldschoolRuleConfig) {
-                    if (oldschoolRuleConfig.strategy) {
-                        projectOptions.strategy = validateSortingStrategy(oldschoolRuleConfig.strategy);
+                if (oldfashionedRuleConfig) {
+                    if (oldfashionedRuleConfig.strategy) {
+                        projectOptions.strategy = validateSortingStrategy(oldfashionedRuleConfig.strategy);
                     }
 
-                    if (typeof oldschoolRuleConfig.emptyLinesBetweenGroups === 'boolean') {
-                        projectOptions.emptyLinesBetweenGroups = oldschoolRuleConfig.emptyLinesBetweenGroups;
+                    if (typeof oldfashionedRuleConfig.emptyLinesBetweenGroups === 'boolean') {
+                        projectOptions.emptyLinesBetweenGroups = oldfashionedRuleConfig.emptyLinesBetweenGroups;
                     }
 
-                    if (typeof oldschoolRuleConfig.sortPropertiesWithinGroups === 'boolean') {
-                        projectOptions.sortPropertiesWithinGroups = oldschoolRuleConfig.sortPropertiesWithinGroups;
+                    if (typeof oldfashionedRuleConfig.sortPropertiesWithinGroups === 'boolean') {
+                        projectOptions.sortPropertiesWithinGroups = oldfashionedRuleConfig.sortPropertiesWithinGroups;
                     }
                 }
                 // Fallback to simple string matching if parsing fails

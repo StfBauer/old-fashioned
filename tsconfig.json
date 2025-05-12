@@ -5,7 +5,7 @@
       "path": "packages/shared"
     },
     {
-      "path": "packages/stylelint-oldschool-order"
+      "path": "packages/stylelint-oldfashioned-order"
     },
     {
       "path": "packages/vscode-old-fashioned"

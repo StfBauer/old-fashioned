@@ -51,7 +51,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode'; // Import vscode to access the mock
-import { findStylelintConfig, hasOldschoolOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../config-loader';
+import { findStylelintConfig, hasOldfashionedOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../config-loader';
 import { FileSystemMockBuilder, resetAllMocks, createTestDocument } from './test-utils';
 import { ConsoleSpy, ErrorSimulator } from './error-utils';
 
@@ -127,14 +127,14 @@ describe('Config Loader Robustness', () => {
         });
     });
 
-    describe('hasOldschoolOrderPlugin robustness', () => {
+    describe('hasOldfashionedOrderPlugin robustness', () => {
         it('should handle nonexistent config files gracefully', () => {
             // Setup mock filesystem with no files
             fsMock.build();
 
             vi.mocked(fs.existsSync).mockReturnValue(false);
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(false);
             expect(consoleSpy.hasError('Configuration file not found')).toBe(true);
@@ -147,7 +147,7 @@ describe('Config Loader Robustness', () => {
             vi.mocked(fs.existsSync).mockReturnValue(true);
             vi.mocked(fs.readFileSync).mockReturnValueOnce('{ invalid: json }');
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(false);
             expect(consoleSpy.hasError('Failed to parse configuration file')).toBe(true);
@@ -160,19 +160,19 @@ describe('Config Loader Robustness', () => {
             vi.mocked(fs.existsSync).mockReturnValue(true);
             vi.mocked(fs.readFileSync).mockReturnValueOnce('{}');
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(false);
             // No error expected for valid but empty JSON
         });
 
-        it('should handle config with plugins but no oldschool plugin', () => {
-            // Setup mock filesystem with config that has plugins but not oldschool
+        it('should handle config with plugins but no oldfashioned plugin', () => {
+            // Setup mock filesystem with config that has plugins but not oldfashioned
             fsMock.addStylelintConfig('/project/.stylelintrc.json', {
                 plugins: ['stylelint-other-plugin']
             }).build();
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(false);
         });
@@ -183,7 +183,7 @@ describe('Config Loader Robustness', () => {
 
             vi.mocked(fs.existsSync).mockReturnValue(true);
 
-            const result = hasOldschoolOrderPlugin('/project/stylelint.config.js');
+            const result = hasOldfashionedOrderPlugin('/project/stylelint.config.js');
 
             expect(result).toBe(true);
         });
@@ -231,7 +231,7 @@ describe('Config Loader Robustness', () => {
 
             // Should fall back to VS Code settings
             expect(result.source).toBe(ConfigSource.VSCODE);
-            expect(consoleSpy.hasError('Error checking for oldschool-order plugin')).toBe(true);
+            expect(consoleSpy.hasError('Error checking for oldfashioned-order plugin')).toBe(true);
         });
 
         it('should handle invalid JSON in project configs', () => {
@@ -255,12 +255,12 @@ describe('Config Loader Robustness', () => {
             expect(consoleSpy.hasError('Failed to parse configuration file')).toBe(true);
         });
 
-        it('should handle missing oldschool rule config gracefully', () => {
+        it('should handle missing oldfashioned rule config gracefully', () => {
             // Setup mock filesystem with config that has the plugin but no rule config
             fsMock.addStylelintConfig('/project/.stylelintrc.json', {
-                plugins: ['stylelint-oldschool-order'],
+                plugins: ['stylelint-oldfashioned-order'],
                 rules: {
-                    // No oldschool rule
+                    // No oldfashioned rule
                     'other-rule': true
                 }
             }).build();
@@ -283,9 +283,9 @@ describe('Config Loader Robustness', () => {
         it('should validate sorting strategy values', () => {
             // Setup mock filesystem with invalid strategy
             fsMock.addStylelintConfig('/project/.stylelintrc.json', {
-                plugins: ['stylelint-oldschool-order'],
+                plugins: ['stylelint-oldfashioned-order'],
                 rules: {
-                    'oldschool/order': [true, { strategy: 'invalid-strategy' }]
+                    'oldfashioned/order': [true, { strategy: 'invalid-strategy' }]
                 }
             }).build();
 

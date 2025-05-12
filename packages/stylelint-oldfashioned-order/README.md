@@ -1,11 +1,11 @@
-# stylelint-oldschool-order
+# stylelint-oldfashioned-order
 
 A Stylelint plugin for sorting CSS properties according to various strategies, including grouped ordering similar to CSSComb.
 
 ## Installation
 
 ```bash
-npm install stylelint-oldschool-order --save-dev
+npm install stylelint-oldfashioned-order --save-dev
 ```
 
 ## Usage
@@ -14,9 +14,9 @@ Add the plugin to your Stylelint configuration:
 
 ```js
 module.exports = {
-  plugins: ['stylelint-oldschool-order'],
+  plugins: ['stylelint-oldfashioned-order'],
   rules: {
-    'plugin/oldschool-order': [
+    'plugin/oldfashioned-order': [
       true,
       {
         // Your options here

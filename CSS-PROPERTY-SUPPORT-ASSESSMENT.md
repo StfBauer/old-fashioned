@@ -53,7 +53,7 @@ This document provides a comprehensive assessment of the CSS property support in
 
 * The extension has robust SCSS/SASS at-rule support:
   * Handles various SASS at-rules like `@use`, `@forward`, `@import`, `@mixin`, `@include`, `@extend`
-  * Includes a dedicated SCSS processor (packages/stylelint-oldschool-order/src/processors/scss-processor.ts)
+  * Includes a dedicated SCSS processor (packages/stylelint-oldfashioned-order/src/processors/scss-processor.ts)
   * Contains comprehensive test cases demonstrating at-rule handling
 
 * Notable SASS at-rule support:

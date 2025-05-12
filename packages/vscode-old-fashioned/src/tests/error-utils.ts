@@ -205,7 +205,7 @@ export class TestConfigLoader {
     }
 
     /**
-     * Check if a configuration has the oldschool plugin
+     * Check if a configuration has the oldfashioned plugin
      */
     private hasPlugin(config: any): boolean {
         if (!config || !config.plugins) {
@@ -213,7 +213,7 @@ export class TestConfigLoader {
         }
 
         return config.plugins.some((plugin: string) =>
-            plugin.includes('oldschool') || plugin.includes('stylelint-oldschool-order')
+            plugin.includes('oldfashioned') || plugin.includes('stylelint-oldfashioned-order')
         );
     }
 }

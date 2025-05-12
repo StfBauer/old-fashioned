@@ -13,9 +13,10 @@ test/**
 .eslintrc.json
 ../../**/*
 ../shared/**/*
-../stylelint-oldschool-order/**/*
+../stylelint-oldfashioned-order/**/*
 tsconfig.json
 tsconfig.*.json
 vitest.config.ts
-.gitkeep
+# Exclude .gitkeep files
 **/.gitkeep
+../.gitkeep

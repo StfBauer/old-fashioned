@@ -9,7 +9,7 @@
 The project is organized as a monorepo with three main packages:
 
 1. **shared** - Core library with shared functionality
-2. **stylelint-oldschool-order** - Stylelint plugin implementation
+2. **stylelint-oldfashioned-order** - Stylelint plugin implementation
 3. **vscode-old-fashioned** - VS Code extension
 
 ## Key Components
@@ -32,7 +32,7 @@ The project is organized as a monorepo with three main packages:
 
 - **Integration with Stylelint**:
   - Uses Stylelint for linting and property ordering
-  - Custom stylelint-oldschool-order plugin implementation
+  - Custom stylelint-oldfashioned-order plugin implementation
 
 ### Technical Implementation
 
@@ -61,7 +61,7 @@ The project is organized as a monorepo with three main packages:
 
 4. **Processing Pipeline**:
    1. The extension parses CSS/SCSS using PostCSS
-   2. It applies the selected sorting strategy using the stylelint-oldschool-order plugin
+   2. It applies the selected sorting strategy using the stylelint-oldfashioned-order plugin
    3. Formatting is applied based on user preferences
    4. The formatted code replaces the original content
 
@@ -75,7 +75,7 @@ Contains the core logic for:
 - Type definitions
 - Utility functions
 
-### Stylelint-Oldschool-Order Package
+### Stylelint-Oldfashioned-Order Package
 
 - Custom Stylelint plugin implementing:
   - Order rules for different sorting strategies

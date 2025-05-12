@@ -8,7 +8,7 @@
 'use strict';
 
 const stylelint = require('stylelint');
-const rule = require('./rules/oldschool-order');
+const rule = require('./rules/oldfashioned-order');
 
 // Export a proper stylelint plugin
 module.exports = stylelint.createPlugin(rule.ruleName, rule.default);

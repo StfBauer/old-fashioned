@@ -1,9 +1,10 @@
 {
     "plugins": [
-        "stylelint-oldschool-order"
+        "stylelint-oldfashioned-order"
     ],
+    "configBasedir": "/Volumes/Code/n8design/projects/old-fashioned",
     "rules": {
-        "plugin/oldschool-order": {
+        "plugin/oldfashioned-order": {
             "strategy": "grouped",
             "emptyLinesBetweenGroups": true,
             "sortPropertiesWithinGroups": true

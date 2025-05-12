@@ -1,7 +1,7 @@
 {
-  "name": "stylelint-oldschool-order",
+  "name": "stylelint-oldfashioned-order",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/stylelint-oldschool-order/src",
+  "sourceRoot": "packages/stylelint-oldfashioned-order/src",
   "projectType": "library",
   "targets": {
     "build": {
@@ -10,9 +10,9 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "packages/stylelint-oldschool-order/dist",
-        "main": "packages/stylelint-oldschool-order/src/index.ts",
-        "tsConfig": "packages/stylelint-oldschool-order/tsconfig.json",
+        "outputPath": "packages/stylelint-oldfashioned-order/dist",
+        "main": "packages/stylelint-oldfashioned-order/src/index.ts",
+        "tsConfig": "packages/stylelint-oldfashioned-order/tsconfig.json",
         "assets": []
       },
       "dependsOn": [
@@ -28,14 +28,14 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "npm pack",
-        "cwd": "dist/packages/stylelint-oldschool-order"
+        "cwd": "dist/packages/stylelint-oldfashioned-order"
       }
     },
     "publish": {
       "executor": "nx:run-commands",
       "options": {
         "command": "npm publish",
-        "cwd": "dist/packages/stylelint-oldschool-order"
+        "cwd": "dist/packages/stylelint-oldfashioned-order"
       }
     },
     "lint": {

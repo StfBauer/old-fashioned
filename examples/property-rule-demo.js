@@ -73,7 +73,7 @@ async function demonstratePropertyProcessing() {
     const result = await stylelint.lint({
         code: sampleCSS,
         config: {
-            plugins: ['../packages/stylelint-oldschool-order/src/index.js'],
+            plugins: ['../packages/stylelint-oldfashioned-order/src/index.js'],
             rules: {
                 'plugin/old-fashioned': [
                     true,

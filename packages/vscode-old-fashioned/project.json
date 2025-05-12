@@ -15,7 +15,7 @@
             "dependsOn": [
                 {
                     "projects": [
-                        "stylelint-oldschool-order",
+                        "stylelint-oldfashioned-order",
                         "shared"
                     ],
                     "target": "build"

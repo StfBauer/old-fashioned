@@ -18,6 +18,12 @@ $primary-color: #3498db;
     width: 100%;
     @include box-shadow(2px 2px 5px rgba(0, 0, 0, 0.2));
 
+        --primary-color: #333;
+    --secondary-color: #666;
+    --spacing: 10px;
+    $hello: "world";
+    $workd: "Hello";
+
     // Nested rule with random properties
     &__logo {
         height: 50px;

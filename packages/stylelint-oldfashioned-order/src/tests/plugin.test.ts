@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import stylelint from 'stylelint';
-import plugin from '../index';
+// Use require instead of import for CommonJS module
+const plugin = require('../index');
 
-describe('stylelint-oldschool-order plugin', () => {
+describe('stylelint-oldfashioned-order plugin', () => {
   describe('basic functionality', () => {
     it('should detect unordered properties with alphabetical strategy', async () => {
       const result = await stylelint.lint({
@@ -16,7 +17,7 @@ describe('stylelint-oldschool-order plugin', () => {
         config: {
           plugins: [plugin],
           rules: {
-            'plugin/oldschool-order': [
+            'plugin/oldfashioned-order': [
               true,
               {
                 strategy: 'alphabetical',
@@ -27,12 +28,12 @@ describe('stylelint-oldschool-order plugin', () => {
           }
         }
       });
-      
+
       expect(result.errored).toBe(true);
       expect(result.results[0].warnings.length).toBeGreaterThan(0);
-      expect(result.results[0].warnings[0].rule).toBe('plugin/oldschool-order');
+      expect(result.results[0].warnings[0].rule).toBe('plugin/oldfashioned-order');
     });
-    
+
     it('should auto-fix unordered properties with alphabetical strategy', async () => {
       const result = await stylelint.lint({
         code: `
@@ -45,7 +46,7 @@ describe('stylelint-oldschool-order plugin', () => {
         config: {
           plugins: [plugin],
           rules: {
-            'plugin/oldschool-order': [
+            'plugin/oldfashioned-order': [
               true,
               {
                 strategy: 'alphabetical',
@@ -57,12 +58,12 @@ describe('stylelint-oldschool-order plugin', () => {
         },
         fix: true
       });
-      
+
       expect(result.output).toContain('background');
       expect(result.output.indexOf('background')).toBeLessThan(result.output.indexOf('color'));
       expect(result.output.indexOf('color')).toBeLessThan(result.output.indexOf('width'));
     });
-    
+
     it('should handle SCSS syntax', async () => {
       const result = await stylelint.lint({
         code: `
@@ -76,7 +77,7 @@ describe('stylelint-oldschool-order plugin', () => {
         config: {
           plugins: [plugin],
           rules: {
-            'plugin/oldschool-order': [
+            'plugin/oldfashioned-order': [
               true,
               {
                 strategy: 'alphabetical',
@@ -89,16 +90,16 @@ describe('stylelint-oldschool-order plugin', () => {
         customSyntax: 'postcss-scss',
         fix: true
       });
-      
+
       // SCSS variables should be preserved at the top
       expect(result.output).toContain('$color');
       expect(result.output.indexOf('$color')).toBeLessThan(result.output.indexOf('background'));
-      
+
       // Properties should be sorted alphabetically
       expect(result.output.indexOf('background')).toBeLessThan(result.output.indexOf('color'));
       expect(result.output.indexOf('color')).toBeLessThan(result.output.indexOf('width'));
     });
-    
+
     it('should add empty lines between groups when requested', async () => {
       const result = await stylelint.lint({
         code: `
@@ -111,7 +112,7 @@ describe('stylelint-oldschool-order plugin', () => {
         config: {
           plugins: [plugin],
           rules: {
-            'plugin/oldschool-order': [
+            'plugin/oldfashioned-order': [
               true,
               {
                 strategy: 'grouped',
@@ -123,7 +124,7 @@ describe('stylelint-oldschool-order plugin', () => {
         },
         fix: true
       });
-      
+
       // Should have empty lines between different groups
       expect(result.output).toMatch(/position: absolute;[\s\n]+.*width: 100px;/);
       expect(result.output).toMatch(/width: 100px;[\s\n]+.*color: red;/);

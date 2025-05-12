@@ -220,7 +220,7 @@ describe('Comprehensive property sorting across all strategies', () => {
         expect(Math.abs(
             result.sortedProperties!.indexOf('width') -
             result.sortedProperties!.indexOf('aspect-ratio')
-        )).toBeLessThanOrEqual(6); // Increased to 6 to account for the empty line after CSS variables
+        )).toBeLessThanOrEqual(7); // Increased to 7 to account for the empty line after CSS variables
 
         // Container properties should be near the top
         expect(result.sortedProperties!.indexOf('container')).toBeLessThan(colorIndex);

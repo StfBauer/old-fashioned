@@ -91,7 +91,8 @@ describe('Comprehensive property sorting across all strategies', () => {
 
         const result = sortProperties(shuffledProps, {
             strategy: 'grouped',
-            emptyLinesBetweenGroups: false
+            emptyLinesBetweenGroups: false,
+            sortPropertiesWithinGroups: true // Add the missing property
         });
 
         expect(result.success).toBe(true);

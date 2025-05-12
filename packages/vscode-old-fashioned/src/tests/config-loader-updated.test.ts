@@ -7,7 +7,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
-import { findStylelintConfig, hasOldschoolOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../config-loader';
+import { findStylelintConfig, hasOldfashionedOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../config-loader';
 
 // Mock Node.js modules
 vi.mock('fs', () => ({
@@ -89,14 +89,14 @@ describe('Config Loader', () => {
         });
     });
 
-    describe('hasOldschoolOrderPlugin', () => {
-        it('should detect oldschool-order plugin in JSON config', () => {
+    describe('hasOldfashionedOrderPlugin', () => {
+        it('should detect oldfashioned-order plugin in JSON config', () => {
             vi.mocked(fs.existsSync).mockReturnValue(true);
             vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
-                plugins: ['stylelint-oldschool-order']
+                plugins: ['stylelint-oldfashioned-order']
             }));
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(true);
         });
@@ -104,10 +104,10 @@ describe('Config Loader', () => {
         it('should detect plugin with partial name match', () => {
             vi.mocked(fs.existsSync).mockReturnValue(true);
             vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
-                plugins: ['@some-scope/oldschool-order']
+                plugins: ['@some-scope/oldfashioned-order']
             }));
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(true);
         });
@@ -118,7 +118,7 @@ describe('Config Loader', () => {
                 plugins: ['some-other-plugin']
             }));
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(false);
         });
@@ -128,11 +128,11 @@ describe('Config Loader', () => {
             vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
                 name: 'my-project',
                 stylelint: {
-                    plugins: ['stylelint-oldschool-order']
+                    plugins: ['stylelint-oldfashioned-order']
                 }
             }));
 
-            const result = hasOldschoolOrderPlugin('/project/package.json');
+            const result = hasOldfashionedOrderPlugin('/project/package.json');
 
             expect(result).toBe(true);
         });
@@ -167,7 +167,7 @@ describe('Config Loader', () => {
             expect(result.options.strategy).toBe('grouped');
         });
 
-        it('should use project config when it exists with oldschool-order plugin', () => {
+        it('should use project config when it exists with oldfashioned-order plugin', () => {
             // Setup mocks for finding config
             vi.mocked(fs.existsSync).mockImplementation((path) => {
                 return String(path).includes('.stylelintrc.json');
@@ -175,9 +175,9 @@ describe('Config Loader', () => {
 
             // Setup mocks for reading config
             vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
-                plugins: ['stylelint-oldschool-order'],
+                plugins: ['stylelint-oldfashioned-order'],
                 rules: {
-                    'oldschool/order': [true, { strategy: 'alphabetical' }]
+                    'oldfashioned/order': [true, { strategy: 'alphabetical' }]
                 }
             }));
 
@@ -199,7 +199,7 @@ describe('Config Loader', () => {
             // Setup mocks
             vi.mocked(fs.existsSync).mockReturnValue(true);
             vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
-                plugins: ['stylelint-oldschool-order']
+                plugins: ['stylelint-oldfashioned-order']
             }));
 
             // Mock document with non-file scheme
@@ -223,9 +223,9 @@ describe('Config Loader', () => {
 
             // Setup mocks for reading config
             vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
-                plugins: ['stylelint-oldschool-order'],
+                plugins: ['stylelint-oldfashioned-order'],
                 rules: {
-                    'oldschool/order': [true, { strategy: 'alphabetical' }]
+                    'oldfashioned/order': [true, { strategy: 'alphabetical' }]
                 }
             }));
 
@@ -263,16 +263,16 @@ describe('Config Loader', () => {
             vi.mocked(fs.readFileSync).mockImplementation((path) => {
                 if (String(path).includes('/project/src/components/.stylelintrc.json')) {
                     return JSON.stringify({
-                        plugins: ['stylelint-oldschool-order'],
+                        plugins: ['stylelint-oldfashioned-order'],
                         rules: {
-                            'oldschool/order': [true, { strategy: 'concentric' }]
+                            'oldfashioned/order': [true, { strategy: 'concentric' }]
                         }
                     });
                 }
                 return JSON.stringify({
-                    plugins: ['stylelint-oldschool-order'],
+                    plugins: ['stylelint-oldfashioned-order'],
                     rules: {
-                        'oldschool/order': [true, { strategy: 'alphabetical' }]
+                        'oldfashioned/order': [true, { strategy: 'alphabetical' }]
                     }
                 });
             });
