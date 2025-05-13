@@ -1,0 +1,26 @@
+{
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "esModuleInterop": true,
+        "outDir": "../dist/benchmark",
+        "rootDir": ".",
+        "strict": true,
+        "composite": true,
+        "paths": {
+            "@old-fashioned/shared": [
+                "../packages/shared/src"
+            ]
+        }
+    },
+    "include": [
+        "**/*.ts"
+    ],
+    "references": [
+        {
+            "path": "../packages/shared"
+        }
+    ]
+}

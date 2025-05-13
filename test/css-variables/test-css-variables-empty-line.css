@@ -1,0 +1,48 @@
+/**
+ * Test case for CSS variables with empty line
+ * This test ensures CSS variables are properly separated with an empty line
+ */
+
+/* Test with alphabetical sorting */
+.css-variables-alphabetical {
+    width: 100%;
+    height: 200px;
+    margin: var(--spacing);
+    --primary-color: #333;
+    --secondary-color: #666;
+    --spacing: 10px;
+    color: var(--primary-color);
+}
+
+/* Test with grouped sorting */
+.css-variables-grouped {
+    width: 100%;
+    height: 200px;
+    margin: var(--spacing);
+    --primary-color: #333;
+    --secondary-color: #666;
+    --spacing: 10px;
+    color: var(--primary-color);
+}
+
+/* Test with concentric sorting */
+.css-variables-concentric {
+    width: 100%;
+    height: 200px;
+    margin: var(--spacing);
+    --primary-color: #333;
+    --secondary-color: #666;
+    --spacing: 10px;
+    color: var(--primary-color);
+}
+
+/* Test with idiomatic sorting */
+.css-variables-idiomatic {
+    width: 100%;
+    height: 200px;
+    margin: var(--spacing);
+    --primary-color: #333;
+    --secondary-color: #666;
+    --spacing: 10px;
+    color: var(--primary-color);
+}

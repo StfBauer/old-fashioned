@@ -89,14 +89,30 @@ export function sortConcentric(
   properties: string[],
   options: SortingOptions
 ): string[] {
-  // Concentric sorting is a specific kind of grouped sorting with a
-  // carefully ordered set of property groups.
-  // For now, we're using the default groups but in the future we could
-  // create a more specific concentric ordering.
+  // Create a map for quick lookup of property indices
+  const orderMap = new Map<string, number>();
 
-  return sortByGroups(properties, {
-    ...options,
-    strategy: 'grouped'
+  // Import the CONCENTRIC_PROPERTY_ORDER from the property-groups
+  const { CONCENTRIC_PROPERTY_ORDER } = require('./property-groups');
+
+  CONCENTRIC_PROPERTY_ORDER.forEach((prop: string, index: number) => {
+    orderMap.set(prop, index);
+  });
+
+  // Sort properties based on their position in the concentric order
+  return [...properties].sort((a, b) => {
+    const indexA = orderMap.has(a) ? orderMap.get(a)! : Number.MAX_SAFE_INTEGER;
+    const indexB = orderMap.has(b) ? orderMap.get(b)! : Number.MAX_SAFE_INTEGER;
+
+    if (indexA === indexB) {
+      // If both properties are not in the order list, sort them alphabetically
+      if (indexA === Number.MAX_SAFE_INTEGER) {
+        return a.localeCompare(b);
+      }
+      return 0;
+    }
+
+    return indexA - indexB;
   });
 }
 
@@ -178,4 +194,29 @@ export function validatePropertyArray(arr: string[]): boolean {
   }
 
   return arr.every(item => isCSSProperty(item));
+}
+
+/**
+ * Shuffle the elements of an array randomly
+ * 
+ * @param array - The array to shuffle
+ * @returns A new array with the elements shuffled
+ */
+export function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
+/**
+ * Format a number as a string with comma separators
+ * 
+ * @param num - The number to format
+ * @returns The formatted number string
+ */
+export function formatNumber(num: number): string {
+  return num.toLocaleString();
 }

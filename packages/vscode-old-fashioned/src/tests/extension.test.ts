@@ -1,50 +1,67 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { sortCssProperties } from '../sorting';
-import { getSortingOptions, getParseSyntax, createDiagnosticFromWarning } from '../utils';
+/**
+ * VS Code Extension Tests - Consolidated Version
+ * 
+ * This is the main test file for the VS Code extension, consolidating the best practices
+ * from the different test approaches (fixed, improved, etc.).
+ */
 
-// Create vscode type
-type VSCodeMock = {
-  window: any;
-  commands: any;
-  workspace: any;
-  languages: any;
-  CancellationTokenSource: any;
-  Range: any;
-  Position: any;
-  Selection: any;
-  CodeAction: any;
-  CodeActionKind: any;
-  DiagnosticSeverity: any;
-  Diagnostic: any;
-  TextEdit: any;
-  WorkspaceEdit: any;
-  ProgressLocation: any;
-  ExtensionContext: any;
-};
+// Import vi first for mocking
+import { vi } from 'vitest';  // Define mocks with hoisting to prevent initialization errors
+const mockStylelint = vi.hoisted(() => ({
+  default: {
+    lint: vi.fn().mockImplementation(() => {
+      return Promise.resolve({
+        results: [{ warnings: [] }],
+        output: 'sorted-css'
+      });
+    })
+  }
+}));
 
-// Mock VS Code APIs with proper type signatures
-const vscode = vi.hoisted(() => {
-  const mockVSCode: VSCodeMock = {
+// Mock VS Code APIs directly to avoid circular dependencies
+const mockVSCode = vi.hoisted(() => {
+  // Create reusable mock functions
+  const showErrorMessage = vi.fn();
+  const showInformationMessage = vi.fn();
+  const withProgress = vi.fn().mockImplementation((options, task) => {
+    // Actually execute the task to ensure associated code runs
+    return task();
+  });
+  const registerCommand = vi.fn();
+
+  // Create mock for getConfiguration
+  const configurationGetMock = vi.fn().mockImplementation((key, defaultValue) => {
+    if (key === 'showActivationMessage') return true;
+    if (key === 'sorting.strategy') return 'grouped';
+    if (key === 'sorting.emptyLinesBetweenGroups') return true;
+    if (key === 'sorting.sortPropertiesWithinGroups') return true;
+    return defaultValue;
+  });
+
+  const getConfigurationMock = vi.fn().mockImplementation((section) => {
+    return { get: configurationGetMock };
+  });
+
+  // The mock object with all VS Code API components
+  return {
     window: {
-      activeTextEditor: null,
-      showErrorMessage: vi.fn(),
-      showInformationMessage: vi.fn(),
-      withProgress: vi.fn((options, task) => task())
+      activeTextEditor: undefined,
+      showErrorMessage,
+      showInformationMessage,
+      withProgress
     },
     commands: {
-      registerCommand: vi.fn(),
+      registerCommand,
       executeCommand: vi.fn()
     },
     workspace: {
-      getConfiguration: vi.fn(() => ({
-        get: (key: string, defaultValue: any) => defaultValue
-      })),
+      getConfiguration: getConfigurationMock,
       onDidOpenTextDocument: vi.fn(),
       onDidChangeTextDocument: vi.fn(),
       onDidSaveTextDocument: vi.fn(),
       onDidCloseTextDocument: vi.fn(),
-      textDocuments: [] as any[],
-      applyEdit: vi.fn()
+      textDocuments: [],
+      applyEdit: vi.fn().mockResolvedValue(true)
     },
     languages: {
       registerCodeActionsProvider: vi.fn(),
@@ -56,232 +73,272 @@ const vscode = vi.hoisted(() => {
         dispose: vi.fn()
       }))
     },
-    CancellationTokenSource: class {
-      token = { isCancellationRequested: false };
-      cancel() {
-        this.token.isCancellationRequested = true;
-      }
-      dispose() {}
-    },
     Range: class {
       constructor(
-        public startLine: number, 
-        public startChar: number, 
-        public endLine: number, 
-        public endChar: number
-      ) {}
+        public start: { line: number; character: number },
+        public end: { line: number; character: number }
+      ) { }
     },
     Position: class {
-      constructor(public line: number, public character: number) {}
+      constructor(public line: number, public character: number) { }
     },
-    Selection: class {
-      constructor(
-        public anchor: any, 
-        public active: any
-      ) {}
-      isEmpty = false
-    },
-    CodeAction: class {
-      constructor(public title: string, public kind: any) {}
-      command: any = undefined;
-    },
-    CodeActionKind: {
-      QuickFix: 'quickfix'
-    },
-    DiagnosticSeverity: {
-      Error: 0,
-      Warning: 1,
-      Information: 2,
-      Hint: 3
+    DiagnosticSeverity: { Error: 0, Warning: 1, Information: 2, Hint: 3 },
+    TextEdit: { replace: vi.fn((range, newText) => ({ range, newText })) },
+    Uri: {
+      file: (path: string) => ({ scheme: 'file', fsPath: path, toString: () => `file://${path}` })
     },
     Diagnostic: class {
-      constructor(public range: any, public message: string, public severity: number) {}
-      source: string = ''
-      code: string = ''
-    },
-    TextEdit: {
-      replace: vi.fn((range, text) => ({ range, newText: text }))
-    },
-    WorkspaceEdit: class {
-      replace = vi.fn()
-    },
-    ProgressLocation: {
-      Notification: 1
-    },
-    ExtensionContext: class {
-      subscriptions: any[] = []
+      constructor(
+        public range: any,
+        public message: string,
+        public severity: number
+      ) { }
+      source: string = '';
+      code: string = '';
     }
   };
-  return mockVSCode;
 });
 
-vi.mock('vscode', () => vscode);
+// Apply mocks
+vi.mock('stylelint', () => mockStylelint);
+vi.mock('vscode', () => mockVSCode);
 
-// Mock the extension module
-const mockExtension = {
-  activate: vi.fn(),
-  deactivate: vi.fn()
-};
-
-vi.mock('../extension', () => mockExtension);
-
-// Mock stylelint
-const mockStylelint = vi.hoisted(() => ({
-  default: {
-    lint: vi.fn().mockResolvedValue({
-      output: 'sorted-css',
-      results: [
-        {
-          warnings: [
-            { 
-              line: 1, 
-              column: 1, 
-              rule: 'plugin/oldschool-order',
-              severity: 'warning', 
-              text: 'Expected order to be: display, width, color'
-            }
-          ]
-        }
-      ]
-    })
-  }
+// Mock fs module for config tests
+vi.mock('fs', () => ({
+  existsSync: vi.fn(),
+  readFileSync: vi.fn()
 }));
 
-vi.mock('stylelint', () => mockStylelint);
+// Now import the rest
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import * as vscode from 'vscode'; // Import vscode to access the mock
+import { sortCssProperties } from '../sorting';
+import { getSortingOptions, getParseSyntax, createDiagnosticFromWarning } from '../utils';
+import { resetAllMocks } from './test-utils';
+import { activate } from '../extension';
 
-describe('Extension', () => {
+describe('VS Code extension', () => {
   let context: any;
-  
+
   beforeEach(() => {
-    context = new vscode.ExtensionContext();
-    vi.clearAllMocks();
+    resetAllMocks();
+    context = { subscriptions: [] };
+
+    // Reset specific mocks we need to test
+    mockVSCode.window.withProgress.mockClear();
+    mockStylelint.default.lint.mockClear();
   });
-  
+
+  afterEach(() => {
+    resetAllMocks();
+  });
+
+  // GROUP 1: Extension Activation Tests
   describe('activate', () => {
     it('should register commands and providers', () => {
-      mockExtension.activate(context);
-      
-      expect(vscode.commands.registerCommand).toHaveBeenCalled();
+      // Call activate function
+      activate(context);
+
+      // Verify commands and providers were registered
+      expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
+        'old-fashioned.sortProperties',
+        expect.any(Function)
+      );
       expect(vscode.languages.registerCodeActionsProvider).toHaveBeenCalled();
-      expect(vscode.languages.registerDocumentFormattingEditProvider).toHaveBeenCalled();
+    });
+
+    it('should show activation message based on configuration', () => {
+      // Call activate function
+      activate(context);
+
+      // By default the showActivationMessage is true in our mock
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+        expect.stringContaining('Old Fashioned CSS Sorter is now active')
+      );
     });
   });
-  
+
+  // GROUP 2: CSS Property Sorting Tests
   describe('sortCssProperties', () => {
-    it('should show error when no active editor', async () => {
-      await sortCssProperties((vscode as any).window.activeTextEditor);
-      expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('No active editor found');
+    it('should show an error message when no active editor', async () => {
+      // Set activeTextEditor to undefined as expected by the type
+      vscode.window.activeTextEditor = undefined;
+
+      // Call the function with undefined, cast to any to avoid type error
+      await sortCssProperties(vscode.window.activeTextEditor as any);
+
+      // Verify that an error message was shown
+      expect(vscode.window.showErrorMessage).toHaveBeenCalledWith(
+        expect.stringContaining('No active editor')
+      );
     });
-    
-    it('should sort CSS properties when editor available', async () => {
+
+    it('should run sorting operation with progress indicator', async () => {
+      // Setup vscode mock with settings and editor
       const mockEditor = {
         document: {
           languageId: 'css',
-          getText: () => '.test { color: red; display: block; }',
+          getText: () => '.foo { color: red; display: block; }',
+          uri: { fsPath: '/test/style.css', scheme: 'file' },
           lineCount: 1,
-          lineAt: (line: number) => ({ text: '.test { color: red; display: block; }' }),
-          uri: 'file:///test.css',
-          fileName: '/test.css'
+          lineAt: (line: number) => ({ text: '.foo { color: red; display: block; }' }),
+          fileName: '/test/style.css'
         },
-        selection: {
-          isEmpty: true
-        }
+        selection: { isEmpty: true, start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        edit: vi.fn().mockResolvedValue(true)
       };
-      
-      await sortCssProperties(mockEditor as any);
-      
+
+      // Set up the editor
+      vscode.window.activeTextEditor = mockEditor as any;
+
+      // Call the function
+      await sortCssProperties(vscode.window.activeTextEditor as any);
+
+      // Verify that progress indicator was shown
       expect(vscode.window.withProgress).toHaveBeenCalled();
-      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('CSS properties sorted successfully');
+
+      // Verify stylelint was called
+      expect(mockStylelint.default.lint).toHaveBeenCalled();
+    });
+
+    it('should show an error message for non-CSS files', async () => {
+      // Setup mock for a non-CSS file
+      const mockEditor = {
+        document: {
+          languageId: 'javascript',
+          getText: () => 'const foo = "bar";',
+          uri: { fsPath: '/test/script.js', scheme: 'file' },
+          fileName: '/test/script.js'
+        },
+        selection: { isEmpty: true }
+      };
+
+      // Set as active editor
+      vscode.window.activeTextEditor = mockEditor as any;
+
+      // Call the function
+      await sortCssProperties(vscode.window.activeTextEditor as any);
+
+      // Verify error was shown
+      expect(vscode.window.showErrorMessage).toHaveBeenCalledWith(
+        expect.stringContaining('only works on CSS, SCSS, or SASS')
+      );
     });
   });
-});
 
-describe('VS Code extension', () => {
+  // GROUP 3: Utility Function Tests
   describe('utils', () => {
     it('should return correct parse syntax for CSS', () => {
       expect(getParseSyntax('css')).toBe('css');
     });
-    
+
     it('should return correct parse syntax for SCSS', () => {
       expect(getParseSyntax('scss')).toBe('scss');
     });
-    
+
     it('should return correct parse syntax for SASS', () => {
       expect(getParseSyntax('sass')).toBe('sass');
     });
-    
+
     it('should return default sorting options', () => {
+      // Setup proper configuration mock for this specific test
+      mockVSCode.workspace.getConfiguration.mockReturnValue({
+        get: vi.fn((key: string, defaultValue: any) => defaultValue)
+      });
+
+      // Test with default (empty) settings
       const options = getSortingOptions();
+      expect(options).toBeDefined();
       expect(options.strategy).toBe('grouped');
       expect(options.emptyLinesBetweenGroups).toBe(true);
-      expect(options.sortPropertiesWithinGroups).toBe(true);
     });
-    
-    it('should create a diagnostic from a warning', () => {
+
+    it('should create diagnostic from stylelint warning', () => {
       const warning = {
-        line: 1,
-        column: 1,
-        text: 'Properties should be sorted',
-        rule: 'plugin/oldschool-order',
+        line: 2,
+        column: 3,
+        rule: 'test-rule',
+        text: 'Test warning',
         severity: 'warning'
       };
-      
-      const document = {
-        lineAt: vi.fn().mockReturnValue({ text: 'color: red;' })
+
+      // Create a mock document instead of a range
+      const mockDocument = {
+        lineAt: (line: number) => ({ text: 'color: red;' }),
+        uri: { fsPath: '/test/style.css', scheme: 'file' },
+        fileName: '/test/style.css',
+        languageId: 'css'
       };
-      
-      const diagnostic = createDiagnosticFromWarning(warning, document as any);
-      
+
+      const diagnostic = createDiagnosticFromWarning(warning, mockDocument as any);
+
       expect(diagnostic).toBeDefined();
       expect(diagnostic.source).toBe('old-fashioned');
-      expect(diagnostic.code).toBe('plugin/oldschool-order');
+      expect(diagnostic.code).toBe('test-rule');
     });
   });
-  
+
+  // GROUP 4: Sorting Implementation Tests 
   describe('sorting', () => {
-    it('should show an error message when no editor is active', async () => {
-      const vscode = await import('vscode');
-      
-      await sortCssProperties(undefined as any);
-      
-      expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('No active editor found');
-    });
-    
-    it('should show an error for non-CSS files', async () => {
-      const vscode = await import('vscode');
-      
-      const editor = {
-        document: {
-          languageId: 'javascript'
-        }
-      };
-      
-      await sortCssProperties(editor as any);
-      
-      expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('This command only works on CSS, SCSS, or SASS files');
-    });
-    
-    it('should sort CSS properties for the entire document', async () => {
-      const vscode = await import('vscode');
-      const stylelint = await import('stylelint');
-      
-      const editor = {
+    it('should call stylelint to perform sorting', async () => {
+      // Create a more complete mock editor
+      const mockEditor = {
         document: {
           languageId: 'css',
-          getText: vi.fn().mockReturnValue('.test { color: red; display: block; }'),
-          lineAt: vi.fn().mockReturnValue({ text: '.test { color: red; display: block; }' }),
+          getText: () => '.foo { color: red; display: block; }',
+          uri: { fsPath: '/test/style.css', scheme: 'file' },
           lineCount: 1,
-          uri: { toString: () => 'file:///test.css' }
+          lineAt: (line: number) => ({ text: '.foo { color: red; display: block; }' }),
+          fileName: '/test/style.css'
         },
-        selection: {
-          isEmpty: true
-        }
+        selection: { isEmpty: true, start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        edit: vi.fn().mockResolvedValue(true)
       };
-      
-      await sortCssProperties(editor as any);
-      
-      expect(stylelint.default.lint).toHaveBeenCalled();
-      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('CSS properties sorted successfully');
+
+      // Set it as active editor
+      vscode.window.activeTextEditor = mockEditor as any;
+
+      // Call sort function with the proper type cast
+      await sortCssProperties(vscode.window.activeTextEditor as any);
+
+      // Verify stylelint was called
+      expect(mockStylelint.default.lint).toHaveBeenCalled();
+
+      // Verify progress was shown
+      expect(vscode.window.withProgress).toHaveBeenCalled();
+    });
+
+    it('should show success message when sorting completes', async () => {
+      // Create a mock editor
+      const mockEditor = {
+        document: {
+          languageId: 'css',
+          getText: () => '.foo { color: red; display: block; }',
+          uri: { fsPath: '/test/style.css', scheme: 'file' },
+          lineCount: 1,
+          lineAt: (line: number) => ({ text: '.foo { color: red; display: block; }' }),
+          fileName: '/test/style.css'
+        },
+        selection: { isEmpty: true, start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        edit: vi.fn().mockResolvedValue(true)
+      };
+
+      // Make stylelint mock return different content to simulate changes
+      mockStylelint.default.lint.mockResolvedValueOnce({
+        results: [{ warnings: [] }],
+        output: '.foo { display: block; color: red; }' // Different order
+      });
+
+      // Set as active editor
+      vscode.window.activeTextEditor = mockEditor as any;
+
+      // Call sort function
+      await sortCssProperties(vscode.window.activeTextEditor as any);
+
+      // Verify success message
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+        expect.stringContaining('CSS properties sorted successfully')
+      );
     });
   });
 });

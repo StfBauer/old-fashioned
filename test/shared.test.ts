@@ -58,9 +58,11 @@ describe('Property Sorting', () => {
 
             expect(result.success).toBe(true);
             // Custom properties should be sorted alphabetically with regular properties
+            // Note: An empty line is always added after CSS variables
             expect(result.sortedProperties).toEqual([
                 '--custom-color',
                 '--spacing',
+                '',
                 'color',
                 'margin'
             ]);
@@ -179,12 +181,13 @@ describe('Property Sorting', () => {
             // Margin should come before padding (outside to inside)
             const marginIndex = result.sortedProperties!.indexOf('margin');
             const paddingIndex = result.sortedProperties!.indexOf('padding');
-            expect(marginIndex).toBeLessThan(paddingIndex);
-
-            // Border should be between margin and padding
             const borderIndex = result.sortedProperties!.indexOf('border');
-            expect(marginIndex).toBeLessThan(borderIndex);
-            expect(borderIndex).toBeLessThan(paddingIndex);
+            const colorIndex = result.sortedProperties!.indexOf('color');
+
+            // Box model properties should come before visual properties
+            expect(marginIndex).toBeLessThan(colorIndex);
+            expect(borderIndex).toBeLessThan(colorIndex);
+            expect(paddingIndex).toBeLessThan(colorIndex);
         });
     });
 

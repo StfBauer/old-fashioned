@@ -1,0 +1,10 @@
+/* Test file for CSS variables empty line */
+.css-variables-test {
+    width: 100%;
+    height: 200px;
+    margin: var(--spacing);
+    color: var(--primary-color);
+    --primary-color: #333;
+    --secondary-color: #666;
+    --spacing: 10px;
+}

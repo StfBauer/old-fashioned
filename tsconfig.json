@@ -1,8 +1,14 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/shared" },
-    { "path": "packages/stylelint-oldschool-order" },
-    { "path": "packages/vscode-old-fashioned" }
+    {
+      "path": "packages/shared"
+    },
+    {
+      "path": "packages/stylelint-oldfashioned-order"
+    },
+    {
+      "path": "packages/vscode-old-fashioned"
+    }
   ]
 }

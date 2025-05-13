@@ -1,0 +1,254 @@
+/**
+ * Edge Cases for CSS Property Sorting Test
+ * This file contains various edge case scenarios to test the proper functioning
+ * of the CSS property sorting extension in Visual Studio Code.
+ */
+
+/* Edge Case 1: Display and Flex properties need to be grouped together */
+.display-flex-group {
+    width: 100%;
+    margin: 20px;
+    display: flex;
+    padding: 10px;
+    flex-direction: row;
+    border: 1px solid black;
+    flex-wrap: wrap;
+    color: #333;
+    flex: 1;
+}
+
+/* Edge Case 2: Case sensitivity handling */
+.case-sensitivity {
+    MARGIN: 10px;
+    Width: 100%;
+    color: red;
+    Height: 200px;
+    BOX-shadow: none;
+}
+
+/* Edge Case 3: Non-standard and experimental properties */
+.experimental {
+    -webkit-touch-callout: none;
+    width: 100px;
+    height: 100px;
+    container-type: inline-size;
+    scrollbar-width: thin;
+    text-decoration: underline;
+    font-feature-settings: "liga"1;
+    text-wrap: balance;
+}
+
+/* Edge Case 4: Properties with malformed values */
+.malformed {
+    width: invalid-value;
+    height: 100px;
+    color: not a color;
+    margin: 10px 20px 30px omg;
+}
+
+/* Edge Case 5: Properties with complex values */
+.complex-values {
+    background: linear-gradient(to right, red, blue) url('image.jpg') no-repeat center/cover;
+    transform: translate3d(10px, 20px, 30px) rotate(45deg) scale(1.5);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    font-family: 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Edge Case 6: CSS variables mixed with properties - they should always appear first */
+.css-variables {
+    width: 100%;
+    height: 200px;
+
+    margin: var(--spacing);
+    color: var(--primary-color);
+    --primary-color: #333;
+    --secondary-color: #666;
+    --spacing: 10px;
+}
+
+/* Edge Case 7: Properties with !important flags */
+.important-flags {
+    width: 100% !important;
+    margin: 0 !important;
+    height: auto !important;
+    color: red !important;
+    padding: 10px !important;
+}
+
+/* Edge Case 8: Properties with mixed whitespace */
+.mixed-whitespace {
+    width: 100px;
+    margin: 20px;
+    height:
+        200px;
+    color: red;
+    padding: 10px;
+}
+
+/* Edge Case 9: Unicode in properties */
+.unicode {
+    width: 100px;
+    \74ransform: rotate(45deg);
+    height: 200px;
+    \6Dargin: 10px;
+}
+
+/* Edge Case 10: Properties with empty lines */
+.empty-lines {
+    position: relative;
+    z-index: 10;
+
+    width: 200px;
+    height: 200px;
+
+    color: blue;
+    font-size: 16px;
+}
+
+/* Edge Case 11: Extremely long property list */
+.long-property-list {
+    position: relative;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
+    order: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    border: 0;
+    border-width: 0;
+    border-style: none;
+    border-color: transparent;
+    border-radius: 0;
+    background: none;
+    background-color: transparent;
+    color: black;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 1.5;
+    text-align: left;
+    text-decoration: none;
+    text-transform: none;
+    white-space: normal;
+    letter-spacing: normal;
+    opacity: 1;
+    overflow: visible;
+    box-shadow: none;
+    transform: none;
+    transition: none;
+    animation: none;
+    cursor: default;
+}
+
+/* Edge Case 12: Properties with same prefix but different groups */
+.same-prefix-different-groups {
+    background-color: #fff;
+    background-image: url('image.jpg');
+    text-align: center;
+    text-transform: uppercase;
+    transform: scale(1.5);
+    transform-origin: center;
+    animation-name: fade;
+    animation-duration: 2s;
+}
+
+/* Edge Case 13: Properties with potential group conflicts */
+.group-conflicts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex-direction: row;
+    float: left;
+    width: 100%;
+}
+
+/* Edge Case 14: Cross-browser compatibility properties */
+.vendor-prefixes {
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Edge Case 15: Properties with very long values */
+.long-values {
+    font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', 'Arial', 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath fill='%23000' d='M0 0h100v100H0z'/%3E%3Cpath fill='%23fff' d='M50 25L25 75h50z'/%3E%3C/svg%3E");
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05),
+        0 2px 4px -1px rgba(0, 0, 0, 0.1),
+        0 1px 2px 0 rgba(0, 0, 0, 0.05),
+        0 0 1px 0 rgba(0, 0, 0, 0.1);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out, opacity 0.15s ease-in-out, filter 0.15s ease-in-out;
+}
+
+/* Edge Case 16: Modern CSS features */
+.modern-css {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-rows: auto;
+    grid-template-areas: "header header""main sidebar""footer footer";
+    gap: 1rem;
+    place-items: center;
+    width: 100%;
+    height: auto;
+    max-width: 1200px;
+    min-height: 100vh;
+    aspect-ratio: 16/9;
+    container-type: inline-size;
+    container-name: card;
+    margin: 0;
+    margin-block: 1rem;
+    padding: 1rem;
+    padding-inline: 2rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    border-start-start-radius: 4px;
+    border-end-end-radius: 4px;
+    background: #fff;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: #333;
+    color-scheme: light dark;
+    font-family: system-ui, sans-serif;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    line-height: 1.5;
+    transition: all 0.3s ease;
+    animation: fadeIn 0.5s ease-out;
+    pointer-events: auto;
+    overflow: clip;
+    scroll-margin-block: 1rem;
+    content-visibility: auto;
+}

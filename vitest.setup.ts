@@ -13,10 +13,10 @@ global.__dirname = typeof __dirname !== 'undefined'
     : fileURLToPath(new URL('.', import.meta.url));
 
 // Set up mocks for resolving packages
-vi.mock('stylelint-oldschool-order', () => {
+vi.mock('stylelint-oldfashioned-order', () => {
     return {
         default: {
-            ruleName: 'plugin/oldschool-order',
+            ruleName: 'plugin/oldfashioned-order',
             messages: {
                 expected: () => 'Expected properties to be in order.'
             }

@@ -25,7 +25,27 @@ export interface PropertyGroup {
 /**
  * Supported sorting strategies
  */
-export type SortingStrategy = 'alphabetical' | 'grouped' | 'concentric' | 'custom';
+export type SortingStrategy = 'alphabetical' | 'grouped' | 'concentric' | 'idiomatic' | 'custom';
+
+/**
+ * Context for nested CSS rules
+ */
+export interface NestedRuleContext {
+  /**
+   * The nesting level of the rule
+   */
+  nestingLevel: number;
+
+  /**
+   * The type of the parent rule (e.g., selector, at-rule)
+   */
+  parentType: string;
+
+  /**
+   * Whether the parent rule is an at-rule (e.g., @media, @supports)
+   */
+  isAtRule: boolean;
+}
 
 /**
  * Sorting options
@@ -50,6 +70,26 @@ export interface SortingOptions {
    * Custom property groups when using 'custom' strategy
    */
   propertyGroups?: string[][];
+
+  /**
+   * Whether to strip extra spaces from properties and values
+   */
+  stripSpaces?: boolean;
+
+  /**
+   * Whether to enforce tab size consistency
+   */
+  tabSize?: boolean;
+
+  /**
+   * Whether to use unitless zeros (e.g., 0 instead of 0px)
+   */
+  unitlessZero?: boolean;
+
+  /**
+   * Whether to align vendor-prefixed properties together
+   */
+  vendorPrefixAlign?: boolean;
 }
 
 /**

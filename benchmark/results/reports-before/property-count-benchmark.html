@@ -1,0 +1,351 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>CSS Property Count Performance Benchmark Results</title>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        h1, h2, h3 {
+          margin-top: 30px;
+        }
+        .chart-container {
+          margin: 40px 0;
+          height: 400px;
+        }
+        .results-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 30px;
+        }
+        .results-table th, .results-table td {
+          padding: 10px;
+          border: 1px solid #ddd;
+          text-align: left;
+        }
+        .results-table th {
+          background-color: #f5f5f5;
+        }
+        .results-table tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+        footer {
+          margin-top: 50px;
+          color: #666;
+          font-size: 14px;
+          text-align: center;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>CSS Property Count Performance Benchmark Results</h1>
+      <p>Generated on 5/7/2025, 9:31:11 PM</p>
+      
+      <h2>Performance Comparison</h2>
+      <div class="chart-container">
+        <canvas id="performanceChart"></canvas>
+      </div>
+      
+      <h2>Operations Per Second</h2>
+      <div class="chart-container">
+        <canvas id="opsChart"></canvas>
+      </div>
+      
+      <h2>Detailed Results</h2>
+      
+      <h3>Input Size: tiny properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0001</td>
+              <td>0.0001</td>
+              <td>0.0001</td>
+              <td>0.1667</td>
+              <td>6961291.74</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0004</td>
+              <td>0.0004</td>
+              <td>0.0003</td>
+              <td>0.1486</td>
+              <td>2375439.10</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0016</td>
+              <td>0.0015</td>
+              <td>0.0013</td>
+              <td>0.1251</td>
+              <td>615088.69</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: small properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0003</td>
+              <td>0.0003</td>
+              <td>0.0002</td>
+              <td>0.0947</td>
+              <td>3346331.60</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0007</td>
+              <td>0.0007</td>
+              <td>0.0006</td>
+              <td>0.1183</td>
+              <td>1424989.01</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0020</td>
+              <td>0.0019</td>
+              <td>0.0016</td>
+              <td>0.1571</td>
+              <td>495509.35</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: medium properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0012</td>
+              <td>0.0011</td>
+              <td>0.0010</td>
+              <td>0.1224</td>
+              <td>838781.92</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0020</td>
+              <td>0.0019</td>
+              <td>0.0017</td>
+              <td>0.1282</td>
+              <td>493305.16</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0042</td>
+              <td>0.0041</td>
+              <td>0.0037</td>
+              <td>0.1574</td>
+              <td>235863.76</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      <h3>Input Size: large properties</h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Time (ms)</th>
+            <th>Median Time (ms)</th>
+            <th>Min Time (ms)</th>
+            <th>Max Time (ms)</th>
+            <th>Ops/sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0047</td>
+              <td>0.0048</td>
+              <td>0.0042</td>
+              <td>0.0415</td>
+              <td>210868.54</td>
+            </tr>
+          
+            <tr>
+              <td>alphabetical</td>
+              <td>0.0049</td>
+              <td>0.0048</td>
+              <td>0.0043</td>
+              <td>0.0294</td>
+              <td>204077.88</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0086</td>
+              <td>0.0083</td>
+              <td>0.0077</td>
+              <td>0.1754</td>
+              <td>115831.72</td>
+            </tr>
+          
+            <tr>
+              <td>grouped</td>
+              <td>0.0096</td>
+              <td>0.0088</td>
+              <td>0.0080</td>
+              <td>0.1792</td>
+              <td>104505.57</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0142</td>
+              <td>0.0140</td>
+              <td>0.0127</td>
+              <td>0.1273</td>
+              <td>70258.27</td>
+            </tr>
+          
+            <tr>
+              <td>concentric</td>
+              <td>0.0147</td>
+              <td>0.0137</td>
+              <td>0.0126</td>
+              <td>0.2489</td>
+              <td>68170.36</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    
+      
+      <footer>
+        Generated by Old Fashioned CSS Property Sorting Benchmarking Tool
+      </footer>
+      
+      <script>
+        // Performance chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(performanceCtx, {
+          type: 'bar',
+          data: {"labels":["tiny","small","medium","large"],"datasets":[{"label":"alphabetical strategy","data":[0.0001436514999999872,0.0002988346999990199,0.0011922050000015133,0.00482119049999892],"backgroundColor":"#4285F4","borderColor":"#4285F4","borderWidth":1},{"label":"grouped strategy","data":[0.0004209748000002037,0.0007017597999998998,0.0020271428000005016,0.00910104100000092],"backgroundColor":"#34A853","borderColor":"#34A853","borderWidth":1},{"label":"concentric strategy","data":[0.0016257817999998905,0.002018125399999576,0.004239735599999176,0.014451164999997445],"backgroundColor":"#FBBC05","borderColor":"#FBBC05","borderWidth":1}]},
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Average Time (ms)'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Input Size (number of properties)'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'Average Sorting Time by Strategy and Input Size'
+              },
+              legend: {
+                position: 'top'
+              }
+            }
+          }
+        });
+        
+        // Operations per second chart
+        const opsData = {
+          labels: ["tiny","small","medium","large"],
+          datasets: [{"label":"alphabetical strategy","data":[6961291.737295393,3346331.60072535,838781.9208934123,207473.2143112187],"backgroundColor":"transparent","borderColor":"#4285F4","borderWidth":2,"tension":0.1},{"label":"grouped strategy","data":[2375439.0999164702,1424989.0062100205,493305.15837352583,110168.64321076329],"backgroundColor":"transparent","borderColor":"#34A853","borderWidth":2,"tension":0.1},{"label":"concentric strategy","data":[615088.6914837325,495509.347437087,235863.7647121661,69214.31917294723],"backgroundColor":"transparent","borderColor":"#FBBC05","borderWidth":2,"tension":0.1}]
+        };
+        
+        const opsCtx = document.getElementById('opsChart').getContext('2d');
+        new Chart(opsCtx, {
+          type: 'line',
+          data: opsData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Operations per Second'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Input Size (number of properties)'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'Operations per Second by Strategy and Input Size'
+              },
+              legend: {
+                position: 'top'
+              }
+            }
+          }
+        });
+      </script>
+    </body>
+    </html>
+  

@@ -6,7 +6,9 @@
             "type": "extensionHost",
             "request": "launch",
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-old-fashioned"
+                "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-old-fashioned",
+                "${workspaceFolder}/packages/vscode-old-fashioned/test/",
+                "--new-window"
             ],
             "outFiles": [
                 "${workspaceFolder}/packages/vscode-old-fashioned/dist/**/*.js"

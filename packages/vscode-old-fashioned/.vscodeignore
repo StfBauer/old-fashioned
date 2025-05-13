@@ -1,0 +1,22 @@
+.vscode/**
+.vscode-test/**
+src/**
+out/**
+temp/**
+test/**
+**/node_modules/**
+.gitignore
+.git/**
+**/.DS_Store
+**/*.ts
+!**/*.d.ts
+.eslintrc.json
+../../**/*
+../shared/**/*
+../stylelint-oldfashioned-order/**/*
+tsconfig.json
+tsconfig.*.json
+vitest.config.ts
+# Exclude .gitkeep files
+**/.gitkeep
+../.gitkeep

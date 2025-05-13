@@ -6,7 +6,8 @@
 
 import * as vscode from 'vscode';
 import * as stylelint from 'stylelint';
-import { getParseSyntax, createDiagnosticFromWarning, isStyleDocument, getSortingOptions } from './utils';
+import * as path from 'path';
+import { getParseSyntax, createDiagnosticFromWarning, isStyleDocument, getSortingOptions, getFormattingOptions } from './utils';
 
 /**
  * Interface for Stylelint warning object
@@ -151,7 +152,7 @@ async function updateDiagnostics(document: vscode.TextDocument): Promise<void> {
         if (styleResult.warnings && styleResult.warnings.length > 0) {
           for (const warning of styleResult.warnings) {
             // Check if warning is from our plugin
-            if (warning.rule && warning.rule.startsWith('plugin/oldschool-order')) {
+            if (warning.rule && warning.rule.startsWith('plugin/oldfashioned-order')) {
               // Create a diagnostic and add it to the collection
               const diagnostic = createDiagnosticFromWarning(warning, document);
               diagnostics.push(diagnostic);
@@ -186,7 +187,8 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
   const syntax = getParseSyntax(document.languageId);
 
   // Get configuration from user settings
-  const options = getSortingOptions();
+  const sortingOptions = getSortingOptions();
+  const formattingOptions = getFormattingOptions();
 
   // Determine the appropriate custom syntax based on the document type
   let customSyntax: string | undefined;
@@ -196,19 +198,73 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
     customSyntax = 'postcss-sass';
   }
 
-  // Run Stylelint with our plugin
-  return stylelint.lint({
-    code: text,
-    codeFilename: document.fileName,
-    config: {
-      plugins: ['stylelint-oldschool-order'],
-      rules: {
-        'plugin/oldschool-order': [
-          true,
-          options
-        ]
+  // Create combined options for the stylelint plugin
+  const combinedOptions = {
+    ...sortingOptions,
+    // Add formatting options
+    'always-semicolon': formattingOptions.alwaysSemicolon,
+    'color-case': formattingOptions.colorCase,
+    'block-indent': formattingOptions.blockIndent,
+    'color-shorthand': formattingOptions.colorShorthand,
+    'element-case': formattingOptions.elementCase,
+    'leading-zero': formattingOptions.leadingZero,
+    'quotes': formattingOptions.quotes,
+    'sort-order-fallback': formattingOptions.sortOrderFallback,
+    'space-before-colon': formattingOptions.spaceBeforeColon,
+    'space-after-colon': formattingOptions.spaceAfterColon,
+    'space-before-combinator': formattingOptions.spaceBeforeCombinator,
+    'space-after-combinator': formattingOptions.spaceAfterCombinator,
+    'space-between-declarations': formattingOptions.spaceBetweenDeclarations,
+    'space-before-opening-brace': formattingOptions.spaceBeforeOpeningBrace,
+    'space-after-opening-brace': formattingOptions.spaceAfterOpeningBrace,
+    'space-after-selector-delimiter': formattingOptions.spaceAfterSelectorDelimiter,
+    'space-before-selector-delimiter': formattingOptions.spaceBeforeSelectorDelimiter,
+    'space-before-closing-brace': formattingOptions.spaceBeforeClosingBrace,
+    'strip-spaces': formattingOptions.stripSpaces,
+    'tab-size': formattingOptions.tabSize,
+    'unitless-zero': formattingOptions.unitlessZero,
+    'vendor-prefix-align': formattingOptions.vendorPrefixAlign
+  };
+
+  // Get the extension path for configBasedir
+  const extensionPath = vscode.extensions.getExtension('n8design.vscode-old-fashioned')?.extensionPath || __dirname;
+  // For development environments, try to use the local workspace path
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  const isDevelopment = extensionPath.includes('old-fashioned/packages/vscode-old-fashioned');
+
+  // Determine the best configBasedir to find the plugin
+  let configBasedir = extensionPath;
+
+  // In development, we want to use the workspace root
+  if (isDevelopment && workspaceFolders && workspaceFolders.length > 0) {
+    // Go up two directories from extension path to get to workspace root
+    configBasedir = path.resolve(extensionPath, '../..');
+    console.log('Using development workspace path:', configBasedir);
+  }
+
+  try {
+    console.log('Running stylelint with configBasedir:', configBasedir);
+
+    // In development, the plugin might be in the workspace node_modules
+    // In production, the plugin should be bundled with the extension
+    return stylelint.lint({
+      code: text,
+      codeFilename: document.fileName,
+      config: {
+        plugins: ['stylelint-oldfashioned-order'],
+        rules: {
+          'plugin/oldfashioned-order': [
+            true,
+            combinedOptions
+          ]
+        },
+        customSyntax
       },
-      customSyntax
-    }
-  });
+      // This is the key setting that helps stylelint locate the plugin
+      configBasedir: configBasedir
+    });
+  } catch (err) {
+    console.error('Error initializing stylelint:', err);
+    throw err;
+  }
 }

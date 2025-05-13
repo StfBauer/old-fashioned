@@ -8,7 +8,10 @@ export default defineConfig({
       dir: '../../node_modules/.vitest',
     },
     environment: 'node',
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}'],
+    include: [
+      'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}',
+      'test/**/*.{test,spec}.ts'
+    ],
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../coverage/packages/shared',

@@ -9,7 +9,7 @@ Old Fashioned is a set of tools for sorting CSS properties according to various 
 The project consists of three main components:
 
 1. **@old-fashioned/shared** - Shared types, interfaces, and utilities
-2. **stylelint-oldschool-order** - Stylelint plugin for sorting CSS properties
+2. **stylelint-oldfashioned-order** - Stylelint plugin for sorting CSS properties
 3. **old-fashioned** - VS Code extension that provides UI and integration
 
 ## Features
@@ -19,6 +19,10 @@ The project consists of three main components:
   - **Grouped** - Sort properties by functional groups (position, display, etc.)
   - **Concentric** - Sort properties from outside to inside
   - **Custom** - Use custom property groups
+- Modern CSS support:
+  - **CSS Variables** - Support for CSS custom properties
+  - **@property** - Support for CSS `@property` at-rules
+  - **Modern properties** - Support for modern CSS properties like `aspect-ratio`, `gap`, etc.
 
 - Support for CSS, SCSS, and SASS syntax
 - Handling of SCSS variables, directives, and nested rules
@@ -39,15 +43,15 @@ The project consists of three main components:
 
 1. Install the plugin:
    ```bash
-   npm install stylelint stylelint-oldschool-order --save-dev
+   npm install stylelint stylelint-oldfashioned-order --save-dev
    ```
 
 2. Add to your Stylelint config:
    ```js
    module.exports = {
-     plugins: ['stylelint-oldschool-order'],
+     plugins: ['stylelint-oldfashioned-order'],
      rules: {
-       'plugin/oldschool-order': [
+       'plugin/oldfashioned-order': [
          true,
          {
            strategy: 'grouped',
@@ -92,7 +96,7 @@ npx nx run-many --target=test --all
 ## Package Structure
 
 - `/packages/shared` - Shared types and utilities
-- `/packages/stylelint-oldschool-order` - Stylelint plugin
+- `/packages/stylelint-oldfashioned-order` - Stylelint plugin
 - `/packages/vscode-old-fashioned` - VS Code extension
 
 ## License
