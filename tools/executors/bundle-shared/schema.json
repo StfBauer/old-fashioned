@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "type": "object",
+    "cli": "nx",
+    "title": "Bundle Shared Executor",
+    "description": "Bundles the shared library into stylelint-oldfashioned-order for publishing",
+    "properties": {
+        "outputPath": {
+            "type": "string",
+            "description": "The output path of the generated files."
+        }
+    },
+    "required": []
+}

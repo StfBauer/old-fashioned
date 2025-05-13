@@ -78,5 +78,14 @@
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/.eslintrc.json"
     ]
+  },
+  "executors": {
+    "@old-fashioned/workspace": {
+      "bundle-shared": {
+        "implementation": "./tools/executors/bundle-shared/executor",
+        "schema": "./tools/executors/bundle-shared/schema.json",
+        "description": "Bundles the shared library into stylelint-oldfashioned-order for publishing"
+      }
+    }
   }
 }

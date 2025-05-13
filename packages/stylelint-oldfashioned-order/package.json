@@ -1,11 +1,49 @@
 {
   "name": "stylelint-oldfashioned-order",
   "version": "0.0.1",
-  "description": "Old fashioned CSS property ordering for Stylelint",
+  "description": "🎨 Contentric, idiomatic or alphabetical CSS property ordering for Stylelint no Problem at all",
   "main": "dist/src/index.js",
+  "keywords": [
+    "stylelint",
+    "stylelint-plugin",
+    "css",
+    "order",
+    "sort",
+    "properties",
+    "alphabetical",
+    "concentric",
+    "idiomatic"
+  ],
+  "author": "Stefan Bauer (@stfbauer)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/n8design/old-fashioned"
+  },
+  "homepage": "https://github.com/n8design/old-fashioned/tree/main/packages/stylelint-oldfashioned-order",
+  "bugs": {
+    "url": "https://github.com/n8design/old-fashioned/issues"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/stfbauer"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/n8design"
+    }
+  ],
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepare-publish": "node ../../tools/scripts/bundle-shared-into-stylelint.js",
+    "prepublishOnly": "echo 'Skipping build in dist folder - already built by Nx'"
   },
   "dependencies": {
     "postcss": "^8.4.24",

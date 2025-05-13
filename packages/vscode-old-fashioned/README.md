@@ -1,122 +1,100 @@
-# Old Fashioned - CSS Property Sorting for VS Code
+# Old Fashioned CSS Property Sorter
 
-A VS Code extension for sorting CSS properties according to various strategies, with support for CSS, SCSS, and SASS.
+A Visual Studio Code extension that helps you maintain consistent CSS by sorting properties according to various strategies.
+
+![Old Fashioned CSS Sorter Demo](packages/vscode-old-fashioned/images/launch-image-old.jpg)
 
 ## Features
 
-- Sort CSS properties by different strategies:
-  - **Alphabetical** (A-Z)
-  - **Grouped** (by functionality like positioning, layout, typography)
-  - **Concentric** (from outside to inside)
-  - **Custom** (using custom property groups)
-  
-- Support for CSS, SCSS, and SASS files
-- Diagnostics for incorrectly ordered properties
-- Quick-fix suggestions for ordering issues
-- Format on demand or via Format Document command
-- Context menu integration
-- **Project-level configuration** support via stylelint config files
+- **Multiple Sorting Strategies**
+  - **Alphabetical**: Simple A-Z sorting of properties
+  - **Concentric**: Sort from outside (position/display) to inside (colors/text)
+  - **Idiomatic**: Following the idiomatic CSS grouping conventions
 
-![Demo of Old Fashioned sorting CSS properties](images/demo.gif)
+- **Special Handling**
+  - Automatically groups related properties (transforms, appearance properties, etc.)
+  - Keeps vendor prefixes adjacent to their standard property
+  - Maintains CSS variables at the top of declarations
 
 ## Usage
 
-### Commands
+1. Open a CSS, SCSS, or LESS file
+2. Use the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+3. Type "Old Fashioned: Sort CSS Properties"
+4. Your CSS properties will be instantly sorted according to your settings
 
-- **Old Fashioned: Sort CSS Properties** - Sort properties in the current file or selection
-- Use the context menu in CSS/SCSS/SASS files
-- Click on Quick Fix suggestions when diagnostics appear
+## Extension Settings
 
-### Keyboard Shortcuts
+This extension contributes the following settings:
 
-You can assign a keyboard shortcut to the "Old Fashioned: Sort CSS Properties" command in VS Code keyboard shortcuts settings.
+* `old-fashioned.sorting.strategy`: Sets the sorting strategy (`alphabetical`, `concentric`, `idiomatic`)
+* `old-fashioned.sorting.emptyLinesBetweenGroups`: Add empty lines between property groups for better readability
+* `old-fashioned.sorting.sortPropertiesWithinGroups`: Sort properties alphabetically within their groups
 
-### Configuration
+## Examples
 
-This extension provides several configuration options:
+### Before:
+```css
+.example {
+  color: red;
+  margin: 10px;
+  display: flex;
+  padding: 5px;
+  background: white;
+}
+```
 
-- **oldFashioned.sortingStrategy**: The strategy to use for sorting CSS properties
-  - Options: "alphabetical", "grouped", "concentric", "custom"
-  - Default: "grouped"
+### After (Alphabetical):
+```css
+.example {
+  background: white;
+  color: red;
+  display: flex;
+  margin: 10px;
+  padding: 5px;
+}
+```
+
+### After (Concentric):
+```css
+.example {
+  display: flex;
+  margin: 10px;
+  padding: 5px;
+  background: white;
+  color: red;
+}
+```
+
+### After (Idiomatic):
+```css
+.example {
+  /* Positioning */
+  /* Box Model */
+  display: flex;
+  margin: 10px;
+  padding: 5px;
   
-- **oldFashioned.emptyLinesBetweenGroups**: Whether to add empty lines between property groups
-  - Default: true
-  
-- **oldFashioned.sortPropertiesWithinGroups**: Whether to alphabetically sort properties within their groups
-  - Default: true
-  
-- **oldFashioned.formatOnFormat**: Whether to sort properties when formatting the document
-  - Default: false
-  
-- **oldFashioned.showActivationMessage**: Whether to show a message when the extension is activated
-  - Default: true
-
-### Project-Level Configuration
-
-Old Fashioned respects project-level stylelint configuration files. If your project has a `.stylelintrc` file (or any standard stylelint config file) with the `stylelint-oldschool-order` plugin configured, the extension will use those settings instead of the VS Code settings.
-
-#### Setup a Project-Level Configuration
-
-1. Install the stylelint and oldschool-order packages:
-   ```bash
-   npm install --save-dev stylelint stylelint-oldschool-order
-   ```
-
-2. Create a `.stylelintrc` file in your project root:
-   ```json
-   {
-     "plugins": [
-       "stylelint-oldschool-order"
-     ],
-     "rules": {
-       "oldschool/order": [true, {
-         "strategy": "grouped",
-         "emptyLinesBetweenGroups": true,
-         "sortPropertiesWithinGroups": true
-       }]
-     }
-   }
-   ```
-
-3. The extension will automatically detect and use this configuration when editing CSS files in your project.
-
-This allows you to:
-- Maintain consistent CSS property ordering across the team
-- Integrate with your build pipeline using the same rules
-- Override the default VS Code settings on a per-project basis
-
-## Property Groups
-
-When using the "grouped" sorting strategy, properties are grouped in the following order:
-
-1. **Positioning** - position, top, right, bottom, left, z-index
-2. **Display & Box Model** - display, flex, flex-*, box-sizing, etc.
-3. **Width & Height** - width, height, min-width, max-width, etc.
-4. **Margin & Padding** - margin, padding, and their variants
-5. **Border & Outline** - border, outline, and their variants 
-6. **Background** - background, background-color, background-image, etc.
-7. **Typography** - color, font, font-*, text-*, etc.
-8. **Visual** - opacity, visibility, overflow, transform, etc.
-9. **Others** - content, cursor, pointer-events, user-select
+  /* Visual */
+  background: white;
+  color: red;
+}
+```
 
 ## Requirements
 
-- VS Code 1.60.0 or newer
-
-## Known Issues
-
-- In very large files, sorting may take a bit longer to complete.
-- Some complex SCSS constructs might not be perfectly handled.
+No additional requirements or dependencies needed.
 
 ## Release Notes
 
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
+
 ### 0.0.1
 
-- Initial release with basic sorting functionality
-- Support for CSS, SCSS, and SASS files
+- Initial release with basic functionality
+- Support for CSS, SCSS, and LESS
 - Multiple sorting strategies
-- Diagnostics and quick-fixes
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Check out the [repository](https://github.com/n8design/old-fashioned) for details.

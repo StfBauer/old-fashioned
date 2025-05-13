@@ -7,10 +7,21 @@
 
 'use strict';
 
-const stylelint = require('stylelint');
-const rule = require('./rules/oldfashioned-order');
+// This file serves as the main entry point for the stylelint-oldfashioned-order plugin
 
-// Export a proper stylelint plugin
-module.exports = stylelint.createPlugin(rule.ruleName, rule.default);
-// These property assignments are critical!
-module.exports.ruleName = rule.ruleName;
+import oldfashionedOrderRule, { ruleName } from './rules/oldfashioned-order';
+
+// Stylelint expects plugin rules to be exported as an object with the rule name as the key
+// This is critical for proper plugin registration
+export default [
+    {
+        // This provides the ruleName property that Stylelint requires
+        ruleName: ruleName,
+        rule: oldfashionedOrderRule,
+        // Mandatory meta information
+        meta: {
+            url: 'https://github.com/n8design/old-fashioned/tree/main/packages/stylelint-oldfashioned-order',
+            deprecated: false
+        }
+    }
+];

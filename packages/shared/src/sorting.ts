@@ -77,7 +77,7 @@ export function sortProperties(properties: string[], options: SortingOptions): S
 
             // Add empty line between CSS and SASS variables if both exist
             if (sortedSassVars.length > 0) {
-                result.push('\n');
+                result.push('');  // Changed from '\n' to empty string
             }
         }
 
@@ -89,8 +89,8 @@ export function sortProperties(properties: string[], options: SortingOptions): S
         // IMPORTANT: Force two empty lines between variables and properties
         // This ensures at least one remains after any processing
         if ((sortedCssVars.length > 0 || sortedSassVars.length > 0) && sortedRegularProps.length > 0) {
-            result.push('\n');
-            result.push('\n'); // Add an extra one to be sure
+            result.push('');  // Changed from '\n' to empty string
+            result.push('');  // Changed from '\n' to empty string
         }
 
         // Remove any leading empty lines from regular properties

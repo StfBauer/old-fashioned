@@ -10,15 +10,39 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "packages/stylelint-oldfashioned-order/dist",
+        "outputPath": "dist/packages/stylelint-oldfashioned-order",
         "main": "packages/stylelint-oldfashioned-order/src/index.ts",
         "tsConfig": "packages/stylelint-oldfashioned-order/tsconfig.json",
-        "assets": []
+        "assets": [
+          "packages/stylelint-oldfashioned-order/*.md"
+        ]
       },
       "dependsOn": [
         {
           "projects": [
             "shared"
+          ],
+          "target": "build"
+        }
+      ]
+    },
+    "bundle-shared": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/packages/stylelint-oldfashioned-order/dist"
+      ],
+      "options": {
+        "commands": [
+          "mkdir -p packages/stylelint-oldfashioned-order/dist",
+          "node tools/scripts/bundle-shared-into-stylelint.js"
+        ],
+        "parallel": false
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "shared",
+            "stylelint-oldfashioned-order"
           ],
           "target": "build"
         }
@@ -34,8 +58,12 @@
     "publish": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npm publish",
-        "cwd": "dist/packages/stylelint-oldfashioned-order"
+        "commands": [
+          "nx build stylelint-oldfashioned-order",
+          "nx run stylelint-oldfashioned-order:bundle-shared",
+          "cd packages/stylelint-oldfashioned-order/dist && npm publish"
+        ],
+        "parallel": false
       }
     },
     "lint": {
@@ -45,13 +73,13 @@
       ]
     },
     "test": {
-      "executor": "@nrwl/vite:test",
+      "executor": "nx:run-commands",
       "outputs": [
         "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "passWithNoTests": true,
-        "config": "vitest.config.ts"
+        "command": "vitest run",
+        "cwd": "packages/stylelint-oldfashioned-order"
       }
     }
   },

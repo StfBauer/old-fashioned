@@ -1,6 +1,6 @@
 # stylelint-oldfashioned-order
 
-A Stylelint plugin for sorting CSS properties according to various strategies, including grouped ordering similar to CSSComb.
+🎨 A stylelint plugin for ordering CSS properties with multiple sorting strategies: alphabetical, concentric, or idiomatic.
 
 ## Installation
 
@@ -10,83 +10,84 @@ npm install stylelint-oldfashioned-order --save-dev
 
 ## Usage
 
-Add the plugin to your Stylelint configuration:
+Add this plugin to your stylelint config:
 
 ```js
+// .stylelintrc.js
 module.exports = {
-  plugins: ['stylelint-oldfashioned-order'],
+  plugins: [
+    "stylelint-oldfashioned-order"
+  ],
   rules: {
-    'plugin/oldfashioned-order': [
-      true,
-      {
-        // Your options here
-        strategy: 'grouped',
-        emptyLinesBetweenGroups: true,
-        sortPropertiesWithinGroups: true
-      }
-    ]
+    "oldfashioned-order/properties-order": "alphabetical" // or "concentric", "idiomatic"
   }
 };
 ```
 
-## Options
+## Sorting Strategies
 
-### `strategy`
+### Alphabetical
 
-Type: `String`  
-Default: `'grouped'`  
-Possible values: `'alphabetical'`, `'grouped'`, `'concentric'`, `'custom'`
+Sorts properties alphabetically with special handling for vendor prefixes.
 
-The strategy to use for sorting CSS properties:
+```css
+/* Before */
+.element {
+  color: red;
+  background: white;
+  display: flex;
+}
 
-- `alphabetical`: Sort properties alphabetically
-- `grouped`: Sort properties by functional groups (positioning, layout, typography, etc.)
-- `concentric`: Sort properties from outside to inside (positioning, dimensions, colors, etc.)
-- `custom`: Use custom property groups defined in `propertyGroups`
-
-### `emptyLinesBetweenGroups`
-
-Type: `Boolean`  
-Default: `true`
-
-Whether to add empty lines between different property groups.
-
-### `sortPropertiesWithinGroups`
-
-Type: `Boolean`  
-Default: `true`
-
-Whether to sort properties alphabetically within their groups.
-
-### `propertyGroups`
-
-Type: `Array<Array<String>>`  
-Default: *Built-in groups*
-
-Custom property groups to use with the `'custom'` strategy. Each sub-array represents a group of properties.
-
-Example:
-
-```js
-propertyGroups: [
-  ['position', 'top', 'right', 'bottom', 'left'],
-  ['width', 'height'],
-  ['color', 'font-size', 'line-height']
-]
+/* After */
+.element {
+  background: white;
+  color: red;
+  display: flex;
+}
 ```
 
-## Features
+### Concentric
 
-- Multiple sorting strategies
-- Empty line insertion between groups
-- Support for CSS, SCSS, and SASS
-- Handling for SCSS variables and nested rules
-- Auto-fix capabilities
+Sorts properties from outside (position/display) to inside (colors/text).
 
-## CSSComb Compatibility
+```css
+/* Before */
+.element {
+  color: red;
+  margin: 10px;
+  background: white;
+}
 
-This plugin is designed to be compatible with CSSComb configurations. If you're migrating from CSSComb, you can use your existing property order configuration.
+/* After */
+.element {
+  margin: 10px;
+  background: white;
+  color: red;
+}
+```
+
+### Idiomatic
+
+Groups properties according to idiomatic CSS conventions.
+
+```css
+/* Before */
+.element {
+  color: red;
+  top: 0;
+  display: block;
+  padding: 5px;
+}
+
+/* After */
+.element {
+  top: 0;
+  display: block;
+  padding: 5px;
+  color: red;
+}
+```
 
 ## License
 
-MIT
+MIT © [Stefan Bauer (@stfbauer)](https://github.com/stfbauer)

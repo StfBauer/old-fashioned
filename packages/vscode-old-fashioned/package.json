@@ -1,256 +1,87 @@
 {
-  "name": "vscode-old-fashioned",
-  "displayName": "Old Fashioned",
-  "description": "CSS property sorting with style",
+  "name": "old-fashioned",
+  "displayName": "Old Fashioned CSS Property Sorter",
   "version": "0.0.1",
+  "description": "A CSS property sorter with multiple sorting strategies",
   "publisher": "n8design",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/n8design/old-fashioned"
+  "author": {
+    "name": "n8design"
   },
+  "license": "MIT",
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.80.0"
   },
+  "icon": "images/old-fashioned.png",
   "categories": [
-    "Formatters"
+    "Formatters",
+    "Linters"
   ],
-  "main": "./dist/extension.js",
+  "keywords": [
+    "css",
+    "sorting",
+    "formatter",
+    "scss",
+    "less"
+  ],
   "activationEvents": [
     "onLanguage:css",
     "onLanguage:scss",
-    "onLanguage:sass",
-    "onCommand:old-fashioned.sortProperties"
+    "onLanguage:less"
   ],
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "old-fashioned.sortProperties",
-        "title": "Sort CSS Properties (Old Fashioned)"
-      },
-      {
-        "command": "old-fashioned.openSettings",
-        "title": "Open Old Fashioned Settings"
+        "title": "Old Fashioned: Sort CSS Properties"
       }
     ],
-    "menus": {
-      "editor/context": [
-        {
-          "when": "editorLangId == css || editorLangId == scss || editorLangId == sass",
-          "command": "old-fashioned.sortProperties",
-          "group": "1_modification"
-        }
-      ],
-      "commandPalette": [
-        {
-          "command": "old-fashioned.sortProperties",
-          "when": "editorLangId == css || editorLangId == scss || editorLangId == sass"
-        },
-        {
-          "command": "old-fashioned.openSettings"
-        }
-      ]
-    },
     "configuration": {
       "title": "Old Fashioned",
       "properties": {
-        "oldFashioned.sorting.strategy": {
+        "old-fashioned.sorting.strategy": {
           "type": "string",
-          "default": "grouped",
+          "default": "alphabetical",
           "enum": [
-            "grouped",
             "alphabetical",
             "concentric",
-            "idiomatic"
+            "idiomatic",
+            "custom"
           ],
-          "description": "Strategy for sorting CSS properties",
-          "order": 1
+          "description": "The sorting strategy to use for CSS properties"
         },
-        "oldFashioned.sorting.emptyLinesBetweenGroups": {
+        "old-fashioned.sorting.emptyLinesBetweenGroups": {
           "type": "boolean",
           "default": false,
-          "description": "Insert empty lines between property groups",
-          "order": 2
+          "description": "Whether to add empty lines between property groups"
         },
-        "oldFashioned.sorting.sortPropertiesWithinGroups": {
+        "old-fashioned.sorting.sortPropertiesWithinGroups": {
           "type": "boolean",
           "default": true,
-          "description": "Sort properties alphabetically within their groups",
-          "order": 3
-        },
-        "oldFashioned.formatting.alwaysSemicolon": {
-          "type": "boolean",
-          "default": true,
-          "description": "Always add a semicolon after the last declaration",
-          "order": 10
-        },
-        "oldFashioned.formatting.colorCase": {
-          "type": "string",
-          "enum": [
-            "lower",
-            "upper"
-          ],
-          "default": "lower",
-          "description": "Case for color values (lower or upper)",
-          "order": 11
-        },
-        "oldFashioned.formatting.blockIndent": {
-          "type": "string",
-          "default": "\t",
-          "description": "Character(s) used for indentation inside blocks",
-          "order": 12
-        },
-        "oldFashioned.formatting.colorShorthand": {
-          "type": "boolean",
-          "default": true,
-          "description": "Use shorthand notation for color values when possible",
-          "order": 13
-        },
-        "oldFashioned.formatting.elementCase": {
-          "type": "string",
-          "enum": [
-            "lower",
-            "upper"
-          ],
-          "default": "lower",
-          "description": "Case for element selectors (lower or upper)",
-          "order": 14
-        },
-        "oldFashioned.formatting.leadingZero": {
-          "type": "boolean",
-          "default": false,
-          "description": "Include leading zero in decimal values",
-          "order": 15
-        },
-        "oldFashioned.formatting.quotes": {
-          "type": "string",
-          "enum": [
-            "double",
-            "single"
-          ],
-          "default": "double",
-          "description": "Type of quotes to use (single or double)",
-          "order": 16
-        },
-        "oldFashioned.formatting.sortOrderFallback": {
-          "type": "string",
-          "enum": [
-            "abc",
-            "none"
-          ],
-          "default": "abc",
-          "description": "Fallback method when properties aren't found in sorting groups",
-          "order": 17
-        },
-        "oldFashioned.formatting.unitlessZero": {
-          "type": "boolean",
-          "default": true,
-          "description": "Remove units for zero values when possible",
-          "order": 18
-        },
-        "oldFashioned.formatting.vendorPrefixAlign": {
-          "type": "boolean",
-          "default": true,
-          "description": "Align vendor prefixed properties",
-          "order": 19
-        },
-        "oldFashioned.formatting.stripSpaces": {
-          "type": "boolean",
-          "default": true,
-          "description": "Remove extra spaces",
-          "order": 20
-        },
-        "oldFashioned.spacing.spaceBeforeColon": {
-          "type": "string",
-          "default": "",
-          "description": "Space before colon in declarations",
-          "order": 30
-        },
-        "oldFashioned.spacing.spaceAfterColon": {
-          "type": "string",
-          "default": " ",
-          "description": "Space after colon in declarations",
-          "order": 31
-        },
-        "oldFashioned.spacing.spaceBeforeCombinator": {
-          "type": "string",
-          "default": " ",
-          "description": "Space before combinators",
-          "order": 32
-        },
-        "oldFashioned.spacing.spaceAfterCombinator": {
-          "type": "string",
-          "default": " ",
-          "description": "Space after combinators",
-          "order": 33
-        },
-        "oldFashioned.spacing.spaceBetweenDeclarations": {
-          "type": "string",
-          "default": "\n",
-          "description": "Space between declarations",
-          "order": 34
-        },
-        "oldFashioned.spacing.spaceBeforeOpeningBrace": {
-          "type": "string",
-          "default": "",
-          "description": "Space before opening brace",
-          "order": 35
-        },
-        "oldFashioned.spacing.spaceAfterOpeningBrace": {
-          "type": "string",
-          "default": "\n",
-          "description": "Space after opening brace",
-          "order": 36
-        },
-        "oldFashioned.spacing.spaceAfterSelectorDelimiter": {
-          "type": "string",
-          "default": "\n",
-          "description": "Space after selector delimiter",
-          "order": 37
-        },
-        "oldFashioned.spacing.spaceBeforeSelectorDelimiter": {
-          "type": "string",
-          "default": "",
-          "description": "Space before selector delimiter",
-          "order": 38
-        },
-        "oldFashioned.spacing.spaceBeforeClosingBrace": {
-          "type": "string",
-          "default": "\n",
-          "description": "Space before closing brace",
-          "order": 39
-        },
-        "oldFashioned.general.tabSize": {
-          "type": "boolean",
-          "default": true,
-          "description": "Use editor's tab size setting",
-          "order": 50
-        },
-        "oldFashioned.general.showActivationMessage": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show a notification when the extension is activated",
-          "order": 51
+          "description": "Whether to sort properties alphabetically within groups"
         }
       }
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "postbuild": "npm install postcss-scss stylelint-order stylelint-scss --no-save && npm install ../stylelint-oldfashioned-order --no-save && node scripts/ensure-plugin-bundled.js && node scripts/verify-plugin-installation.js",
-    "vscode:prepublish": "npm run build",
-    "package": "vsce package --no-dependencies"
+    "package": "vsce package",
+    "publish": "vsce publish"
   },
   "dependencies": {
-    "@old-fashioned/shared": "file:../shared",
+    "stylelint-oldfashioned-order": "^0.0.1",
     "postcss": "^8.4.24",
     "postcss-scss": "^4.0.9",
     "stylelint": "^16.0.0",
-    "stylelint-oldfashioned-order": "file:../stylelint-oldfashioned-order",
     "stylelint-order": "^6.0.4",
     "stylelint-scss": "^6.2.1"
   },
   "devDependencies": {
+    "@vscode/vsce": "^2.22.0",
     "@types/node": "^18.0.0",
     "@types/vscode": "^1.60.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/n8design/old-fashioned"
   }
 }
