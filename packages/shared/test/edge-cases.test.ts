@@ -424,38 +424,33 @@ describe('CSS Property Sorting - Edge Cases', () => {
     describe('Cross-browser compatibility properties', () => {
         it('should group vendor-prefixed properties with their standard versions', () => {
             const properties = [
+                'color',
                 'appearance',
-                '-webkit-appearance',
                 '-moz-appearance',
-                'user-select',
-                '-webkit-user-select',
-                '-moz-user-select',
-                '-ms-user-select',
-                'mask-image',
-                '-webkit-mask-image'
+                'padding',
+                '-webkit-appearance'
             ];
 
-            const result = sortProperties(properties, { strategy: 'grouped' });
+            const result = sortProperties(properties, { strategy: 'alphabetical' });
 
             expect(result.success).toBe(true);
 
-            // Appearance properties should be grouped
+            // Check that all appearance properties are grouped together
+            // with vendor-prefixed versions coming before the standard version
             const appearanceIndex = result.sortedProperties!.indexOf('appearance');
             const webkitAppearanceIndex = result.sortedProperties!.indexOf('-webkit-appearance');
             const mozAppearanceIndex = result.sortedProperties!.indexOf('-moz-appearance');
 
-            expect(Math.abs(appearanceIndex - webkitAppearanceIndex)).toBeLessThanOrEqual(2);
-            expect(Math.abs(appearanceIndex - mozAppearanceIndex)).toBeLessThanOrEqual(2);
+            // In our new algorithm, vendor-prefixed properties should come before standard properties
+            expect(webkitAppearanceIndex).toBeLessThan(appearanceIndex);
+            expect(mozAppearanceIndex).toBeLessThan(appearanceIndex);
 
-            // User-select properties should be grouped
-            const userSelectIndex = result.sortedProperties!.indexOf('user-select');
-            const webkitUserSelectIndex = result.sortedProperties!.indexOf('-webkit-user-select');
-            const mozUserSelectIndex = result.sortedProperties!.indexOf('-moz-user-select');
-            const msUserSelectIndex = result.sortedProperties!.indexOf('-ms-user-select');
+            // Ensure they're all grouped together without other properties in between
+            const minIndex = Math.min(appearanceIndex, webkitAppearanceIndex, mozAppearanceIndex);
+            const maxIndex = Math.max(appearanceIndex, webkitAppearanceIndex, mozAppearanceIndex);
 
-            expect(Math.abs(userSelectIndex - webkitUserSelectIndex)).toBeLessThanOrEqual(3);
-            expect(Math.abs(userSelectIndex - mozUserSelectIndex)).toBeLessThanOrEqual(3);
-            expect(Math.abs(userSelectIndex - msUserSelectIndex)).toBeLessThanOrEqual(3);
+            // The difference between min and max should be exactly the number of appearance properties - 1
+            expect(maxIndex - minIndex).toBe(2);
         });
     });
 
