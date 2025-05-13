@@ -30,94 +30,81 @@ export function sortProperties(properties: string[], options: SortingOptions): S
         const regularProps = properties.filter(prop => !prop.trim().startsWith('--') && !prop.trim().startsWith('$'));
 
         // Sort variables alphabetically
-        const sortedCssVariables = [...cssVariables].sort((a, b) => a.localeCompare(b));
-        const sortedSassVariables = [...sassVariables].sort((a, b) => a.localeCompare(b));
+        const sortedCssVars = [...cssVariables].sort((a, b) => a.localeCompare(b));
+        const sortedSassVars = [...sassVariables].sort((a, b) => a.localeCompare(b));
 
-        let sortedResult: SortingResult = {
-            success: true,
-            sortedProperties: regularProps
-        };
-
-        // Apply the requested sorting strategy for regular properties
+        // Sort regular properties according to the selected strategy
+        let sortedRegularProps: string[] = [];
         switch (completeOptions.strategy) {
             case 'alphabetical':
-                // For alphabetical sorting, use our enhanced algorithm that handles special cases
-                sortedResult.sortedProperties = sortAlphabetically(regularProps);
+                sortedRegularProps = sortAlphabetically(regularProps);
                 break;
             case 'grouped':
-                sortedResult = sortByGroups(regularProps, completeOptions, DEFAULT_PROPERTY_GROUPS);
+                sortedRegularProps = sortByGroups(regularProps, completeOptions, DEFAULT_PROPERTY_GROUPS).sortedProperties || [];
                 break;
             case 'concentric':
-                sortedResult = sortByConcentric(regularProps);
+                sortedRegularProps = sortByConcentric(regularProps).sortedProperties || [];
                 break;
             case 'idiomatic':
-                sortedResult = sortByGroups(regularProps, completeOptions, IDIOMATIC_PROPERTY_GROUPS);
+                sortedRegularProps = sortByGroups(regularProps, completeOptions, IDIOMATIC_PROPERTY_GROUPS).sortedProperties || [];
                 break;
             case 'custom':
-                // Custom strategy requires propertyGroups to be provided
                 if (!completeOptions.propertyGroups || !Array.isArray(completeOptions.propertyGroups)) {
                     return {
                         success: false,
                         error: 'Custom strategy requires propertyGroups option'
                     };
                 }
-                sortedResult = sortByGroups(regularProps, completeOptions, completeOptions.propertyGroups);
+                sortedRegularProps = sortByGroups(regularProps, completeOptions, completeOptions.propertyGroups).sortedProperties || [];
                 break;
             default:
-                // Unknown strategy
                 return {
                     success: false,
                     error: `Unknown strategy: ${completeOptions.strategy}`
                 };
         }
 
-        if (!sortedResult.success) {
-            return sortedResult;
-        }
-
         // Process nested rules if applicable
         const context = { nestingLevel: 0, parentType: 'root', isAtRule: false };
-        let sortedProperties = processNestedRules(sortedResult.sortedProperties || [], completeOptions, context);
+        sortedRegularProps = processNestedRules(sortedRegularProps, completeOptions, context);
 
-        // Build the final variable section
-        const allVariables = [];
+        // Build the final result with proper spacing
+        const result: string[] = [];
 
-        // Add CSS custom properties first if present
-        if (sortedCssVariables.length > 0) {
-            allVariables.push(...sortedCssVariables);
+        // Add CSS variables first
+        if (sortedCssVars.length > 0) {
+            result.push(...sortedCssVars);
 
             // Add empty line between CSS and SASS variables if both exist
-            if (sortedSassVariables.length > 0) {
-                allVariables.push('');
+            if (sortedSassVars.length > 0) {
+                result.push('\n');
             }
         }
 
-        // Add SASS variables next if present
-        if (sortedSassVariables.length > 0) {
-            allVariables.push(...sortedSassVariables);
+        // Add SASS variables
+        if (sortedSassVars.length > 0) {
+            result.push(...sortedSassVars);
         }
 
-        // Determine if we need an empty line after the entire variables block
-        // We need it if there are any variables and any regular properties
-        const needsEmptyLine = (allVariables.length > 0 && sortedProperties.length > 0);
-
-        // Remove any empty line at the start of sorted properties to avoid double empty lines
-        if (sortedProperties.length > 0 && sortedProperties[0] === '') {
-            sortedProperties = sortedProperties.slice(1);
+        // IMPORTANT: Force two empty lines between variables and properties
+        // This ensures at least one remains after any processing
+        if ((sortedCssVars.length > 0 || sortedSassVars.length > 0) && sortedRegularProps.length > 0) {
+            result.push('\n');
+            result.push('\n'); // Add an extra one to be sure
         }
 
-        // Combine all sections with variables at the top
-        if (needsEmptyLine) {
-            sortedProperties = [...allVariables, '', ...sortedProperties];
-        } else {
-            sortedProperties = [...allVariables, ...sortedProperties];
+        // Remove any leading empty lines from regular properties
+        while (sortedRegularProps.length > 0 && sortedRegularProps[0] === '') {
+            sortedRegularProps.shift();
         }
+
+        // Add the remaining properties
+        result.push(...sortedRegularProps);
 
         return {
             success: true,
-            sortedProperties
+            sortedProperties: result
         };
-
     } catch (error) {
         return {
             success: false,
