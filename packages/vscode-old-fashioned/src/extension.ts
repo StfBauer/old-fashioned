@@ -54,12 +54,20 @@ export function activate(context: vscode.ExtensionContext) {
         console.log('Attempting to access extension configuration...');
         const sortingOptions = getSortingOptions();
         const formattingOptions = getFormattingOptions();
-        console.log('Retrieved sorting options:', sortingOptions);
+        console.log('Retrieved sorting options:', JSON.stringify(sortingOptions, null, 2));
 
-        // Use our updated sorting implementation from sorting.ts
-        await sortCssProperties(editor);
+        // Give feedback to the user about which strategy is being used
+        vscode.window.showInformationMessage(`Sorting CSS properties using '${sortingOptions.strategy}' strategy`);
+
+        // Pass the sorting options directly to ensure they're not lost
+        await sortCssProperties(editor, sortingOptions, formattingOptions);
+
+        // Format document after sorting
+        console.log('Formatting document after sorting...');
+        await vscode.commands.executeCommand('editor.action.formatDocument');
+        console.log('Document formatting complete');
       } catch (err) {
-        console.error('Error during CSS sorting:', err);
+        console.error('Error during CSS sorting or formatting:', err);
         vscode.window.showErrorMessage(`Error: ${err}`);
       }
     });

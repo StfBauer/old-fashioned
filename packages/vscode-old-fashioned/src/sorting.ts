@@ -8,7 +8,8 @@
 import * as vscode from 'vscode';
 import { sortProperties } from '@old-fashioned/shared';
 import { SortingStrategy, SortingOptions } from '@old-fashioned/shared';
-import { DEFAULT_PROPERTY_GROUPS, IDIOMATIC_PROPERTY_GROUPS } from '@old-fashioned/shared';
+import { CONCENTRIC_PROPERTY_ORDER, IDIOMATIC_PROPERTY_GROUPS } from '@old-fashioned/shared';
+import { addEmptyLinesBetweenGroups } from './formatter';
 import { getSortingOptions, getFormattingOptions } from './utils';
 import { getDocumentSortingOptions, ConfigSource } from './config-loader';
 import * as postcss from 'postcss';
@@ -27,8 +28,14 @@ interface TextProcessingResult {
  * Sort CSS properties in the active editor
  * 
  * @param editor - The active text editor
+ * @param sortingOptions - The sorting options
+ * @param formattingOptions - The formatting options
  */
-export async function sortCssProperties(editor: vscode.TextEditor): Promise<void> {
+export async function sortCssProperties(
+  editor: vscode.TextEditor,
+  sortingOptions?: SortingOptions,
+  formattingOptions?: any
+): Promise<void> {
   // Check if we have a valid editor
   if (!editor) {
     vscode.window.showErrorMessage('No active editor found');
@@ -46,83 +53,45 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
   const { selection, text, isEntireDocument } = getTextToProcess(editor);
 
   try {
-    // Check for project-level configuration first
-    const configWithSource = getDocumentSortingOptions(document);
-    const sortingOptions = configWithSource.options;
+    // Use provided sorting options or get from settings
+    const options = sortingOptions || getSortingOptions();
+    console.log(`Using sorting options:`, JSON.stringify(options, null, 2));
 
-    // Notify user about configuration source (optional)
-    if (configWithSource.source === ConfigSource.PROJECT) {
-      console.log(`Using project-level stylelint configuration from: ${configWithSource.configPath}`);
-    } else {
-      console.log('Using VS Code extension settings for sorting');
-    }
+    // Use provided formatting options or get from settings
+    const formatting = formattingOptions || getFormattingOptions();
 
     // Show progress indicator
     await vscode.window.withProgress({
       location: vscode.ProgressLocation.Notification,
-      title: "Sorting CSS properties...",
+      title: `Sorting CSS properties with ${options.strategy} strategy...`,
       cancellable: false
     }, async () => {
-      // Get formatting configuration, use try/catch to prevent settings UI from opening
-      let formattingOptions;
-
-      try {
-        formattingOptions = getFormattingOptions();
-      } catch (error) {
-        console.error('Error getting formatting options:', error);
-        // Use default formatting values
-        formattingOptions = {
-          alwaysSemicolon: true,
-          colorCase: 'lower' as 'lower' | 'upper',
-          blockIndent: '\t',
-          colorShorthand: true,
-          elementCase: 'lower' as 'lower' | 'upper',
-          leadingZero: false,
-          quotes: 'double' as 'double' | 'single',
-          sortOrderFallback: 'abc' as 'abc' | 'none',
-          spaceBeforeColon: '',
-          spaceAfterColon: ' ',
-          spaceBeforeCombinator: ' ',
-          spaceAfterCombinator: ' ',
-          spaceBetweenDeclarations: '\n',
-          spaceBeforeOpeningBrace: '',
-          spaceAfterOpeningBrace: '\n',
-          spaceAfterSelectorDelimiter: '\n',
-          spaceBeforeSelectorDelimiter: '',
-          spaceBeforeClosingBrace: '\n',
-          stripSpaces: true,
-          tabSize: true,
-          unitlessZero: true,
-          vendorPrefixAlign: true
-        };
-      }
-
-      // Parse and sort the CSS/SCSS - use the project configuration we detected earlier
+      // Parse and sort the CSS/SCSS
       const sortedText = sortCssText(text, document.languageId, {
-        ...configWithSource.options, // Use the project-level config if available
+        ...options,
         // Add formatting options 
-        'always-semicolon': formattingOptions.alwaysSemicolon,
-        'color-case': formattingOptions.colorCase,
-        'block-indent': formattingOptions.blockIndent,
-        'color-shorthand': formattingOptions.colorShorthand,
-        'element-case': formattingOptions.elementCase,
-        'leading-zero': formattingOptions.leadingZero,
-        'quotes': formattingOptions.quotes,
-        'sort-order-fallback': formattingOptions.sortOrderFallback,
-        'space-before-colon': formattingOptions.spaceBeforeColon,
-        'space-after-colon': formattingOptions.spaceAfterColon,
-        'space-before-combinator': formattingOptions.spaceBeforeCombinator,
-        'space-after-combinator': formattingOptions.spaceAfterCombinator,
-        'space-between-declarations': formattingOptions.spaceBetweenDeclarations,
-        'space-before-opening-brace': formattingOptions.spaceBeforeOpeningBrace,
-        'space-after-opening-brace': formattingOptions.spaceAfterOpeningBrace,
-        'space-after-selector-delimiter': formattingOptions.spaceAfterSelectorDelimiter,
-        'space-before-selector-delimiter': formattingOptions.spaceBeforeSelectorDelimiter,
-        'space-before-closing-brace': formattingOptions.spaceBeforeClosingBrace,
-        'strip-spaces': formattingOptions.stripSpaces,
-        'tab-size': formattingOptions.tabSize,
-        'unitless-zero': formattingOptions.unitlessZero,
-        'vendor-prefix-align': formattingOptions.vendorPrefixAlign
+        'always-semicolon': formatting.alwaysSemicolon,
+        'color-case': formatting.colorCase,
+        'block-indent': formatting.blockIndent,
+        'color-shorthand': formatting.colorShorthand,
+        'element-case': formatting.elementCase,
+        'leading-zero': formatting.leadingZero,
+        'quotes': formatting.quotes,
+        'sort-order-fallback': formatting.sortOrderFallback,
+        'space-before-colon': formatting.spaceBeforeColon,
+        'space-after-colon': formatting.spaceAfterColon,
+        'space-before-combinator': formatting.spaceBeforeCombinator,
+        'space-after-combinator': formatting.spaceAfterCombinator,
+        'space-between-declarations': formatting.spaceBetweenDeclarations,
+        'space-before-opening-brace': formatting.spaceBeforeOpeningBrace,
+        'space-after-opening-brace': formatting.spaceAfterOpeningBrace,
+        'space-after-selector-delimiter': formatting.spaceAfterSelectorDelimiter,
+        'space-before-selector-delimiter': formatting.spaceBeforeSelectorDelimiter,
+        'space-before-closing-brace': formatting.spaceBeforeClosingBrace,
+        'strip-spaces': formatting.stripSpaces,
+        'tab-size': formatting.tabSize,
+        'unitless-zero': formatting.unitlessZero,
+        'vendor-prefix-align': formatting.vendorPrefixAlign
       });
 
       if (sortedText !== text) {
@@ -144,7 +113,7 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
 
         // Apply the edit
         await vscode.workspace.applyEdit(edit);
-        vscode.window.showInformationMessage('CSS properties sorted successfully');
+        vscode.window.showInformationMessage(`CSS properties sorted successfully using ${options.strategy} strategy`);
       } else {
         vscode.window.showInformationMessage('CSS properties are already properly sorted');
       }
@@ -164,6 +133,15 @@ export async function sortCssProperties(editor: vscode.TextEditor): Promise<void
  */
 function sortCssText(cssText: string, languageId: string, options: any): string {
   try {
+    // Ensure we have a strategy and it's a valid one
+    const strategy = options.strategy || 'alphabetical';
+    console.log(`Sorting ${languageId} file with strategy: ${strategy}`);
+
+    // For SCSS/SASS, ensure proper module directive ordering at the file level
+    if (languageId === 'scss' || languageId === 'sass') {
+      cssText = ensureSassModuleDirectiveOrder(cssText);
+    }
+
     let root;
     // Choose parser based on language
     if (languageId === 'css') {
@@ -175,50 +153,142 @@ function sortCssText(cssText: string, languageId: string, options: any): string 
 
     // Process each rule
     root.walkRules((rule) => {
-      const declarations = rule.nodes
-        .filter((node: any) => node.type === 'decl')
-        .map((node: any) => node.prop);
+      // Separate different types of nodes within this rule
+      const declarations: any[] = [];
+      const customProps: any[] = [];
+      const sassVars: any[] = [];
+      const mediaAtRules: any[] = [];
+      const includeAtRules: any[] = [];
+      const otherAtRules: any[] = [];
+      const nestedRules: any[] = [];
+      const comments: any[] = [];
+      const otherNodes: any[] = [];
 
+      // Sort the rule's nodes into categories
+      rule.nodes.forEach((node: any) => {
+        if (node.type === 'decl') {
+          // Check if it's a custom property or SASS variable
+          if (typeof node.prop === 'string') {
+            if (node.prop.startsWith('--')) {
+              customProps.push(node);
+            } else if (node.prop.startsWith('$')) {
+              sassVars.push(node);
+            } else {
+              declarations.push(node);
+            }
+          } else {
+            declarations.push(node);
+          }
+        } else if (node.type === 'atrule') {
+          if (node.name === 'media') {
+            mediaAtRules.push(node);
+          } else if (node.name === 'include') {
+            includeAtRules.push(node);
+          } else {
+            otherAtRules.push(node);
+          }
+        } else if (node.type === 'rule') {
+          nestedRules.push(node);
+        } else if (node.type === 'comment') {
+          comments.push(node);
+        } else {
+          otherNodes.push(node);
+        }
+      });
+
+      // Sort declarations if we have any
       if (declarations.length > 0) {
-        const sortingResult = sortProperties(declarations, options);
+        // Extract property names for sorting
+        const declProps = declarations.map((decl: any) => decl.prop);
+
+        // Sort the properties
+        const sortingResult = sortProperties(declProps, options);
 
         if (sortingResult.success && sortingResult.sortedProperties) {
           // Create a map of property index in the sorted array
           const sortedIndexMap = new Map<string, number>();
-          sortingResult.sortedProperties.forEach((prop, index) => {
+          // Fix the forEach call with explicit types
+          sortingResult.sortedProperties.forEach((prop: string, index: number) => {
             if (prop !== '') { // Skip empty line markers
               sortedIndexMap.set(prop, index);
             }
           });
 
-          // Sort the actual declaration nodes
-          const sortedDecls = [...rule.nodes]
-            .filter((node: any) => node.type === 'decl')
-            .sort((a: any, b: any) => {
-              const indexA = sortedIndexMap.get(a.prop) ?? Number.MAX_SAFE_INTEGER;
-              const indexB = sortedIndexMap.get(b.prop) ?? Number.MAX_SAFE_INTEGER;
-              return indexA - indexB;
-            });
-
-          const nonDecls = rule.nodes.filter((node: any) => node.type !== 'decl');
-
-          // Replace with sorted declarations (we'll handle empty lines in the formatter)
-          rule.nodes = [...sortedDecls, ...nonDecls];
+          // Sort the declarations
+          declarations.sort((a: any, b: any) => {
+            const indexA = sortedIndexMap.get(a.prop) ?? Number.MAX_SAFE_INTEGER;
+            const indexB = sortedIndexMap.get(b.prop) ?? Number.MAX_SAFE_INTEGER;
+            return indexA - indexB;
+          });
         }
       }
+
+      // Filter comments to find those that were at the beginning
+      const topComments = comments.filter((comment: any) => {
+        const commentIndex = rule.nodes.indexOf(comment);
+        // Consider a comment as "top" if it appears before any non-comment node
+        for (let i = 0; i < commentIndex; i++) {
+          if (rule.nodes[i].type !== 'comment') {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Filter out top comments from the main comments array
+      const remainingComments = comments.filter((comment: any) => !topComments.includes(comment));
+
+      // Rebuild the rule's nodes in the correct order
+      rule.nodes = [
+        ...topComments,
+        ...customProps,
+        ...sassVars,
+        ...declarations,
+        ...includeAtRules,
+        ...otherAtRules,
+        ...remainingComments,
+        ...nestedRules,
+        ...otherNodes,
+        ...mediaAtRules  // Media queries at the very end
+      ];
     });
 
-    // Stringify the result
-    const result = root.toString();
+    // Make SASS module directives at the top level appear in the correct order
+    if (languageId === 'scss' || languageId === 'sass') {
+      const useNodes: any[] = [];
+      const forwardNodes: any[] = [];
+      const otherNodes: any[] = [];
 
-    // If empty lines between groups is enabled, process the result to add empty lines
-    // between custom properties and SCSS variables
+      root.nodes.forEach((node: any) => {
+        if (node.type === 'atrule') {
+          if (node.name === 'use') {
+            useNodes.push(node);
+          } else if (node.name === 'forward') {
+            forwardNodes.push(node);
+          } else {
+            otherNodes.push(node);
+          }
+        } else {
+          otherNodes.push(node);
+        }
+      });
+
+      if (useNodes.length > 0 || forwardNodes.length > 0) {
+        // Rebuild the root with the correct order
+        root.nodes = [...useNodes, ...forwardNodes, ...otherNodes];
+      }
+    }
+
+    // Stringify the result
+    let result = root.toString();
+
+    // If empty lines between groups is enabled, use the formatter to add them
     if (options.emptyLinesBetweenGroups) {
-      return processDeclarationGroups(result, options.strategy);
+      return addEmptyLinesBetweenGroups(result, strategy);
     }
 
     // Otherwise just add the debug marker
-    return `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${options.strategy}) */\n${result}`;
+    return `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${strategy}) */\n${result}`;
   } catch (error) {
     console.error('Error parsing CSS:', error);
     return cssText; // Return original text if parsing fails
@@ -256,103 +326,74 @@ function getTextToProcess(editor: vscode.TextEditor): TextProcessingResult {
 }
 
 /**
- * Get property groups based on the strategy
- */
-function getPropertyGroups(strategy: string): string[][] | null {
-  switch (strategy) {
-    case 'grouped':
-      return DEFAULT_PROPERTY_GROUPS;
-    case 'idiomatic':
-      return IDIOMATIC_PROPERTY_GROUPS;
-    case 'concentric':
-      // Concentric is not group-based
-      return null;
-    case 'alphabetical':
-      // Alphabetical is not group-based
-      return null;
-    default:
-      return null;
-  }
-}
-
-/**
- * Process the CSS text to add empty lines between different property groups
+ * Ensure SASS module directives (@use and @forward) are in the correct order at the file level
  * 
- * @param cssText - CSS text to process
- * @param strategy - The sorting strategy being used
- * @returns Processed CSS text with empty lines added
+ * @param sassText - The SASS/SCSS text content
+ * @returns Text with module directives properly ordered
  */
-function processDeclarationGroups(cssText: string, strategy: string): string {
-  // First, split the text and clean up any duplicate empty lines
-  const lines = cssText.split('\n');
-  const cleanedLines: string[] = [];
+function ensureSassModuleDirectiveOrder(sassText: string): string {
+  // This is a simple preprocessing step for top-level module directives
+  const lines = sassText.split('\n');
+  const useDirectives: string[] = [];
+  const forwardDirectives: string[] = [];
+  const otherLines: string[] = [];
 
-  // Remove all blank lines first
+  let inComment = false;
+
   for (const line of lines) {
-    if (line.trim() !== '' || cleanedLines.length === 0 || cleanedLines[cleanedLines.length - 1].trim() !== '') {
-      cleanedLines.push(line);
-    }
-  }
+    const trimmedLine = line.trim();
 
-  // Process the cleaned lines to add exactly one blank line between groups
-  const result: string[] = [];
-  let inCustomProps = false;
-  let inScssVars = false;
-
-  for (let i = 0; i < cleanedLines.length; i++) {
-    const line = cleanedLines[i];
-    const trimmed = line.trim();
-
-    // Skip empty lines - we'll add them back as needed
-    if (trimmed === '') {
+    // Track comment blocks
+    if (trimmedLine.startsWith('/*') && !trimmedLine.includes('*/')) {
+      inComment = true;
+      otherLines.push(line);
       continue;
     }
 
-    // Check for rule boundaries
-    const isRuleStart = trimmed.includes('{');
-    const isRuleEnd = trimmed.includes('}');
-
-    if (isRuleStart || isRuleEnd) {
-      // Reset tracking when entering or leaving a rule
-      if (isRuleStart) {
-        inCustomProps = false;
-        inScssVars = false;
+    if (inComment) {
+      if (trimmedLine.includes('*/')) {
+        inComment = false;
       }
-      result.push(line);
+      otherLines.push(line);
       continue;
     }
 
-    // Check for property type
-    const isCustomProp = trimmed.match(/^\s*--[a-zA-Z0-9-_]+\s*:/);
-    const isScssVar = trimmed.match(/^\s*\$[a-zA-Z0-9-_]+\s*:/);
-
-    // Check for transitions between groups
-    if (inCustomProps && !isCustomProp) {
-      // We're leaving custom props
-      result.push('');
-      inCustomProps = false;
+    // Skip single-line comments
+    if (trimmedLine.startsWith('//')) {
+      otherLines.push(line);
+      continue;
     }
 
-    if (!inScssVars && isScssVar) {
-      // We're entering SCSS vars
-      if (result.length > 0 && result[result.length - 1].trim() !== '') {
-        result.push('');
-      }
-      inScssVars = true;
-    } else if (inScssVars && !isScssVar) {
-      // We're leaving SCSS vars
-      result.push('');
-      inScssVars = false;
+    // Only process top-level directives (not indented)
+    if (line.startsWith('@use ')) {
+      useDirectives.push(line);
+    } else if (line.startsWith('@forward ')) {
+      forwardDirectives.push(line);
+    } else {
+      otherLines.push(line);
     }
-
-    // Update state based on current line
-    if (isCustomProp) {
-      inCustomProps = true;
-    }
-
-    // Add the current line
-    result.push(line);
   }
 
-  return `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${strategy}) */\n${result.join('\n')}`;
+  // Only reorder if we found directives to reorder
+  if (useDirectives.length > 0 || forwardDirectives.length > 0) {
+    // Add empty lines between directive groups if needed
+    const result: string[] = [...useDirectives];
+
+    if (useDirectives.length > 0 && forwardDirectives.length > 0) {
+      result.push('');
+    }
+
+    result.push(...forwardDirectives);
+
+    if ((useDirectives.length > 0 || forwardDirectives.length > 0) && otherLines.length > 0) {
+      result.push('');
+    }
+
+    result.push(...otherLines);
+
+    return result.join('\n');
+  }
+
+  // No directives to reorder, return original text
+  return sassText;
 }

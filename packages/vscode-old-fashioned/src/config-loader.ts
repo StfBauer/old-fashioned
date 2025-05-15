@@ -1,467 +1,312 @@
 /**
- * Stylelint Configuration Loader
+ * Configuration loader for Old Fashioned
  * 
- * This module handles loading stylelint configurations from various sources
- * and merging them with the VS Code extension settings.
+ * This module handles loading and processing configuration from various sources
+ * including project-level stylelint configs and VS Code settings.
  */
 
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import * as path from 'path';
+import * as fs from 'fs';
 import { SortingOptions, SortingStrategy } from '@old-fashioned/shared';
+import { getSortingOptions } from './utils';
 
 /**
- * Configuration source for tracking where settings came from
+ * Sources for configuration
  */
 export enum ConfigSource {
-    DEFAULT = 'default',
     VSCODE = 'vscode',
-    PROJECT = 'project'
+    PROJECT = 'project',
+    DEFAULT = 'default'
 }
 
 /**
- * Combined configuration with information about its source
+ * Configuration with source information
  */
 export interface ConfigWithSource {
-    options: SortingOptions;
     source: ConfigSource;
-    configPath?: string;
+    options: SortingOptions;
+    configPath: string | null;
 }
 
 /**
- * Configuration file details
+ * Default sorting options
  */
-export interface ConfigFileDetails {
-    path: string;
-    exists: boolean;
-}
+export const DEFAULT_SORTING_OPTIONS: SortingOptions = {
+    strategy: 'alphabetical', // Changed from 'grouped' to 'alphabetical'
+    emptyLinesBetweenGroups: true,
+    sortPropertiesWithinGroups: true
+};
 
 /**
- * Interface for parsed stylelint configuration
- */
-export interface StylelintConfig {
-    plugins?: string[];
-    rules?: Record<string, any>;
-    extends?: string | string[];
-}
-
-/**
- * Interface for parsed package.json with stylelint config
- */
-export interface PackageJsonWithStylelint {
-    stylelint?: StylelintConfig;
-    [key: string]: any;
-}
-
-/**
- * Interface for oldfashioned plugin rule configuration
- */
-export interface OldfashionedOrderRule {
-    strategy?: SortingStrategy;
-    emptyLinesBetweenGroups?: boolean;
-    sortPropertiesWithinGroups?: boolean;
-    [key: string]: any;
-}
-
-/**
- * Custom error for configuration-related errors
- */
-export class ConfigurationError extends Error {
-    constructor(message: string, public readonly code: string) {
-        super(message);
-        this.name = 'ConfigurationError';
-    }
-}
-
-/**
- * Error codes for configuration errors
- */
-export enum ConfigErrorCode {
-    FILE_NOT_FOUND = 'FILE_NOT_FOUND',
-    INVALID_JSON = 'INVALID_JSON',
-    NO_PLUGIN = 'NO_PLUGIN',
-    INVALID_CONFIG = 'INVALID_CONFIG'
-}
-
-/**
- * Default stylelint configuration file names
- */
-const CONFIG_FILE_NAMES = [
-    '.stylelintrc',
-    '.stylelintrc.json',
-    '.stylelintrc.yml',
-    '.stylelintrc.yaml',
-    '.stylelintrc.js',
-    'stylelint.config.js',
-    'package.json' // Will check for stylelint property inside
-];
-
-/**
- * Find the nearest stylelint configuration file
+ * Find stylelint configuration for a document
  * 
- * @param startDir - The directory to start searching from
- * @returns Details about the found configuration file or null
+ * @param docOrPath - The document or file path to find configuration for
+ * @returns The stylelint configuration and its path, or null if not found
  */
-export function findStylelintConfig(startDir: string): ConfigFileDetails | null {
-    if (!startDir || typeof startDir !== 'string') {
-        console.error('Invalid directory path provided to findStylelintConfig');
-        return null;
-    }
-
+function findStylelintConfig(docOrPath: vscode.TextDocument | string): { config: any; configPath: string | null } {
     try {
-        let currentDir = startDir;
+        let filePath: string;
 
-        // Check for config files in current directory and walk up
-        while (currentDir) {
-            for (const fileName of CONFIG_FILE_NAMES) {
-                const filePath = path.join(currentDir, fileName);
+        // Handle both TextDocument and string input
+        if (typeof docOrPath === 'string') {
+            filePath = docOrPath;
+        } else {
+            // It's a TextDocument
+            filePath = docOrPath.uri.fsPath;
+        }
 
-                if (fs.existsSync(filePath)) {
-                    // For package.json, check if it contains a stylelint property
-                    if (fileName === 'package.json') {
-                        try {
-                            const fileContent = fs.readFileSync(filePath, 'utf8');
-                            if (!fileContent) {
-                                continue;
-                            }
+        if (!filePath) {
+            return { config: null, configPath: null };
+        }
 
-                            const packageJson = JSON.parse(fileContent) as PackageJsonWithStylelint;
-                            if (packageJson.stylelint) {
-                                return { path: filePath, exists: true };
-                            }
-                        } catch (error) {
-                            const errorMessage = error instanceof Error ? error.message : String(error);
-                            console.error(`Error reading package.json at ${filePath}: ${errorMessage}`);
+        // Get directory path from file
+        const dirPath = path.dirname(filePath);
 
-                            // Continue checking other files instead of failing completely
-                            continue;
-                        }
+        // Search for stylelint configuration files
+        const stylelintConfigs = [
+            '.stylelintrc',
+            '.stylelintrc.json',
+            '.stylelintrc.js',
+            '.stylelintrc.yaml',
+            '.stylelintrc.yml',
+            'stylelint.config.js',
+            'package.json'
+        ];
+
+        // Check each configuration file
+        for (const configFile of stylelintConfigs) {
+            const configPath = path.join(dirPath, configFile);
+
+            if (fs.existsSync(configPath)) {
+                if (configFile === 'package.json') {
+                    // For package.json, check if it has a stylelint section
+                    const packageJson = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                    if (packageJson.stylelint) {
+                        return {
+                            config: packageJson.stylelint,
+                            configPath
+                        };
+                    }
+                } else {
+                    // For other config files, load the entire file
+                    let config;
+                    if (configFile.endsWith('.js')) {
+                        // For JS files, we can't require them directly in VS Code extension
+                        // We'd need a more complex solution, but for now we'll skip them
+                        continue;
                     } else {
-                        return { path: filePath, exists: true };
+                        // For JSON and YAML files, read them as JSON
+                        try {
+                            config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                            return {
+                                config,
+                                configPath
+                            };
+                        } catch (parseError) {
+                            console.error(`Error parsing ${configFile}:`, parseError);
+                        }
                     }
                 }
             }
-
-            // Stop if we've reached the filesystem root
-            const parentDir = path.dirname(currentDir);
-            if (parentDir === currentDir) {
-                break;
-            }
-            currentDir = parentDir;
         }
 
-        return null;
+        // If no config found in current directory, try parent directory (up to a limit)
+        const parentDir = path.dirname(dirPath);
+        if (parentDir && parentDir !== dirPath) {
+            return findStylelintConfig(parentDir);
+        }
+
+        // If no config found, return null
+        return { config: null, configPath: null };
     } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(`Error finding stylelint config: ${errorMessage}`);
-        return null;
+        console.error('Error finding stylelint config:', error);
+        return { config: null, configPath: null };
     }
 }
 
 /**
- * Check if a stylelint configuration includes oldfashioned-order plugin
+ * Map configuration value to sorting strategy
  * 
- * @param configPath - Path to the stylelint configuration file
- * @returns True if the configuration includes oldfashioned-order plugin
+ * @param value - Configuration value
+ * @returns Sorting strategy
  */
-export function hasOldfashionedOrderPlugin(configPath: string): boolean {
-    try {
-        // Validate configPath before using it
-        if (!configPath || typeof configPath !== 'string') {
-            console.error('Invalid configuration path provided to hasOldfashionedOrderPlugin');
-            return false;
-        }
+function mapToSortingStrategy(value: string): SortingStrategy {
+    // Convert to lowercase for case-insensitive matching
+    const valueLower = value.toLowerCase();
 
-        if (!fs.existsSync(configPath)) {
-            throw new ConfigurationError(`Configuration file not found: ${configPath}`, ConfigErrorCode.FILE_NOT_FOUND);
-        }
-
-        if (configPath.endsWith('.js')) {
-            // We can't directly require JS files in VS Code extension
-            // This would need a more complex solution involving worker processes
-            // For now, assume it might contain the plugin
-            return true;
-        }
-
-        // For JSON/YAML files or package.json
-        const content = fs.readFileSync(configPath, 'utf8');
-        let config: StylelintConfig | undefined;
-
-        try {
-            if (configPath.endsWith('package.json')) {
-                const packageJson = JSON.parse(content) as PackageJsonWithStylelint;
-                config = packageJson.stylelint;
-            } else if (configPath.endsWith('.json') || configPath.endsWith('.stylelintrc')) {
-                config = JSON.parse(content) as StylelintConfig;
-            } else {
-                // YAML parsing would need a dependency - for now assume it might have the plugin
-                return true;
-            }
-        } catch (parseError) {
-            throw new ConfigurationError(
-                `Failed to parse configuration file: ${configPath}. ${parseError instanceof Error ? parseError.message : ''}`,
-                ConfigErrorCode.INVALID_JSON
-            );
-        }
-
-        if (!config) {
-            return false;
-        }
-
-        // Check for the plugin in the config
-        return (
-            Array.isArray(config.plugins) &&
-            config.plugins.some((plugin) =>
-                typeof plugin === 'string' && (
-                    plugin.includes('oldfashioned') ||
-                    plugin.includes('oldschool-order') ||
-                    plugin.includes('stylelint-oldfashioned-order')
-                )
-            )
-        );
-
-    } catch (error) {
-        // Log the error with detailed information
-        if (error instanceof ConfigurationError) {
-            console.error(`${error.name} (${error.code}): ${error.message}`);
-        } else {
-            console.error('Error checking for oldfashioned-order plugin:', error);
-        }
-        return false;
-    }
-}
-
-/**
- * Safely parse a JSON file with type checking
- * 
- * @param filePath - Path to the JSON file
- * @returns Parsed content with specified type or null on error
- */
-function parseJsonFile<T>(filePath: string): T | null {
-    try {
-        // Validate filePath before using it
-        if (!filePath || typeof filePath !== 'string') {
-            console.error('Invalid file path provided to parseJsonFile');
-            return null;
-        }
-
-        if (!fs.existsSync(filePath)) {
-            throw new ConfigurationError(`File not found: ${filePath}`, ConfigErrorCode.FILE_NOT_FOUND);
-        }
-
-        const content = fs.readFileSync(filePath, 'utf8');
-        if (!content) {
-            return null;
-        }
-
-        try {
-            return JSON.parse(content) as T;
-        } catch (parseError) {
-            throw new ConfigurationError(
-                `Invalid JSON in ${filePath}: ${parseError instanceof Error ? parseError.message : ''}`,
-                ConfigErrorCode.INVALID_JSON
-            );
-        }
-    } catch (error) {
-        if (error instanceof ConfigurationError) {
-            console.error(`${error.name} (${error.code}): ${error.message}`);
-        } else {
-            console.error(`Error parsing file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
-        }
-        return null;
-    }
-}
-
-/**
- * Validate and convert a string to a valid SortingStrategy
- * 
- * @param strategy - The strategy string to validate
- * @returns A valid SortingStrategy
- */
-function validateSortingStrategy(strategy: string | unknown): SortingStrategy {
-    const validStrategies: SortingStrategy[] = ['alphabetical', 'grouped', 'concentric', 'idiomatic', 'custom'];
-
-    if (typeof strategy === 'string' && validStrategies.includes(strategy as SortingStrategy)) {
-        return strategy as SortingStrategy;
-    }
-
-    // Default to 'grouped' if invalid
-    return 'grouped';
-}
-
-/**
- * Interface for VS Code settings
- */
-interface OldFashionedSettings {
-    'sorting.strategy': SortingStrategy;
-    'sorting.emptyLinesBetweenGroups': boolean;
-    'sorting.sortPropertiesWithinGroups': boolean;
-}
-
-/**
- * Get VS Code extension settings with type safety
- * 
- * @param section - The settings section to get
- * @param defaultValue - Default value if setting not found
- * @returns The setting value or default
- */
-function getSetting<T>(
-    section: string,
-    defaultValue: T
-): T {
-    const settings = vscode.workspace.getConfiguration('oldFashioned');
-    if (!settings || typeof settings.get !== 'function') {
-        return defaultValue;
-    }
-
-    const value = settings.get<T>(section, defaultValue);
-    return value;
-}
-
-/**
- * Get the sorting options for the given document, considering project configurations
- * 
- * @param document - The document to get configuration for
- * @returns The sorting options with information about their source
- */
-export function getDocumentSortingOptions(document: vscode.TextDocument): ConfigWithSource {
-    // Get settings using our type-safe utility
-    const strategy = getSetting<string>('sorting.strategy', 'grouped');
-    const emptyLinesBetweenGroups = getSetting<boolean>('sorting.emptyLinesBetweenGroups', true);
-    const sortPropertiesWithinGroups = getSetting<boolean>('sorting.sortPropertiesWithinGroups', true);
-
-    const defaultOptions: SortingOptions = {
-        strategy: validateSortingStrategy(strategy),
-        emptyLinesBetweenGroups,
-        sortPropertiesWithinGroups
+    const valueMap: Record<string, SortingStrategy> = {
+        alphabetical: 'alphabetical',
+        concentric: 'concentric',
+        outsidein: 'concentric',
+        'outside-in': 'concentric',
+        idiomatic: 'idiomatic',
+        smacss: 'idiomatic',
     };
 
-    // If no document or not a file, return default settings
-    if (!document || document.uri.scheme !== 'file') {
+    return valueMap[valueLower] || 'alphabetical'; // Default to 'alphabetical'
+}
+
+/**
+ * Get sorting options from a StyleLint configuration
+ * 
+ * @param stylelintConfig - The StyleLint configuration object
+ * @returns The sorting options and the StyleLint plugin they came from, if any
+ */
+function getSortingOptionsFromStylelint(stylelintConfig: any): { options: SortingOptions; plugin: string | null } {
+    if (!stylelintConfig) {
         return {
-            options: defaultOptions,
-            source: ConfigSource.VSCODE
+            options: DEFAULT_SORTING_OPTIONS,
+            plugin: null
         };
     }
 
-    // Try to find project configuration
-    const docDir = path.dirname(document.uri.fsPath);
-    const configDetails = findStylelintConfig(docDir);
+    // Check for various stylelint plugins that might contain sorting rules
+    // First, check for our own plugin
+    if (
+        stylelintConfig.plugins &&
+        Array.isArray(stylelintConfig.plugins) &&
+        stylelintConfig.plugins.includes('stylelint-oldfashioned-order') &&
+        stylelintConfig.rules &&
+        stylelintConfig.rules['oldfashioned/properties-order']
+    ) {
+        const ruleOptions = stylelintConfig.rules['oldfashioned/properties-order'];
+        let orderConfig = '';
 
-    if (configDetails && configDetails.exists && configDetails.path) {
-        const hasPlugin = hasOldfashionedOrderPlugin(configDetails.path);
-
-        // If project config has the plugin, it takes precedence over VS Code settings
-        if (hasPlugin) {
-            console.log(`Project configuration found at ${configDetails.path} with oldfashioned-order plugin`);            // Parse the stylelint config and extract oldfashioned-order options
-            try {
-                const content = fs.readFileSync(configDetails.path, 'utf8');
-                let projectOptions = { ...defaultOptions };
-
-                // Parse the configuration content based on file type
-                let config: StylelintConfig | undefined;
-                let oldfashionedRuleConfig: OldfashionedOrderRule | undefined;
-
-                if (configDetails.path.endsWith('package.json')) {
-                    try {
-                        const packageJson = JSON.parse(content) as PackageJsonWithStylelint;
-                        config = packageJson.stylelint;
-                    } catch (parseError) {
-                        console.error(`Error parsing package.json: ${parseError instanceof Error ? parseError.message : ''}`);
-                    }
-                } else if (configDetails.path.endsWith('.json') || configDetails.path.endsWith('.stylelintrc')) {
-                    try {
-                        config = JSON.parse(content) as StylelintConfig;
-                    } catch (parseError) {
-                        console.error(`Error parsing .stylelintrc: ${parseError instanceof Error ? parseError.message : ''}`);
-                    }
-                }
-
-                // Extract rule configuration if available
-                if (config?.rules) {
-                    // Check for oldfashioned/order rule
-                    const oldfashionedRule = config.rules['oldfashioned/order'];
-                    if (Array.isArray(oldfashionedRule) && oldfashionedRule.length >= 2) {
-                        // Extract configuration object from rule
-                        oldfashionedRuleConfig = oldfashionedRule[1] as OldfashionedOrderRule;
-                    }
-                }
-
-                // Apply configuration if found
-                if (oldfashionedRuleConfig) {
-                    if (oldfashionedRuleConfig.strategy) {
-                        projectOptions.strategy = validateSortingStrategy(oldfashionedRuleConfig.strategy);
-                    }
-
-                    if (typeof oldfashionedRuleConfig.emptyLinesBetweenGroups === 'boolean') {
-                        projectOptions.emptyLinesBetweenGroups = oldfashionedRuleConfig.emptyLinesBetweenGroups;
-                    }
-
-                    if (typeof oldfashionedRuleConfig.sortPropertiesWithinGroups === 'boolean') {
-                        projectOptions.sortPropertiesWithinGroups = oldfashionedRuleConfig.sortPropertiesWithinGroups;
-                    }
-                }
-                // Fallback to simple string matching if parsing fails
-                else if (content.includes('"strategy"') || content.includes("'strategy'")) {
-                    if (content.includes('"alphabetical"') || content.includes("'alphabetical'")) {
-                        projectOptions.strategy = 'alphabetical';
-                    } else if (content.includes('"concentric"') || content.includes("'concentric'")) {
-                        projectOptions.strategy = 'concentric';
-                    } else if (content.includes('"grouped"') || content.includes("'grouped'")) {
-                        projectOptions.strategy = 'grouped';
-                    }
-
-                    // Extract other options if present
-                    if (content.includes('"emptyLinesBetweenGroups"') || content.includes("'emptyLinesBetweenGroups'")) {
-                        projectOptions.emptyLinesBetweenGroups = !content.includes('false');
-                    }
-
-                    if (content.includes('"sortPropertiesWithinGroups"') || content.includes("'sortPropertiesWithinGroups'")) {
-                        projectOptions.sortPropertiesWithinGroups = !content.includes('false');
-                    }
-                }
-
-                return {
-                    options: projectOptions,
-                    source: ConfigSource.PROJECT,
-                    configPath: configDetails.path
-                };
-            } catch (error) {
-                console.error('Error parsing project configuration:', error);
-                // Fallback to VS Code settings on error
-                return {
-                    options: defaultOptions,
-                    source: ConfigSource.VSCODE
-                };
-            }
+        // Extract order configuration
+        if (Array.isArray(ruleOptions) && ruleOptions.length > 0) {
+            orderConfig = ruleOptions[0];
+        } else if (typeof ruleOptions === 'string') {
+            orderConfig = ruleOptions;
         }
+
+        // Extract the strategy (order) from the rule
+        let strategy: SortingStrategy = 'alphabetical'; // Default strategy
+        if (orderConfig === 'alphabetical') {
+            strategy = 'alphabetical';
+        } else if (orderConfig === 'concentric' || orderConfig === 'outside-in') {
+            strategy = 'concentric';
+        } else if (orderConfig === 'idiomatic' || orderConfig === 'recess') {
+            strategy = 'idiomatic';
+        }
+
+        return {
+            options: {
+                strategy,
+                emptyLinesBetweenGroups: true,
+                sortPropertiesWithinGroups: true
+            },
+            plugin: 'stylelint-oldfashioned-order'
+        };
     }
 
-    // No project config with the plugin found, use VS Code settings
+    // Check for stylelint-order plugin
+    if (
+        stylelintConfig.plugins &&
+        Array.isArray(stylelintConfig.plugins) &&
+        stylelintConfig.plugins.includes('stylelint-order') &&
+        stylelintConfig.rules &&
+        stylelintConfig.rules['order/properties-order']
+    ) {
+        const ruleOptions = stylelintConfig.rules['order/properties-order'];
+        let orderConfig = '';
+
+        // Extract order configuration
+        if (Array.isArray(ruleOptions) && ruleOptions.length > 0 && typeof ruleOptions[0] === 'string') {
+            orderConfig = ruleOptions[0];
+        } else if (typeof ruleOptions === 'string') {
+            orderConfig = ruleOptions;
+        }
+
+        // Map the stylelint-order configuration to our strategy
+        let strategy: SortingStrategy = 'alphabetical'; // Default strategy
+        if (orderConfig === 'alphabetical') {
+            strategy = 'alphabetical';
+        } else if (orderConfig === 'concentric' || orderConfig === 'outside-in' || orderConfig === 'smacss') {
+            strategy = 'concentric';
+        } else if (orderConfig === 'idiomatic' || orderConfig === 'recess') {
+            strategy = 'idiomatic';
+        }
+
+        return {
+            options: {
+                strategy,
+                emptyLinesBetweenGroups: true,
+                sortPropertiesWithinGroups: true
+            },
+            plugin: 'stylelint-order'
+        };
+    }
+
+    // If no valid configuration is found, use default options
     return {
-        options: defaultOptions,
-        source: ConfigSource.VSCODE
+        options: {
+            strategy: 'alphabetical', // Default strategy
+            emptyLinesBetweenGroups: true,
+            sortPropertiesWithinGroups: true
+        },
+        plugin: null
     };
 }
 
-// Example fix for a file loading function:
-function loadConfigFile(filePath: string | undefined): string | null {
-    if (!filePath) {
-        // Handle undefined path gracefully
-        console.error('Config file path is undefined');
-        return null;
-    }
+/**
+ * Get sorting options for a document
+ * 
+ * @param document - The text document
+ * @returns The sorting options and information about how they were determined
+ */
+export function getDocumentSortingOptions(document: vscode.TextDocument): ConfigWithSource {
+    try {
+        // First check if there are VSCode settings defined
+        const config = vscode.workspace.getConfiguration('oldFashioned');
+        const vscodeSortingStrategy = config.get<string>('sorting.strategy');
 
-    // Validate path exists before trying to use it
-    if (fs.existsSync(filePath)) {
-        return fs.readFileSync(filePath, 'utf8');
-    } else {
-        console.warn(`Config file not found: ${filePath}`);
-        return null;
+        if (vscodeSortingStrategy) {
+            // VSCode settings take precedence
+            console.log(`Using sorting strategy from VSCode settings: ${vscodeSortingStrategy}`);
+            return {
+                source: ConfigSource.VSCODE,
+                options: getSortingOptions(),
+                configPath: 'VSCode settings'
+            };
+        }
+
+        // Check for stylelint configuration in the workspace
+        const stylelintResult = findStylelintConfig(document);
+
+        if (stylelintResult && stylelintResult.config) {
+            // Use the stylelint configuration
+            console.log(`Using sorting configuration from stylelint at: ${stylelintResult.configPath}`);
+            const optionsResult = getSortingOptionsFromStylelint(stylelintResult.config);
+
+            return {
+                source: ConfigSource.PROJECT,
+                options: optionsResult.options,
+                configPath: stylelintResult.configPath
+            };
+        }
+
+        // Configure sorting options to match stylelint-order configuration
+        const options: SortingOptions = {
+            strategy: 'alphabetical', // Default strategy
+            emptyLinesBetweenGroups: true,
+            sortPropertiesWithinGroups: true
+        };
+
+        // If no configuration was found, use defaults
+        return {
+            source: ConfigSource.DEFAULT,
+            options,
+            configPath: null
+        };
+    } catch (error) {
+        console.error('Error getting document sorting options:', error instanceof Error ? error.message : String(error));
+
+        // Fallback to default options
+        return {
+            source: ConfigSource.DEFAULT,
+            options: DEFAULT_SORTING_OPTIONS,
+            configPath: null
+        };
     }
 }
-
-// Look for patterns like:
-// - Loading configuration without checking if paths are defined
-// - Using path.resolve or path.join with potentially undefined arguments
-// - Reading files using fs.readFileSync without validation

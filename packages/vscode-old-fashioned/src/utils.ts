@@ -52,17 +52,33 @@ export function getParseSyntax(languageId: string): string {
 }
 
 /**
- * Gets sorting options from VS Code configuration
+ * Get the sorting options from VSCode settings
  * 
- * @returns The sorting options from VS Code settings
+ * @returns The sorting options
  */
 export function getSortingOptions(): SortingOptions {
   const config = vscode.workspace.getConfiguration('oldFashioned');
 
+  // Get strategy with explicit path and detailed logging
+  const strategyRaw = config.get<string>('sorting.strategy');
+  console.log('Raw strategy from config:', strategyRaw);
+
+  // Valid strategies now exclude 'grouped' and 'custom'
+  const validStrategies = ['alphabetical', 'concentric', 'idiomatic'];
+  const validStrategy = validStrategies.includes(strategyRaw || '')
+    ? strategyRaw
+    : 'alphabetical'; // Default to alphabetical if not valid
+
+  console.log(`Using sorting strategy: ${validStrategy}`);
+
+  // Get other options
+  const emptyLinesBetweenGroups = config.get<boolean>('sorting.emptyLinesBetweenGroups', true);
+  const sortPropertiesWithinGroups = config.get<boolean>('sorting.sortPropertiesWithinGroups', true);
+
   return {
-    strategy: config.get<SortingStrategy>('sorting.strategy', 'grouped'),
-    emptyLinesBetweenGroups: config.get<boolean>('sorting.emptyLinesBetweenGroups', true),
-    sortPropertiesWithinGroups: config.get<boolean>('sorting.sortPropertiesWithinGroups', true)
+    strategy: validStrategy as SortingStrategy,
+    emptyLinesBetweenGroups,
+    sortPropertiesWithinGroups
   };
 }
 

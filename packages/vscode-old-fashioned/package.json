@@ -37,28 +37,37 @@
       }
     ],
     "configuration": {
-      "title": "Old Fashioned",
+      "title": "Old Fashioned CSS Sorter",
       "properties": {
-        "old-fashioned.sorting.strategy": {
+        "oldFashioned.sorting.strategy": {
           "type": "string",
-          "default": "alphabetical",
           "enum": [
             "alphabetical",
             "concentric",
-            "idiomatic",
-            "custom"
+            "idiomatic"
           ],
-          "description": "The sorting strategy to use for CSS properties"
+          "enumDescriptions": [
+            "Sort properties alphabetically (A-Z)",
+            "Sort from outside to inside (position → text → misc)",
+            "Sort according to idiomatic CSS standards"
+          ],
+          "default": "alphabetical",
+          "description": "The strategy to use for sorting CSS properties"
         },
-        "old-fashioned.sorting.emptyLinesBetweenGroups": {
-          "type": "boolean",
-          "default": false,
-          "description": "Whether to add empty lines between property groups"
-        },
-        "old-fashioned.sorting.sortPropertiesWithinGroups": {
+        "oldFashioned.sorting.emptyLinesBetweenGroups": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to sort properties alphabetically within groups"
+          "description": "Add empty lines between property groups"
+        },
+        "oldFashioned.sorting.sortPropertiesWithinGroups": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sort properties alphabetically within each group"
+        },
+        "oldFashioned.formatting.alwaysSemicolon": {
+          "type": "boolean",
+          "default": true,
+          "description": "Always add a semicolon after property declarations."
         }
       }
     }
