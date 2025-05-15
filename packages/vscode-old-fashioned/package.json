@@ -1,13 +1,33 @@
 {
-  "name": "old-fashioned",
+  "name": "vscode-old-fashioned",
   "displayName": "Old Fashioned CSS Property Sorter",
   "version": "0.0.1",
   "description": "A CSS property sorter with multiple sorting strategies",
   "publisher": "n8design",
-  "author": {
-    "name": "n8design"
-  },
+  "author": "Stefan Bauer (@stfbauer)",
   "license": "MIT",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/stfbauer"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/n8design"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n8design/old-fashioned.git"
+  },
+  "homepage": "https://github.com/n8design/old-fashioned/tree/main/packages/vscode-old-fashioned",
+  "bugs": {
+    "url": "https://github.com/n8design/old-fashioned/issues"
+  },
+  "galleryBanner": {
+    "color": "#1f1f1f",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -24,16 +44,14 @@
     "less"
   ],
   "activationEvents": [
-    "onLanguage:css",
-    "onLanguage:scss",
-    "onLanguage:less"
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "old-fashioned.sortProperties",
-        "title": "Old Fashioned: Sort CSS Properties"
+        "command": "vscode-old-fashioned.hello",
+        "title": "Hello Old Fashioned"
       }
     ],
     "configuration": {
@@ -63,25 +81,30 @@
       }
     }
   },
-  "scripts": {
-    "package": "vsce package",
-    "publish": "vsce publish"
-  },
   "dependencies": {
-    "stylelint-oldfashioned-order": "^0.0.1",
+    "ajv": "^8.12.0",
     "postcss": "^8.4.24",
     "postcss-scss": "^4.0.9",
     "stylelint": "^16.0.0",
-    "stylelint-order": "^6.0.4",
-    "stylelint-scss": "^6.2.1"
+    "vscode": "^1.87.0"
   },
   "devDependencies": {
-    "@vscode/vsce": "^2.22.0",
+    "@types/estree": "^1.0.7",
+    "@types/json-schema": "^7.0.15",
     "@types/node": "^18.0.0",
-    "@types/vscode": "^1.60.0"
+    "@types/vscode": "^1.100.0",
+    "@vscode/vsce": "^2.22.0",
+    "esbuild": "^0.20.0",
+    "postcss-scss": "^4.0.9"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/n8design/old-fashioned"
-  }
+  "directories": {
+    "test": "test"
+  },
+  "type": "commonjs",
+  "types": "./dist/extension.d.ts",
+  "bundleDependencies": [
+    "postcss",
+    "postcss-scss",
+    "stylelint"
+  ]
 }

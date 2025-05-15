@@ -5,9 +5,12 @@
  */
 
 import * as vscode from 'vscode';
-import * as stylelint from 'stylelint';
 import * as path from 'path';
 import { getParseSyntax, createDiagnosticFromWarning, isStyleDocument, getSortingOptions, getFormattingOptions } from './utils';
+
+const stylelintOldfashionedOrder = require('stylelint-oldfashioned-order');
+// Use CommonJS require for stylelint to access the lint function
+const stylelint = require('stylelint');
 
 /**
  * Interface for Stylelint warning object
@@ -50,6 +53,7 @@ const diagnosticsCollection = vscode.languages.createDiagnosticCollection('old-f
  * @returns Array of disposable resources
  */
 export function activateDiagnostics(context: vscode.ExtensionContext): vscode.Disposable[] {
+  console.log('[OFLOG:diagnostics.ts] activateDiagnostics called. Extension Path from context:', context.extensionPath);
   const subscriptions: vscode.Disposable[] = [];
 
   // Register event handlers
@@ -97,11 +101,15 @@ export function activateDiagnostics(context: vscode.ExtensionContext): vscode.Di
   });
 
   // Process already open documents
-  vscode.workspace.textDocuments.forEach(document => {
-    if (isStyleDocument(document)) {
-      updateDiagnostics(document);
-    }
-  });
+  if (Array.isArray(vscode.workspace.textDocuments)) {
+    vscode.workspace.textDocuments.forEach(document => {
+      if (isStyleDocument(document)) {
+        updateDiagnostics(document);
+      }
+    });
+  } else {
+    console.warn('[OFLOG:diagnostics.ts] vscode.workspace.textDocuments is not an array:', vscode.workspace.textDocuments);
+  }
 
   // Map to store timers for document changes
   const changeTimers = new Map<string, NodeJS.Timeout>();
@@ -182,7 +190,8 @@ async function updateDiagnostics(document: vscode.TextDocument): Promise<void> {
  * @param text - The text to lint
  * @returns The Stylelint linter result
  */
-async function lintDocument(document: vscode.TextDocument, text: string): Promise<stylelint.LinterResult> {
+async function lintDocument(document: vscode.TextDocument, text: string): Promise<any> {
+  console.log('[OFLOG:diagnostics.ts] lintDocument called for:', document.uri.fsPath);
   // Get the document syntax (css, scss, sass)
   const syntax = getParseSyntax(document.languageId);
 
@@ -228,30 +237,32 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
 
   // Get the extension path for configBasedir
   const extensionPath = vscode.extensions.getExtension('n8design.vscode-old-fashioned')?.extensionPath || __dirname;
+  console.log('[OFLOG:diagnostics.ts] lintDocument - initial extensionPath:', extensionPath);
   // For development environments, try to use the local workspace path
   const workspaceFolders = vscode.workspace.workspaceFolders;
   const isDevelopment = extensionPath.includes('old-fashioned/packages/vscode-old-fashioned');
 
   // Determine the best configBasedir to find the plugin
   let configBasedir = extensionPath;
+  console.log('[OFLOG:diagnostics.ts] lintDocument - initial configBasedir:', configBasedir);
 
   // In development, we want to use the workspace root
   if (isDevelopment && workspaceFolders && workspaceFolders.length > 0) {
     // Go up two directories from extension path to get to workspace root
-    configBasedir = path.resolve(extensionPath, '../..');
-    console.log('Using development workspace path:', configBasedir);
+    configBasedir = path.resolve(extensionPath, '../../');
+    console.log('[OFLOG:diagnostics.ts] lintDocument - Using development workspace path for configBasedir:', configBasedir);
+  } else {
+    console.log('[OFLOG:diagnostics.ts] lintDocument - Using production extensionPath for configBasedir:', configBasedir);
   }
 
   try {
     console.log('Running stylelint with configBasedir:', configBasedir);
-
-    // In development, the plugin might be in the workspace node_modules
-    // In production, the plugin should be bundled with the extension
+    // Use the plugin directly, not just by name
     return stylelint.lint({
       code: text,
       codeFilename: document.fileName,
       config: {
-        plugins: ['stylelint-oldfashioned-order'],
+        plugins: [stylelintOldfashionedOrder],
         rules: {
           'plugin/oldfashioned-order': [
             true,
@@ -260,7 +271,6 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
         },
         customSyntax
       },
-      // This is the key setting that helps stylelint locate the plugin
       configBasedir: configBasedir
     });
   } catch (err) {

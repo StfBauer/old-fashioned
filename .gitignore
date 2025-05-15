@@ -41,6 +41,12 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# TypeScript
+*.tsbuildinfo
+
+# VS Code Extensions
+*.vsix
+
 .nx/cache
 .nx/workspace-data
 

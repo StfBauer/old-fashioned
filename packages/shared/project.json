@@ -22,10 +22,14 @@
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "command": "eslint src/**/*.ts",
-        "cwd": "packages/shared"
+        "lintFilePatterns": [
+          "packages/shared/src/**/*.ts"
+        ]
       }
     }
   },

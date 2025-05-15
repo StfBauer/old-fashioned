@@ -1,0 +1,5 @@
+{
+    "name": "temp-old-fashioned-packages-marker",
+    "private": true,
+    "description": "Temporary file to diagnose an ENOENT error during extension loading."
+}

@@ -2,17 +2,35 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Extension (Direct Folder Open)",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--disable-extensions",
+                "${workspaceFolder}"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ],
+            "preLaunchTask": "npm: build",
+            "trace": true,
+            "cwd": "${workspaceFolder}"
+        },
+        {
             "name": "Extension",
             "type": "extensionHost",
             "request": "launch",
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-old-fashioned",
-                "${workspaceFolder}/packages/vscode-old-fashioned/test/"
+                "--disable-extensions"
             ],
             "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
+                "${workspaceFolder}/packages/vscode-old-fashioned/dist/**/*.js"
             ],
-            "preLaunchTask": "npm: build"
+            "preLaunchTask": "shell: build-extension",
+            "trace": true,
+            "cwd": "${workspaceFolder}/packages/vscode-old-fashioned"
         }
     ]
 }

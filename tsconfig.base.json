@@ -14,8 +14,8 @@
       "@old-fashioned/shared": [
         "packages/shared/dist"
       ],
-      "@old-fashioned/stylelint-oldschool-order": [
-        "packages/stylelint-oldschool-order/src"
+      "@old-fashioned/stylelint-oldfashioned-order": [
+        "packages/stylelint-oldfashioned-order/src"
       ],
       "@old-fashioned/vscode-old-fashioned": [
         "packages/vscode-old-fashioned/src"

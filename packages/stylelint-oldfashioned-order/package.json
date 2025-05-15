@@ -40,8 +40,8 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "test": "vitest run",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node14 --outfile=dist/src/index.js --format=cjs",
+    "test": "vitest run tests/",
     "prepare-publish": "node ../../tools/scripts/bundle-shared-into-stylelint.js",
     "prepublishOnly": "echo 'Skipping build in dist folder - already built by Nx'"
   },
@@ -49,6 +49,9 @@
     "postcss": "^8.4.24",
     "stylelint": "^16.0.0",
     "stylelint-order": "^6.0.4"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.5"
   },
   "peerDependencies": {
     "stylelint": "^14.0.0 || ^15.0.0 || ^16.0.0"

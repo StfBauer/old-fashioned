@@ -103,40 +103,61 @@ const CONFIG_FILE_NAMES = [
  * @returns Details about the found configuration file or null
  */
 export function findStylelintConfig(startDir: string): ConfigFileDetails | null {
-    if (!startDir || typeof startDir !== 'string') {
-        console.error('Invalid directory path provided to findStylelintConfig');
-        return null;
-    }
-
     try {
+        if (!startDir || typeof startDir !== 'string' || !path.isAbsolute(startDir)) {
+            console.error(`[OFLOG] Invalid or non-absolute startDir provided to findStylelintConfig: '${startDir}'`);
+            return null;
+        }
+
         let currentDir = startDir;
+        console.log(`[OFLOG] findStylelintConfig: Starting search from dir: ${currentDir}`);
 
         // Check for config files in current directory and walk up
         while (currentDir) {
+            console.log(`[OFLOG] findStylelintConfig: Checking directory: ${currentDir}`);
             for (const fileName of CONFIG_FILE_NAMES) {
                 const filePath = path.join(currentDir, fileName);
+                console.log(`[OFLOG] findStylelintConfig: Checking for file: ${filePath}`);
 
                 if (fs.existsSync(filePath)) {
-                    // For package.json, check if it contains a stylelint property
+                    console.log(`[OFLOG] findStylelintConfig: Found existing file/dir: ${filePath}`);
                     if (fileName === 'package.json') {
+                        console.log(`[OFLOG] findStylelintConfig: Handling package.json: ${filePath}`);
                         try {
+                            // Ensure it's a file before attempting to read
+                            const stats = fs.statSync(filePath);
+                            if (!stats.isFile()) {
+                                console.warn(`[OFLOG] findStylelintConfig: Skipping non-file entry found at ${filePath} while looking for package.json`);
+                                continue;
+                            }
+
                             const fileContent = fs.readFileSync(filePath, 'utf8');
                             if (!fileContent) {
+                                console.warn(`[OFLOG] findStylelintConfig: Empty package.json found at ${filePath}`);
                                 continue;
                             }
 
                             const packageJson = JSON.parse(fileContent) as PackageJsonWithStylelint;
                             if (packageJson.stylelint) {
+                                console.log(`[OFLOG] findStylelintConfig: Found stylelint config in package.json: ${filePath}`);
                                 return { path: filePath, exists: true };
                             }
+                            console.log(`[OFLOG] findStylelintConfig: package.json at ${filePath} does not contain a stylelint property.`);
+                            // If package.json exists and is a file, but no stylelint property, continue searching.
                         } catch (error) {
-                            const errorMessage = error instanceof Error ? error.message : String(error);
-                            console.error(`Error reading package.json at ${filePath}: ${errorMessage}`);
-
-                            // Continue checking other files instead of failing completely
+                            const e = error as Error & NodeJS.ErrnoException;
+                            // Log detailed error information, including if it's ENOENT from statSync or readFileSync
+                            if (e.code === 'ENOENT') {
+                                console.warn(`ENOENT for ${filePath} during statSync/readFileSync for package.json. Path was: ${filePath}. This might indicate a race condition or an issue with fs.existsSync returning true for a non-existent file.`);
+                            } else {
+                                console.error(`Error processing package.json at ${filePath}. Name: ${e.name}, Code: ${e.code || 'N/A'}, Message: ${e.message}. Stack: ${e.stack || 'N/A'}`);
+                            }
+                            // Continue checking other files/directories instead of failing completely
                             continue;
                         }
                     } else {
+                        // For other config file types, fs.existsSync is usually sufficient
+                        // Potentially add fs.statSync().isFile() here too if problems persist with other file types
                         return { path: filePath, exists: true };
                     }
                 }
@@ -145,15 +166,16 @@ export function findStylelintConfig(startDir: string): ConfigFileDetails | null 
             // Stop if we've reached the filesystem root
             const parentDir = path.dirname(currentDir);
             if (parentDir === currentDir) {
+                console.log(`[OFLOG] findStylelintConfig: Reached filesystem root or parent is same as current. Stopping search.`);
                 break;
             }
             currentDir = parentDir;
         }
-
+        console.log(`[OFLOG] findStylelintConfig: No config file found after walking up from ${startDir}`);
         return null;
     } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(`Error finding stylelint config: ${errorMessage}`);
+        const e = error as Error;
+        console.error(`[OFLOG] Critical error in findStylelintConfig starting from '${startDir}': Name: ${e.name}, Message: ${e.message}. Stack: ${e.stack || 'N/A'}`);
         return null;
     }
 }
@@ -264,7 +286,7 @@ function parseJsonFile<T>(filePath: string): T | null {
  * @returns A valid SortingStrategy
  */
 function validateSortingStrategy(strategy: string | unknown): SortingStrategy {
-    const validStrategies: SortingStrategy[] = ['alphabetical', 'grouped', 'concentric', 'idiomatic', 'custom'];
+    const validStrategies = ['alphabetical', 'grouped', 'concentric', 'custom'] as SortingStrategy[];
 
     if (typeof strategy === 'string' && validStrategies.includes(strategy as SortingStrategy)) {
         return strategy as SortingStrategy;
@@ -294,11 +316,11 @@ function getSetting<T>(
     section: string,
     defaultValue: T
 ): T {
+    // Use the real VS Code API
     const settings = vscode.workspace.getConfiguration('oldFashioned');
     if (!settings || typeof settings.get !== 'function') {
         return defaultValue;
     }
-
     const value = settings.get<T>(section, defaultValue);
     return value;
 }

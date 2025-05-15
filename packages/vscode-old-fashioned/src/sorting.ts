@@ -1,19 +1,23 @@
 /**
  * CSS Property Sorting Implementation
- * 
- * This module handles the actual sorting of CSS properties in the editor
- * using strategies from the shared package.
  */
 
 import * as vscode from 'vscode';
-import { sortProperties } from '@old-fashioned/shared';
-import { SortingStrategy } from '@old-fashioned/shared';
-import { DEFAULT_PROPERTY_GROUPS, IDIOMATIC_PROPERTY_GROUPS } from '@old-fashioned/shared';
+// Replace shared imports with local imports
+import {
+  sortProperties,
+  SortingStrategy,
+  DEFAULT_PROPERTY_GROUPS,
+  IDIOMATIC_PROPERTY_GROUPS
+} from './shared-imports';
 import { addEmptyLinesBetweenGroups } from './formatter';
 import { getSortingOptions, getFormattingOptions } from './utils';
 import { getDocumentSortingOptions, ConfigSource } from './config-loader';
 import * as postcss from 'postcss';
-import * as postcssScss from 'postcss-scss';
+
+// Import without type checking - simplest solution
+// @ts-ignore - Ignore the lack of type definitions
+const postcssScss = require('postcss-scss');
 
 /**
  * Text processing result interface
@@ -171,11 +175,11 @@ function sortCssText(cssText: string, languageId: string, options: any): string 
       root = postcss.parse(cssText);
     } else {
       // For SCSS/SASS, use the SCSS parser
-      root = postcssScss.parse(cssText);
+      root = postcssScss(cssText); // Changed from postcssScss.parse to postcssScss()
     }
 
     // Process each rule
-    root.walkRules((rule) => {
+    root.walkRules((rule: postcss.Rule) => {
       const declarations = rule.nodes
         .filter((node: any) => node.type === 'decl')
         .map((node: any) => node.prop);

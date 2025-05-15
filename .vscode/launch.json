@@ -6,14 +6,17 @@
             "type": "extensionHost",
             "request": "launch",
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-old-fashioned",
+                "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-old-fashioned/",
                 "${workspaceFolder}/packages/vscode-old-fashioned/test/",
-                "--new-window"
+                "--profile",
+                "Clean Test Profile"
             ],
             "outFiles": [
                 "${workspaceFolder}/packages/vscode-old-fashioned/dist/**/*.js"
             ],
-            "preLaunchTask": "build-extension"
+            "preLaunchTask": "build-extension",
+            "trace": true,
+            "cwd": "${workspaceFolder}" // Explicitly set CWD to the extension's folder
         }
     ]
 }

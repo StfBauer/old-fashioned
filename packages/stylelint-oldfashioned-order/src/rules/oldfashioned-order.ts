@@ -5,11 +5,8 @@ import { Root, Result, Node } from 'postcss';
 // Define rule name according to stylelint conventions
 export const ruleName = 'oldfashioned-order/properties-order';
 
-// Get the appropriate utils based on stylelint version (compatible with v14-16)
-const utils = 'utils' in stylelint ? stylelint.utils : require('stylelint/lib/utils');
-
 // Create rule messages
-export const messages = utils.ruleMessages(ruleName, {
+export const messages = stylelint.utils.ruleMessages(ruleName, {
   expected: (unfixed: string, fixed: string) => `Expected property order to be: ${fixed}. Current order: ${unfixed}`
 });
 
@@ -25,21 +22,52 @@ function rule(primaryOption: string, secondaryOptions?: Record<string, any>) {
   };
 
   return (root: Root, result: Result) => {
-    // Validate options
-    const validOptions = utils.validateOptions(result, ruleName, {
+    // Validate primary option
+    const primaryValid = stylelint.utils.validateOptions(result, ruleName, {
       actual: primaryOption,
       possible: ['alphabetical', 'concentric', 'idiomatic', 'custom']
-    }, {
-      actual: secondaryOptions,
-      possible: {
-        emptyLinesBetweenGroups: [true, false],
-        sortPropertiesWithinGroups: [true, false]
-      },
-      optional: true
+      // primaryOption is not optional
     });
 
-    if (!validOptions) {
-      return;
+    if (!primaryValid) {
+      return; // Stop if primary option is invalid
+    }
+
+    // Validate secondary options if they are provided
+    // The rule signature makes secondaryOptions optional (secondaryOptions?: Record<string, any>)
+    // So, we only validate them if they exist.
+    let secondaryValid = true; // Assume valid if not provided
+    if (secondaryOptions !== undefined) {
+      secondaryValid = stylelint.utils.validateOptions(result, ruleName, {
+        actual: secondaryOptions,
+        possible: function (val: Record<string, any>): boolean { // val will not be undefined here due to the check above
+          if (typeof val !== 'object' || val === null) {
+            return false; // Should be an object if provided
+          }
+          // Validate specific properties if they exist
+          if (val.hasOwnProperty('emptyLinesBetweenGroups') && typeof val.emptyLinesBetweenGroups !== 'boolean') {
+            return false;
+          }
+          if (val.hasOwnProperty('sortPropertiesWithinGroups') && typeof val.sortPropertiesWithinGroups !== 'boolean') {
+            return false;
+          }
+          // Ensure no other unexpected properties exist in secondaryOptions
+          const allowedKeys = ['emptyLinesBetweenGroups', 'sortPropertiesWithinGroups'];
+          for (const key in val) {
+            if (Object.prototype.hasOwnProperty.call(val, key)) {
+              if (!allowedKeys.includes(key)) {
+                return false; // Disallow unknown properties
+              }
+            }
+          }
+          return true;
+        },
+        optional: true // This means secondaryOptions as a whole is optional
+      });
+    }
+
+    if (!secondaryValid) {
+      return; // Stop if secondary options are invalid
     }
 
     // For testing purposes, simulated implementation

@@ -5,82 +5,26 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "outputPath": "dist/packages/stylelint-oldfashioned-order",
-        "main": "packages/stylelint-oldfashioned-order/src/index.ts",
-        "tsConfig": "packages/stylelint-oldfashioned-order/tsconfig.json",
-        "assets": [
-          "packages/stylelint-oldfashioned-order/*.md"
-        ]
+        "command": "node ../../tools/esbuild/build.js --project=stylelint-oldfashioned-order",
+        "cwd": "packages/stylelint-oldfashioned-order"
       },
-      "dependsOn": [
-        {
-          "projects": [
-            "shared"
-          ],
-          "target": "build"
-        }
-      ]
-    },
-    "bundle-shared": {
-      "executor": "nx:run-commands",
       "outputs": [
-        "{workspaceRoot}/packages/stylelint-oldfashioned-order/dist"
-      ],
-      "options": {
-        "commands": [
-          "mkdir -p packages/stylelint-oldfashioned-order/dist",
-          "node tools/scripts/bundle-shared-into-stylelint.js"
-        ],
-        "parallel": false
-      },
-      "dependsOn": [
-        {
-          "projects": [
-            "shared",
-            "stylelint-oldfashioned-order"
-          ],
-          "target": "build"
-        }
-      ]
-    },
-    "package": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "npm pack",
-        "cwd": "dist/packages/stylelint-oldfashioned-order"
-      }
-    },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          "nx build stylelint-oldfashioned-order",
-          "nx run stylelint-oldfashioned-order:bundle-shared",
-          "cd packages/stylelint-oldfashioned-order/dist && npm publish"
-        ],
-        "parallel": false
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
+        "{projectRoot}/dist"
       ]
     },
     "test": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/vite:test",
       "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
+        "{projectRoot}/coverage"
       ],
       "options": {
-        "command": "vitest run",
-        "cwd": "packages/stylelint-oldfashioned-order"
+        "passWithNoTests": true
       }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
     }
   },
   "tags": []

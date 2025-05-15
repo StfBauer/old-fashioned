@@ -7,27 +7,22 @@
         "build": {
             "executor": "nx:run-commands",
             "options": {
-                "commands": [
-                    "npm run build"
-                ],
+                "command": "node esbuild.config.js",
                 "cwd": "packages/vscode-old-fashioned"
             },
-            "dependsOn": [
-                {
-                    "projects": [
-                        "stylelint-oldfashioned-order",
-                        "shared"
-                    ],
-                    "target": "build"
-                }
+            "outputs": [
+                "{projectRoot}/dist"
             ]
         },
         "package": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "npx @vscode/vsce package",
+                "command": "vsce package --out vscode-old-fashioned-$(jq -r .version packages/vscode-old-fashioned/package.json).vsix",
                 "cwd": "packages/vscode-old-fashioned"
             },
+            "outputs": [
+                "{workspaceRoot}/packages/vscode-old-fashioned/vscode-old-fashioned-*.vsix"
+            ],
             "dependsOn": [
                 {
                     "target": "build",
@@ -35,14 +30,50 @@
                 }
             ]
         },
-        "test": {
-            "executor": "@nrwl/vite:test",
-            "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-            ],
+        "vsce-publish": {
+            "executor": "nx:run-commands",
             "options": {
-                "passWithNoTests": true,
-                "config": "vitest.config.ts"
+                "command": "vsce publish vscode-old-fashioned-*.vsix --pat ${VSCE_PAT}",
+                "cwd": "packages/vscode-old-fashioned"
+            },
+            "dependsOn": [
+                "package"
+            ]
+        },
+        "nx-release-publish": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "nx run vscode-old-fashioned:vsce-publish"
+            }
+        },
+        "copy-test-samples": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "rm -rf packages/vscode-old-fashioned/temp",
+                    "mkdir -p packages/vscode-old-fashioned/temp",
+                    "cp -r packages/vscode-old-fashioned/test/samples/* packages/vscode-old-fashioned/temp/"
+                ],
+                "parallel": false
+            },
+            "outputs": [
+                "{workspaceRoot}/packages/vscode-old-fashioned/temp"
+            ]
+        },
+        "test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "vitest run",
+                "cwd": "packages/vscode-old-fashioned"
+            },
+            "dependsOn": [
+                "copy-test-samples"
+            ]
+        },
+        "link-dev": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "VSCODE_EXT_DIR=''; \\\nif [[ \\\"$OSTYPE\\\" == \\\"darwin\\\"* ]]; then \\\n    VSCODE_EXT_DIR=\\\"$HOME/.vscode/extensions\\\"; \\\nelif [[ \\\"$OSTYPE\\\" == \\\"linux-gnu\\\"* ]]; then \\\n    VSCODE_EXT_DIR=\\\"$HOME/.vscode/extensions\\\"; \\\nelif [[ \\\"$OSTYPE\\\" == \\\"msys\\\"* || \\\"$OSTYPE\\\" == \\\"win32\\\"* ]]; then \\\n    VSCODE_EXT_DIR=\\\"$APPDATA/Code/User/extensions\\\"; \\\nelse \\\n    echo \\\"Unsupported OSTYPE: $OSTYPE\\\"; \\\n    exit 1; \\\nfi; \\\nEXTENSION_SRC_DIR='packages/vscode-old-fashioned'; \\\nVERSION=$(jq -r .version packages/vscode-old-fashioned/package.json); \\\nEXTENSION_NAME_WITH_VERSION=\\\"n8design.vscode-old-fashioned-$VERSION\\\"; \\\nEXTENSION_SYMLINK_PATH=\\\"$VSCODE_EXT_DIR/$EXTENSION_NAME_WITH_VERSION\\\"; \\\nif [ -e \\\"$EXTENSION_SYMLINK_PATH\\\" ]; then \\\n    echo \\\"Removing existing extension at $EXTENSION_SYMLINK_PATH...\\\"; \\\n    rm -rf \\\"$EXTENSION_SYMLINK_PATH\\\"; \\\nfi; \\\necho \\\"Creating symlink from $PWD/$EXTENSION_SRC_DIR to $EXTENSION_SYMLINK_PATH\\\"; \\\nln -s \\\"$PWD/$EXTENSION_SRC_DIR\\\" \\\"$EXTENSION_SYMLINK_PATH\\\"; \\\necho \\\"Extension linked successfully. Restart VS Code to see the extension.\\\""
             }
         }
     },

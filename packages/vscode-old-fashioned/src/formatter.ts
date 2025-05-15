@@ -7,14 +7,14 @@ import * as vscode from 'vscode';
 
 // Create mapping from property name to group index for different strategies
 const groupedPropertyMap = new Map<string, number>();
-DEFAULT_PROPERTY_GROUPS.forEach((group, index) => {
+DEFAULT_PROPERTY_GROUPS?.forEach((group, index) => {
     group.forEach(prop => {
         groupedPropertyMap.set(prop.toLowerCase().trim(), index);
     });
 });
 
 const idiomaticPropertyMap = new Map<string, number>();
-IDIOMATIC_PROPERTY_GROUPS.forEach((group, index) => {
+IDIOMATIC_PROPERTY_GROUPS?.forEach((group, index) => {
     group.forEach(prop => {
         idiomaticPropertyMap.set(prop.toLowerCase().trim(), index);
     });
@@ -58,7 +58,7 @@ const CONCENTRIC_GROUPED = [
 ];
 
 const concentricPropertyMap = new Map<string, number>();
-CONCENTRIC_GROUPED.forEach((group, index) => {
+CONCENTRIC_GROUPED?.forEach((group, index) => {
     group.forEach(prop => {
         concentricPropertyMap.set(prop.toLowerCase().trim(), index);
     });

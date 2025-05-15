@@ -69,41 +69,34 @@ export function sortProperties(properties: string[], options: SortingOptions): S
         sortedRegularProps = processNestedRules(sortedRegularProps, completeOptions, context);
 
         // Build the final result with proper spacing
-        const result: string[] = [];
+        const finalSortedList: string[] = [];
 
-        // Add CSS variables first
         if (sortedCssVars.length > 0) {
-            result.push(...sortedCssVars);
-
-            // Add empty line between CSS and SASS variables if both exist
-            if (sortedSassVars.length > 0) {
-                result.push('');  // Changed from '\n' to empty string
-            }
+            finalSortedList.push(...sortedCssVars);
         }
 
-        // Add SASS variables
         if (sortedSassVars.length > 0) {
-            result.push(...sortedSassVars);
+            if (finalSortedList.length > 0 && sortedCssVars.length > 0) { // If CSS vars were added
+                finalSortedList.push(''); // Separator between CSS and SASS vars
+            }
+            finalSortedList.push(...sortedSassVars);
         }
 
-        // IMPORTANT: Force two empty lines between variables and properties
-        // This ensures at least one remains after any processing
-        if ((sortedCssVars.length > 0 || sortedSassVars.length > 0) && sortedRegularProps.length > 0) {
-            result.push('');  // Changed from '\n' to empty string
-            result.push('');  // Changed from '\n' to empty string
-        }
-
-        // Remove any leading empty lines from regular properties
+        // Remove any leading empty lines from regular properties before adding them
         while (sortedRegularProps.length > 0 && sortedRegularProps[0] === '') {
             sortedRegularProps.shift();
         }
 
-        // Add the remaining properties
-        result.push(...sortedRegularProps);
+        if (sortedRegularProps.length > 0) {
+            if (finalSortedList.length > 0) { // If any variables (CSS or SASS) were added
+                finalSortedList.push(''); // Separator between vars and regular props
+            }
+            finalSortedList.push(...sortedRegularProps);
+        }
 
         return {
             success: true,
-            sortedProperties: result
+            sortedProperties: finalSortedList
         };
     } catch (error) {
         return {

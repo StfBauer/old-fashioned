@@ -1,8 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import stylelint from 'stylelint';
 import path from 'path';
-// Import the actual rule implementation
 import oldfashionedOrderRule, { ruleName } from '../rules/oldfashioned-order';
+
+// Define types for stylelint options and results
+type StylelintOptions = Record<string, any>;
+type StylelintResult = Record<string, any>;
+
+// Import stylelint with require to avoid TypeScript errors
+const stylelint = require('stylelint');
+
+// Create a properly typed standalone function
+const standalone = async (options: StylelintOptions): Promise<StylelintResult> => {
+  return await stylelint.lint(options);
+};
 
 describe('stylelint-oldfashioned-order plugin', () => {
   it('should export a rule', () => {
@@ -19,7 +29,7 @@ describe('stylelint-oldfashioned-order plugin', () => {
     };
 
     it('should detect unordered properties with alphabetical strategy', async () => {
-      const result = await stylelint.lint({
+      const result = await standalone({
         code: `
           .test {
             color: red;
@@ -35,7 +45,7 @@ describe('stylelint-oldfashioned-order plugin', () => {
     });
 
     it('should auto-fix unordered properties with alphabetical strategy', async () => {
-      const result = await stylelint.lint({
+      const result = await standalone({
         code: `
           .test {
             color: red;
@@ -52,7 +62,7 @@ describe('stylelint-oldfashioned-order plugin', () => {
     });
 
     it('should handle SCSS syntax', async () => {
-      const result = await stylelint.lint({
+      const result = await standalone({
         code: `
           .test {
             color: red;
@@ -70,7 +80,7 @@ describe('stylelint-oldfashioned-order plugin', () => {
     });
 
     it('should add empty lines between groups when requested', async () => {
-      const result = await stylelint.lint({
+      const result = await standalone({
         code: `
           .test {
             color: red;
