@@ -30,7 +30,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode'; // Import vscode to access the mock
-import { findStylelintConfig, hasOldschoolOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../config-loader';
+import { findStylelintConfig, hasOldfashionedOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../../src/config-loader';
 import { VSCodeMockBuilder, FileSystemMockBuilder, resetAllMocks, createTestDocument } from './test-utils';
 
 describe('Config Loader', () => {
@@ -106,7 +106,7 @@ describe('Config Loader', () => {
                 plugins: ['stylelint-oldschool-order']
             }).build();
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(true);
         });
@@ -117,7 +117,7 @@ describe('Config Loader', () => {
                 plugins: ['@some-scope/oldschool-order']
             }).build();
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(true);
         });
@@ -128,7 +128,7 @@ describe('Config Loader', () => {
                 plugins: ['some-other-plugin']
             }).build();
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(false);
         });
@@ -142,7 +142,7 @@ describe('Config Loader', () => {
                 }
             }).build();
 
-            const result = hasOldschoolOrderPlugin('/project/package.json');
+            const result = hasOldfashionedOrderPlugin('/project/package.json');
 
             expect(result).toBe(true);
         });

@@ -51,7 +51,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode'; // Import vscode to access the mock
-import { findStylelintConfig, hasOldfashionedOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../config-loader';
+import { findStylelintConfig, hasOldfashionedOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../../src/config-loader';
 import { FileSystemMockBuilder, resetAllMocks, createTestDocument } from './test-utils';
 import { ConsoleSpy, ErrorSimulator } from './error-utils';
 

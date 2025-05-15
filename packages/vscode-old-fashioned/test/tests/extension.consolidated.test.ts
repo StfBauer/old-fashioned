@@ -110,10 +110,10 @@ vi.mock('fs', () => ({
 // Now import the rest
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as vscode from 'vscode'; // Import vscode to access the mock
-import { sortCssProperties } from '../sorting';
-import { getSortingOptions, getParseSyntax, createDiagnosticFromWarning } from '../utils';
+import { sortCssProperties } from '../../src/sorting';
+import { getSortingOptions, getParseSyntax, createDiagnosticFromWarning } from '../../src/utils';
 import { resetAllMocks } from './test-utils';
-import { activate } from '../extension';
+import { activate } from '../../src/extension';
 
 describe('VS Code extension', () => {
     let context: any;

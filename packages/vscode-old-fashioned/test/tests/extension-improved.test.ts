@@ -110,8 +110,8 @@ vi.mock('fs', () => ({
 
 // NOW we can import the modules
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { sortCssProperties } from '../sorting';
-import { getSortingOptions, getParseSyntax, createDiagnosticFromWarning } from '../utils';
+import { sortCssProperties } from '../../src/sorting';
+import { getSortingOptions, getParseSyntax, createDiagnosticFromWarning } from '../../src/utils';
 import * as vscode from 'vscode';
 import * as stylelint from 'stylelint';
 

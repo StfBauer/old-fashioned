@@ -1,37 +1,5 @@
-/**
- * Configuration Integration Tests - Consolidated Version
- * 
- * This file tests the integration between project-level configuration
- * and VS Code extension settings.
- */
-
-// Import vi first for mocking
 import { vi } from 'vitest';
-import * as path from 'path';
-import * as os from 'os';
-import { ConfigSource } from '../config-loader';
-
-// Define mocks with hoisting to prevent initialization errors
-const mockFS = vi.hoisted(() => ({
-    existsSync: vi.fn(),
-    readFileSync: vi.fn(),
-    mkdirSync: vi.fn(),
-    writeFileSync: vi.fn()
-}));
-
-const mockStylelint = vi.hoisted(() => ({
-    default: {
-        lint: vi.fn().mockImplementation(() => {
-            return Promise.resolve({
-                results: [{ warnings: [] }],
-                output: 'sorted-css'
-            });
-        })
-    }
-}));
-
-// Mock VS Code APIs directly to avoid circular dependencies
-const mockVSCode = vi.hoisted(() => ({
+vi.mock('vscode', () => ({
     window: {
         activeTextEditor: undefined,
         showErrorMessage: vi.fn(),
@@ -44,21 +12,15 @@ const mockVSCode = vi.hoisted(() => ({
         executeCommand: vi.fn()
     },
     workspace: {
-        getConfiguration: vi.fn().mockReturnValue({
-            get: vi.fn().mockImplementation((key: string, defaultValue: any) => {
-                if (key === 'sorting.strategy') return 'grouped';
-                if (key === 'sorting.emptyLinesBetweenGroups') return true;
-                if (key === 'sorting.sortPropertiesWithinGroups') return true;
-                if (key === 'showActivationMessage') return true;
-                return defaultValue;
-            })
-        }),
+        getConfiguration: vi.fn(() => ({
+            get: vi.fn((key, defaultValue) => defaultValue)
+        })),
         onDidOpenTextDocument: vi.fn(),
         onDidChangeTextDocument: vi.fn(),
         onDidSaveTextDocument: vi.fn(),
         onDidCloseTextDocument: vi.fn(),
         textDocuments: [],
-        applyEdit: vi.fn().mockResolvedValue(true)
+        applyEdit: vi.fn()
     },
     languages: {
         registerCodeActionsProvider: vi.fn(),
@@ -70,42 +32,48 @@ const mockVSCode = vi.hoisted(() => ({
             dispose: vi.fn()
         }))
     },
-    Range: class {
-        constructor(
-            public start: { line: number; character: number },
-            public end: { line: number; character: number }
-        ) { }
-    },
-    Position: class {
-        constructor(public line: number, public character: number) { }
-    },
-    DiagnosticSeverity: { Error: 0, Warning: 1, Information: 2, Hint: 3 },
-    TextEdit: { replace: vi.fn((range, newText) => ({ range, newText })) },
     Uri: {
-        file: (path: string) => ({ scheme: 'file', fsPath: path, toString: () => `file://${path}` })
+        file: (path) => ({ scheme: 'file', fsPath: path, toString: () => `file://${path}` })
     },
-    Diagnostic: class {
-        constructor(
-            public range: any,
-            public message: string,
-            public severity: number
-        ) { }
-        source: string = '';
-        code: string = '';
+    Range: class {
+        start: any;
+        end: any;
+        constructor(startLine: number, startChar: number, endLine: number, endChar: number) {
+            this.start = { line: startLine, character: startChar };
+            this.end = { line: endLine, character: endChar };
+        }
     }
 }));
-
-// Apply mocks
-vi.mock('fs', () => mockFS);
-vi.mock('stylelint', () => mockStylelint);
-vi.mock('vscode', () => mockVSCode);
-
-// Now import the rest
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import * as path from 'path';
+import * as os from 'os';
 import * as vscode from 'vscode';
-import { sortCssProperties } from '../sorting';
-import { getSortingOptions } from '../utils';
-import { getDocumentSortingOptions } from '../config-loader';
+import { sortCssProperties } from '../../src/sorting';
+import { getSortingOptions } from '../../src/utils';
+import { getDocumentSortingOptions, ConfigSource } from '../../src/config-loader';
+
+vi.mock('fs', () => ({
+    existsSync: vi.fn(),
+    readFileSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    writeFileSync: vi.fn()
+}));
+const mockFS = {
+    existsSync: vi.fn(),
+    readFileSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    writeFileSync: vi.fn()
+};
+const mockStylelint = {
+    default: {
+        lint: vi.fn().mockImplementation(() => {
+            return Promise.resolve({
+                results: [{ warnings: [] }],
+                output: 'sorted-css'
+            });
+        })
+    }
+};
 
 describe('Project-Level Configuration Integration Tests', () => {
     const tempDir = path.join(os.tmpdir(), `oldschool-test-${Date.now()}`);
@@ -113,7 +81,7 @@ describe('Project-Level Configuration Integration Tests', () => {
 
     beforeEach(() => {
         // Reset all mocks
-        vi.resetAllMocks();
+        vi.clearAllMocks();
 
         testFilePath = path.join(tempDir, 'style.css');
 

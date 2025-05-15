@@ -8,7 +8,12 @@ export default defineConfig({
       dir: '../../node_modules/.vitest',
     },
     environment: 'node',
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}'],
+    include: [
+      'test/**/*.test.ts',
+      'test/**/*.test.js',
+      'test/**/*.spec.ts',
+      'test/**/*.spec.js'
+    ],
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../coverage/packages/vscode-old-fashioned',

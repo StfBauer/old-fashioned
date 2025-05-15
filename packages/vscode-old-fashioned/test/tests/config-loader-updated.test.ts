@@ -1,13 +1,19 @@
-/**
- * Config Loader Tests
- * 
- * Tests for the stylelint configuration loading functionality
- */
-
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { vi } from 'vitest';
+vi.mock('vscode', () => ({
+    workspace: {
+        getConfiguration: vi.fn(() => ({
+            get: (key, defaultValue) => defaultValue
+        }))
+    },
+    Uri: {
+        file: (path) => ({ scheme: 'file', fsPath: path, toString: () => `file://${path}` })
+    }
+}));
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
-import { findStylelintConfig, hasOldfashionedOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../config-loader';
+import * as vscode from 'vscode';
+import { findStylelintConfig, hasOldfashionedOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../../src/config-loader';
 
 // Mock Node.js modules
 vi.mock('fs', () => ({
@@ -15,22 +21,9 @@ vi.mock('fs', () => ({
     readFileSync: vi.fn()
 }));
 
-// Mock VS Code APIs directly to avoid circular dependencies
-const mockVSCode = {
-    workspace: {
-        getConfiguration: vi.fn(() => ({
-            get: (key: string, defaultValue: any) => defaultValue
-        }))
-    },
-    Uri: {
-        file: (path: string) => ({ scheme: 'file', fsPath: path, toString: () => `file://${path}` })
-    }
-};
-vi.mock('vscode', () => mockVSCode);
-
 describe('Config Loader', () => {
     beforeEach(() => {
-        vi.resetAllMocks();
+        vi.clearAllMocks();
     });
 
     afterEach(() => {
@@ -144,7 +137,7 @@ describe('Config Loader', () => {
             vi.mocked(fs.existsSync).mockReturnValue(false);
 
             // Update mock VS Code settings
-            mockVSCode.workspace.getConfiguration = vi.fn().mockReturnValue({
+            (vscode.workspace.getConfiguration as any) = vi.fn().mockReturnValue({
                 get: (key: string) => {
                     if (key === 'sorting.strategy') return 'grouped';
                     if (key === 'sorting.emptyLinesBetweenGroups') return true;
@@ -155,7 +148,7 @@ describe('Config Loader', () => {
 
             // Mock document
             const document = {
-                uri: mockVSCode.Uri.file('/project/src/style.css'),
+                uri: vscode.Uri.file('/project/src/style.css'),
                 languageId: 'css',
                 getText: () => '.test { color: red; }'
             };
@@ -183,7 +176,7 @@ describe('Config Loader', () => {
 
             // Mock document
             const document = {
-                uri: mockVSCode.Uri.file('/project/src/style.css'),
+                uri: vscode.Uri.file('/project/src/style.css'),
                 languageId: 'css',
                 getText: () => '.test { color: red; }'
             };
@@ -231,7 +224,7 @@ describe('Config Loader', () => {
 
             // Mock document in a deeply nested location
             const document = {
-                uri: mockVSCode.Uri.file('/project/src/components/Button/Button.css'),
+                uri: vscode.Uri.file('/project/src/components/Button/Button.css'),
                 languageId: 'css',
                 getText: () => '.button { background: blue; }'
             };
@@ -279,7 +272,7 @@ describe('Config Loader', () => {
 
             // Mock document that should use the nested config
             const document = {
-                uri: mockVSCode.Uri.file('/project/src/components/Button/Button.css'),
+                uri: vscode.Uri.file('/project/src/components/Button/Button.css'),
                 languageId: 'css',
                 getText: () => '.button { background: blue; }'
             };

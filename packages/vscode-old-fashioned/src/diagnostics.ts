@@ -3,7 +3,7 @@
  * 
  * This file handles diagnostics for CSS property ordering issues
  */
-
+import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as stylelint from 'stylelint';
 import * as path from 'path';
@@ -226,8 +226,38 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
     'vendor-prefix-align': formattingOptions.vendorPrefixAlign
   };
 
-  // Get the extension path for configBasedir
-  const extensionPath = vscode.extensions.getExtension('n8design.vscode-old-fashioned')?.extensionPath || __dirname;
+  // Try multiple possible extension IDs to find the correct one
+  let extensionId = '';
+  let extensionPath = '';
+
+  // List of possible extension IDs
+  const possibleIds = [
+    'n8design.old-fashioned',
+    'n8design.vscode-old-fashioned',
+    'n8design.oldfashioned'
+  ];
+
+  // Try to find the extension using different potential IDs
+  for (const id of possibleIds) {
+    const ext = vscode.extensions.getExtension(id);
+    if (ext) {
+      extensionId = id;
+      extensionPath = ext.extensionPath;
+      console.log(`Found extension with ID: ${id}`);
+      break;
+    }
+  }
+
+  // If we didn't find the extension, log all extensions and use __dirname as fallback
+  if (!extensionPath) {
+    console.log('Extension not found. Available extensions:');
+    vscode.extensions.all.forEach(ext => {
+      console.log(`- ${ext.id} (${ext.extensionPath})`);
+    });
+    extensionPath = __dirname;
+    console.warn(`Using fallback path: ${extensionPath}`);
+  }
+
   // For development environments, try to use the local workspace path
   const workspaceFolders = vscode.workspace.workspaceFolders;
   const isDevelopment = extensionPath.includes('old-fashioned/packages/vscode-old-fashioned');
@@ -245,11 +275,27 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
   try {
     console.log('Running stylelint with configBasedir:', configBasedir);
 
+    // Check if the configBasedir exists
+    if (!fs.existsSync(configBasedir)) {
+      console.error(`configBasedir does not exist: ${configBasedir}`);
+      throw new Error(`Configuration directory does not exist: ${configBasedir}`);
+    }
+
+    // Ensure we have a valid filename or provide a fallback
+    let codeFilename: string;
+    if (document.uri.scheme === 'file' && document.fileName) {
+      codeFilename = document.fileName;
+    } else {
+      // For non-file documents, create a synthetic filename based on language
+      codeFilename = `untitled.${document.languageId}`;
+      console.log(`Document has no filename, using synthetic name: ${codeFilename}`);
+    }
+
     // In development, the plugin might be in the workspace node_modules
     // In production, the plugin should be bundled with the extension
     return stylelint.lint({
       code: text,
-      codeFilename: document.fileName,
+      codeFilename: codeFilename,
       config: {
         plugins: ['stylelint-oldfashioned-order'],
         rules: {

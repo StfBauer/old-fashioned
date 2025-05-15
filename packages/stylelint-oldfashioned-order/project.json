@@ -5,17 +5,13 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "nx:run-commands",
       "outputs": [
-        "{options.outputPath}"
+        "{workspaceRoot}/packages/stylelint-oldfashioned-order/dist"
       ],
       "options": {
-        "outputPath": "dist/packages/stylelint-oldfashioned-order",
-        "main": "packages/stylelint-oldfashioned-order/src/index.ts",
-        "tsConfig": "packages/stylelint-oldfashioned-order/tsconfig.json",
-        "assets": [
-          "packages/stylelint-oldfashioned-order/*.md"
-        ]
+        "command": "node esbuild.config.js",
+        "cwd": "packages/stylelint-oldfashioned-order"
       },
       "dependsOn": [
         {

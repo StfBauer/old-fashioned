@@ -27,7 +27,7 @@ vi.mock('fs', () => ({
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
-import { findStylelintConfig, hasOldschoolOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../config-loader';
+import { findStylelintConfig, hasOldfashionedOrderPlugin, getDocumentSortingOptions, ConfigSource } from '../../src/config-loader';
 
 // Now create a helper for logging/capturing console messages
 class ConsoleSpy {
@@ -142,7 +142,7 @@ describe('Fixed Config Loader Tests', () => {
                 plugins: ['stylelint-oldschool-order']
             }));
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(true);
         });
@@ -153,7 +153,7 @@ describe('Fixed Config Loader Tests', () => {
                 plugins: ['@some-scope/oldschool-order']
             }));
 
-            const result = hasOldschoolOrderPlugin('/project/.stylelintrc.json');
+            const result = hasOldfashionedOrderPlugin('/project/.stylelintrc.json');
 
             expect(result).toBe(true);
         });

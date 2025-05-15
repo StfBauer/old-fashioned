@@ -64,8 +64,8 @@
     }
   },
   "scripts": {
-    "package": "vsce package",
-    "publish": "vsce publish"
+    "build": "node esbuild.config.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "stylelint-oldfashioned-order": "^0.0.1",

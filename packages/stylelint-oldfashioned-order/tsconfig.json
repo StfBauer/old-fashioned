@@ -5,6 +5,7 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "declaration": true,
+    "emitDeclarationOnly": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
@@ -16,7 +17,6 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.js"
   ],
   "exclude": [
     "node_modules",
@@ -27,5 +27,12 @@
     {
       "path": "../shared"
     }
-  ]
+  ],
+  "build": {
+    "entryPoints": [
+      "src/index.ts"
+    ],
+    "bundle": false,
+    "outdir": "dist"
+  }
 }

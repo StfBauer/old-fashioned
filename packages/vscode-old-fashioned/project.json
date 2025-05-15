@@ -8,7 +8,7 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "npm run build"
+                    "node esbuild.config.js"
                 ],
                 "cwd": "packages/vscode-old-fashioned"
             },

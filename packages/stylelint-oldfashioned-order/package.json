@@ -2,7 +2,7 @@
   "name": "stylelint-oldfashioned-order",
   "version": "0.0.1",
   "description": "🎨 Contentric, idiomatic or alphabetical CSS property ordering for Stylelint no Problem at all",
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "keywords": [
     "stylelint",
     "stylelint-plugin",
@@ -40,7 +40,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "node esbuild.config.js",
     "test": "vitest run",
     "prepare-publish": "node ../../tools/scripts/bundle-shared-into-stylelint.js",
     "prepublishOnly": "echo 'Skipping build in dist folder - already built by Nx'"

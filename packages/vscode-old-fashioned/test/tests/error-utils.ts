@@ -8,7 +8,7 @@
 import { vi } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ConfigSource, ConfigurationError, ConfigErrorCode } from '../config-loader';
+import { ConfigSource, ConfigurationError, ConfigErrorCode } from '../../src/config-loader';
 
 /**
  * A utility class for capturing and analyzing console output during tests

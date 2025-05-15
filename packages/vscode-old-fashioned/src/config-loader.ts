@@ -166,6 +166,12 @@ export function findStylelintConfig(startDir: string): ConfigFileDetails | null 
  */
 export function hasOldfashionedOrderPlugin(configPath: string): boolean {
     try {
+        // Validate configPath before using it
+        if (!configPath || typeof configPath !== 'string') {
+            console.error('Invalid configuration path provided to hasOldfashionedOrderPlugin');
+            return false;
+        }
+
         if (!fs.existsSync(configPath)) {
             throw new ConfigurationError(`Configuration file not found: ${configPath}`, ConfigErrorCode.FILE_NOT_FOUND);
         }
@@ -205,9 +211,12 @@ export function hasOldfashionedOrderPlugin(configPath: string): boolean {
         // Check for the plugin in the config
         return (
             Array.isArray(config.plugins) &&
-            (
-                config.plugins.includes('stylelint-oldfashioned-order') ||
-                config.plugins.some((plugin) => plugin.includes('oldfashioned'))
+            config.plugins.some((plugin) =>
+                typeof plugin === 'string' && (
+                    plugin.includes('oldfashioned') ||
+                    plugin.includes('oldschool-order') ||
+                    plugin.includes('stylelint-oldfashioned-order')
+                )
             )
         );
 
@@ -230,6 +239,12 @@ export function hasOldfashionedOrderPlugin(configPath: string): boolean {
  */
 function parseJsonFile<T>(filePath: string): T | null {
     try {
+        // Validate filePath before using it
+        if (!filePath || typeof filePath !== 'string') {
+            console.error('Invalid file path provided to parseJsonFile');
+            return null;
+        }
+
         if (!fs.existsSync(filePath)) {
             throw new ConfigurationError(`File not found: ${filePath}`, ConfigErrorCode.FILE_NOT_FOUND);
         }
@@ -333,7 +348,7 @@ export function getDocumentSortingOptions(document: vscode.TextDocument): Config
     const docDir = path.dirname(document.uri.fsPath);
     const configDetails = findStylelintConfig(docDir);
 
-    if (configDetails && configDetails.exists) {
+    if (configDetails && configDetails.exists && configDetails.path) {
         const hasPlugin = hasOldfashionedOrderPlugin(configDetails.path);
 
         // If project config has the plugin, it takes precedence over VS Code settings
@@ -428,3 +443,25 @@ export function getDocumentSortingOptions(document: vscode.TextDocument): Config
         source: ConfigSource.VSCODE
     };
 }
+
+// Example fix for a file loading function:
+function loadConfigFile(filePath: string | undefined): string | null {
+    if (!filePath) {
+        // Handle undefined path gracefully
+        console.error('Config file path is undefined');
+        return null;
+    }
+
+    // Validate path exists before trying to use it
+    if (fs.existsSync(filePath)) {
+        return fs.readFileSync(filePath, 'utf8');
+    } else {
+        console.warn(`Config file not found: ${filePath}`);
+        return null;
+    }
+}
+
+// Look for patterns like:
+// - Loading configuration without checking if paths are defined
+// - Using path.resolve or path.join with potentially undefined arguments
+// - Reading files using fs.readFileSync without validation

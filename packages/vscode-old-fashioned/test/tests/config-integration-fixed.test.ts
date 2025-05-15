@@ -1,26 +1,11 @@
-/**
- * Config Integration Tests - Fixed Version
- * 
- * Integration tests for project-level stylelint configuration handling
- * This version fixes circular dependency issues with proper mock ordering
- */
-
-// Import vi first for mocking
 import { vi } from 'vitest';
-
-// Define mocks BEFORE importing modules
-vi.mock('fs', () => ({
-    existsSync: vi.fn(),
-    readFileSync: vi.fn()
-}));
-
-// Mock VS Code APIs directly to avoid circular dependencies
 vi.mock('vscode', () => ({
     window: {
-        activeTextEditor: null as any,
+        activeTextEditor: undefined,
         showErrorMessage: vi.fn(),
         showInformationMessage: vi.fn(),
-        withProgress: vi.fn((options: any, task: any) => task())
+        showWarningMessage: vi.fn(),
+        withProgress: vi.fn().mockImplementation((options, task) => task())
     },
     commands: {
         registerCommand: vi.fn(),
@@ -28,7 +13,52 @@ vi.mock('vscode', () => ({
     },
     workspace: {
         getConfiguration: vi.fn(() => ({
-            get: (key: string, defaultValue: any) => defaultValue
+            get: vi.fn((key, defaultValue) => defaultValue)
+        })),
+        onDidOpenTextDocument: vi.fn(),
+        onDidChangeTextDocument: vi.fn(),
+        onDidSaveTextDocument: vi.fn(),
+        onDidCloseTextDocument: vi.fn(),
+        textDocuments: [],
+        applyEdit: vi.fn()
+    },
+    languages: {
+        registerCodeActionsProvider: vi.fn(),
+        registerDocumentFormattingEditProvider: vi.fn(),
+        createDiagnosticCollection: vi.fn(() => ({
+            set: vi.fn(),
+            delete: vi.fn(),
+            clear: vi.fn(),
+            dispose: vi.fn()
+        }))
+    },
+    Uri: {
+        file: (path) => ({ scheme: 'file', fsPath: path, toString: () => `file://${path}` })
+    }
+}));
+
+// Define mocks BEFORE importing modules
+vi.mock('fs', () => ({
+    existsSync: vi.fn(),
+    readFileSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    writeFileSync: vi.fn()
+}));
+const mockVSCode = {
+    window: {
+        activeTextEditor: undefined,
+        showErrorMessage: vi.fn(),
+        showInformationMessage: vi.fn(),
+        showWarningMessage: vi.fn(),
+        withProgress: vi.fn().mockImplementation((options, task) => task())
+    },
+    commands: {
+        registerCommand: vi.fn(),
+        executeCommand: vi.fn()
+    },
+    workspace: {
+        getConfiguration: vi.fn(() => ({
+            get: vi.fn((key: string, defaultValue: any) => defaultValue)
         })),
         onDidOpenTextDocument: vi.fn(),
         onDidChangeTextDocument: vi.fn(),
@@ -49,19 +79,9 @@ vi.mock('vscode', () => ({
     },
     Uri: {
         file: (path: string) => ({ scheme: 'file', fsPath: path, toString: () => `file://${path}` })
-    },
-    Range: class {
-        constructor(
-            public start: { line: number; character: number },
-            public end: { line: number; character: number }
-        ) { }
-    },
-    Position: class {
-        constructor(public line: number, public character: number) { }
-    },
-    DiagnosticSeverity: { Error: 0, Warning: 1, Information: 2, Hint: 3 },
-    TextEdit: { replace: vi.fn((range, newText) => ({ range, newText })) }
-}));
+    }
+};
+vi.mock('vscode', () => mockVSCode);
 
 // Mock stylelint
 const mockStylelint = {
@@ -89,12 +109,11 @@ vi.mock('stylelint', () => mockStylelint);
 
 // Now import the rest
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import * as vscode from 'vscode'; // Import vscode to access the mock
-import { sortCssProperties } from '../sorting';
-import { ConfigSource, getDocumentSortingOptions } from '../config-loader';
+import * as vscode from 'vscode';
+import { sortCssProperties } from '../../src/sorting';
+import { ConfigSource, getDocumentSortingOptions } from '../../src/config-loader';
 import { VSCodeMockBuilder, FileSystemMockBuilder, resetAllMocks, createTestDocument, createTestEditor } from './test-utils';
 
 describe('Project-Level Configuration Integration Tests', () => {

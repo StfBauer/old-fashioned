@@ -7,9 +7,8 @@
 
 import * as vscode from 'vscode';
 import { sortProperties } from '@old-fashioned/shared';
-import { SortingStrategy } from '@old-fashioned/shared';
+import { SortingStrategy, SortingOptions } from '@old-fashioned/shared';
 import { DEFAULT_PROPERTY_GROUPS, IDIOMATIC_PROPERTY_GROUPS } from '@old-fashioned/shared';
-import { addEmptyLinesBetweenGroups } from './formatter';
 import { getSortingOptions, getFormattingOptions } from './utils';
 import { getDocumentSortingOptions, ConfigSource } from './config-loader';
 import * as postcss from 'postcss';
@@ -25,7 +24,7 @@ interface TextProcessingResult {
 }
 
 /**
- * Sort CSS properties in the active text editor
+ * Sort CSS properties in the active editor
  * 
  * @param editor - The active text editor
  */
@@ -212,9 +211,10 @@ function sortCssText(cssText: string, languageId: string, options: any): string 
     // Stringify the result
     const result = root.toString();
 
-    // If empty lines between groups is enabled, use the formatter to add them
+    // If empty lines between groups is enabled, process the result to add empty lines
+    // between custom properties and SCSS variables
     if (options.emptyLinesBetweenGroups) {
-      return addEmptyLinesBetweenGroups(result, options.strategy);
+      return processDeclarationGroups(result, options.strategy);
     }
 
     // Otherwise just add the debug marker
@@ -273,4 +273,86 @@ function getPropertyGroups(strategy: string): string[][] | null {
     default:
       return null;
   }
+}
+
+/**
+ * Process the CSS text to add empty lines between different property groups
+ * 
+ * @param cssText - CSS text to process
+ * @param strategy - The sorting strategy being used
+ * @returns Processed CSS text with empty lines added
+ */
+function processDeclarationGroups(cssText: string, strategy: string): string {
+  // First, split the text and clean up any duplicate empty lines
+  const lines = cssText.split('\n');
+  const cleanedLines: string[] = [];
+
+  // Remove all blank lines first
+  for (const line of lines) {
+    if (line.trim() !== '' || cleanedLines.length === 0 || cleanedLines[cleanedLines.length - 1].trim() !== '') {
+      cleanedLines.push(line);
+    }
+  }
+
+  // Process the cleaned lines to add exactly one blank line between groups
+  const result: string[] = [];
+  let inCustomProps = false;
+  let inScssVars = false;
+
+  for (let i = 0; i < cleanedLines.length; i++) {
+    const line = cleanedLines[i];
+    const trimmed = line.trim();
+
+    // Skip empty lines - we'll add them back as needed
+    if (trimmed === '') {
+      continue;
+    }
+
+    // Check for rule boundaries
+    const isRuleStart = trimmed.includes('{');
+    const isRuleEnd = trimmed.includes('}');
+
+    if (isRuleStart || isRuleEnd) {
+      // Reset tracking when entering or leaving a rule
+      if (isRuleStart) {
+        inCustomProps = false;
+        inScssVars = false;
+      }
+      result.push(line);
+      continue;
+    }
+
+    // Check for property type
+    const isCustomProp = trimmed.match(/^\s*--[a-zA-Z0-9-_]+\s*:/);
+    const isScssVar = trimmed.match(/^\s*\$[a-zA-Z0-9-_]+\s*:/);
+
+    // Check for transitions between groups
+    if (inCustomProps && !isCustomProp) {
+      // We're leaving custom props
+      result.push('');
+      inCustomProps = false;
+    }
+
+    if (!inScssVars && isScssVar) {
+      // We're entering SCSS vars
+      if (result.length > 0 && result[result.length - 1].trim() !== '') {
+        result.push('');
+      }
+      inScssVars = true;
+    } else if (inScssVars && !isScssVar) {
+      // We're leaving SCSS vars
+      result.push('');
+      inScssVars = false;
+    }
+
+    // Update state based on current line
+    if (isCustomProp) {
+      inCustomProps = true;
+    }
+
+    // Add the current line
+    result.push(line);
+  }
+
+  return `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${strategy}) */\n${result.join('\n')}`;
 }

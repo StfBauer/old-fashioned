@@ -9,7 +9,7 @@
 import { vi } from 'vitest';
 import * as path from 'path';
 import * as os from 'os';
-import { ConfigSource } from '../config-loader';
+import { ConfigSource } from '../../src/config-loader';
 
 // Define mocks with hoisting to prevent initialization errors
 const mockFS = vi.hoisted(() => ({
@@ -103,9 +103,9 @@ vi.mock('vscode', () => mockVSCode);
 // Now import the rest
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as vscode from 'vscode';
-import { sortCssProperties } from '../sorting';
-import { getSortingOptions } from '../utils';
-import { getDocumentSortingOptions } from '../config-loader';
+import { sortCssProperties } from '../../src/sorting';
+import { getSortingOptions } from '../../src/utils';
+import { getDocumentSortingOptions } from '../../src/config-loader';
 
 describe('Project-Level Configuration Integration Tests', () => {
     const tempDir = path.join(os.tmpdir(), `oldschool-test-${Date.now()}`);

@@ -10,7 +10,7 @@
         "{workspaceRoot}/packages/shared/dist"
       ],
       "options": {
-        "command": "tsc --build",
+        "command": "node esbuild.config.js",
         "cwd": "packages/shared"
       }
     },
