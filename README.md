@@ -1,48 +1,73 @@
-# Old-Fashioned CSS Sorter
+# Old Fashioned
 
-A collection of tools for maintaining clean, consistent CSS code through intelligent property sorting.
+A professional CSS/SCSS property organization toolkit with multiple sorting strategies and smart formatting options.
 
-## Packages
+## Demo
+
+![Old Fashioned CSS Formatter in action](packages/vscode-old-fashioned/images/old-fashioned-demo.gif)
+
+## What's Included
 
 This monorepo contains the following packages:
 
-- **vscode-old-fashioned**: VS Code extension for sorting CSS properties
-- **shared**: Shared code for sorting strategies and property groups
-- **stylelint-oldfashioned-order**: Stylelint plugin for sorting CSS properties (planned)
+### VS Code Extension
+
+The [VS Code Extension](/packages/vscode-old-fashioned) provides an easy-to-use interface for sorting and organizing CSS/SCSS properties directly in your editor. Features include:
+
+- Multiple sorting strategies (alphabetical, concentric, idiomatic)
+- Support for CSS, SCSS, and SASS files
+- Smart formatting options including property grouping
+- Configurable notification levels
+- Integration with VS Code's built-in formatter
+
+### Shared Library
+
+The [shared library](/packages/shared) contains the core sorting logic used by all Old Fashioned tools:
+
+- Various property sorting algorithms
+- CSS/SCSS parsing utilities
+- Configuration options handling
 
 ## Getting Started
 
-### For Users
+### Using the VS Code Extension
 
-Install the [Old Fashioned CSS Sorter](https://marketplace.visualstudio.com/items?itemName=n8design.old-fashioned) extension from the VS Code marketplace.
+1. Install the [Old Fashioned CSS Formatter](https://marketplace.visualstudio.com/items?itemName=N8D.vscode-old-fashioned) from the VS Code marketplace
+2. Open a CSS, SCSS, or SASS file
+3. Use the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) and search for "Sort CSS Properties (Old Fashioned)"
+4. Customize your sorting strategy in the extension settings
 
-See the [extension README](./packages/vscode-old-fashioned/README.md) for usage instructions.
+### Setting Up for Development
 
-### For Developers
+```bash
+# Clone the repository
+git clone https://github.com/n8design/old-fashioned.git
+cd old-fashioned
 
-1. Clone this repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Build all packages:
-   ```
-   npx nx run-many --target=build --all
-   ```
+# Install dependencies
+npm install
 
-## Development Workflow
+# Build all packages
+npm run build
 
-This project uses Nx for monorepo management. Common commands:
+# Run tests
+npm test
+```
 
-- `npx nx build vscode-old-fashioned` - Build the VS Code extension
-- `npx nx test vscode-old-fashioned` - Run tests for the VS Code extension
-- `npx nx build shared` - Build the shared package
-- `npx nx graph` - Visualize the project graph
+## Configuration
+
+Old Fashioned supports several sorting strategies:
+
+- **Alphabetical**: Sort properties alphabetically (A-Z)
+- **Concentric**: Sort from outside to inside (position → text → misc)
+- **Idiomatic**: Sort according to idiomatic CSS standards
+
+See the [VS Code Extension README](/packages/vscode-old-fashioned/README.md) for detailed configuration options.
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
