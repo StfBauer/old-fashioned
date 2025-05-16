@@ -32,7 +32,7 @@ A Visual Studio Code extension that helps you keep your CSS properties organized
 
 ## Demo
 
-![Old Fashioned CSS Formatter in action](https://github.com/n8design/old-fashioned/raw/main/packages/vscode-old-fashioned/images/old-fashioned-demo.gif)
+![Old Fashioned CSS Formatter in action](https://github.com/StfBauer/old-fashioned/blob/60febaf8ba2468a4541d44633c47b7f6f8a2e912/packages/vscode-old-fashioned/images/old-fashioned-demo.gif)
 
 ## Extension Settings
 
