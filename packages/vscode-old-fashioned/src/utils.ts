@@ -103,9 +103,7 @@ export function getFormattingOptions(): any {
     vendorPrefixAlign: config.get<boolean>('formatting.vendorPrefixAlign', true),
     stripSpaces: config.get<boolean>('formatting.stripSpaces', true),
     showDebugComments: config.get<boolean>('showDebugComments', false),
-    formatMinified: config.get<boolean>('formatting.formatMinified', true),
-    reduceBlankLines: config.get<boolean>('formatting.reduceBlankLines', true),
-
+    formatBeforeSorting: config.get<boolean>('formatting.formatBeforeSorting', true),
     // Spacing settings
     spaceBeforeColon: config.get<string>('spacing.spaceBeforeColon', ''),
     spaceAfterColon: config.get<string>('spacing.spaceAfterColon', ' '),

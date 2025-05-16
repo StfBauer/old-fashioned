@@ -83,19 +83,24 @@ export async function sortCssProperties(
   async function performSort(sortOptions: SortingOptions, formatOptions: any) {
     let currentText = text; // Create a mutable copy of the text
 
-    // First, try to format the document using VS Code's built-in formatter
-    try {
-      // Apply VS Code's built-in formatting
-      if (isEntireDocument) {
-        // Only attempt to format if we're processing the entire document
-        await vscode.commands.executeCommand('editor.action.formatDocument');
+    // Check if formatting before sorting is enabled
+    const shouldFormatBeforeSorting = formatOptions.formatBeforeSorting !== false;
 
-        // Re-fetch the text after formatting
-        currentText = document.getText();
+    // First, try to format the document using VS Code's built-in formatter if enabled
+    if (shouldFormatBeforeSorting) {
+      try {
+        // Apply VS Code's built-in formatting
+        if (isEntireDocument) {
+          // Only attempt to format if we're processing the entire document
+          await vscode.commands.executeCommand('editor.action.formatDocument');
+
+          // Re-fetch the text after formatting
+          currentText = document.getText();
+        }
+      } catch (formattingError) {
+        console.log('Formatting skipped or failed:', formattingError);
+        // Continue even if formatting fails - we can still sort with the original text
       }
-    } catch (formattingError) {
-      console.log('Formatting skipped or failed:', formattingError);
-      // Continue even if formatting fails - we can still sort with the original text
     }
 
     // Then sort the properties

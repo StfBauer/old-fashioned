@@ -75,6 +75,11 @@
           ],
           "default": "verbose",
           "description": "Control how many notifications are shown during sorting operations"
+        },
+        "oldFashioned.formatting.formatBeforeSorting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Format the document using VS Code's formatter before sorting properties"
         }
       }
     }
