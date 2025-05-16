@@ -9,10 +9,18 @@ import * as vscode from 'vscode';
 import { SortingStrategy } from '@old-fashioned/shared';
 
 /**
- * Add empty lines between groups of CSS properties based on the chosen strategy
+ * Reduces multiple consecutive blank lines to a single blank line
  * 
- * This formatter processes the sorted CSS text and inserts empty lines between
- * different logical groups of properties to improve readability.
+ * @param text - The text to process
+ * @returns Text with reduced blank lines
+ */
+export function reduceBlankLines(text: string): string {
+    // Replace sequences of 2 or more blank lines with a single blank line
+    return text.replace(/\n\s*\n\s*\n+/g, '\n\n');
+}
+
+/**
+ * Add empty lines between groups of CSS properties based on the chosen strategy
  * 
  * @param cssText - The CSS text to format after property sorting
  * @param strategy - The sorting strategy used (alphabetical, concentric, idiomatic)
@@ -21,6 +29,12 @@ import { SortingStrategy } from '@old-fashioned/shared';
  */
 export function addEmptyLinesBetweenGroups(cssText: string, strategy: string, options?: { showDebugComments?: boolean }): string {
     console.log(`Formatting with strategy: ${strategy}`);
+
+    // Fix spacing in @property rules (add space after @property if missing)
+    cssText = cssText.replace(/@property--/g, '@property --');
+
+    // Fix spacing in @media rules (add space after @media if missing)
+    cssText = cssText.replace(/@media\(/g, '@media (');
 
     // Remove any GROUP_BOUNDARY comments from the input
     cssText = cssText.replace(/\/\*\s*GROUP_BOUNDARY\s*\*\//g, '');
@@ -54,7 +68,7 @@ export function addEmptyLinesBetweenGroups(cssText: string, strategy: string, op
         const isCustomProp = trimmed.match(/^\s*--[a-zA-Z0-9-_]+\s*:/);
         const isScssVar = trimmed.match(/^\s*\$[a-zA-Z0-9-_]+\s*:/);
 
-        // Detect property groups - this is what was missing!
+        // Detect property groups
         const propertyMatch = trimmed.match(/^\s*([a-zA-Z-]+)\s*:/);
         if (propertyMatch && !isCustomProp && !isScssVar) {
             const property = propertyMatch[1];
@@ -104,7 +118,10 @@ export function addEmptyLinesBetweenGroups(cssText: string, strategy: string, op
     }
 
     // Get the final formatted result
-    const formattedResult = result.join('\n');
+    let formattedResult = result.join('\n');
+
+    // Reduce multiple blank lines to a single blank line
+    formattedResult = reduceBlankLines(formattedResult);
 
     // Add debug marker only if showDebugComments is true
     const showDebugComments = options?.showDebugComments === true;
@@ -117,10 +134,6 @@ export function addEmptyLinesBetweenGroups(cssText: string, strategy: string, op
 
 /**
  * Get the group index for a CSS property based on the selected strategy
- * 
- * This helper function determines which logical group a CSS property belongs to
- * according to the selected sorting strategy. The group index is used to decide
- * where to insert empty lines in the formatted output.
  * 
  * @param property - The CSS property name
  * @param strategy - The sorting strategy (alphabetical, concentric, idiomatic)
@@ -172,7 +185,7 @@ function getPropertyGroup(property: string, strategy: string): number {
                 ['color', 'font', 'font-family', 'font-size', 'font-weight', 'line-height', 'text-align']
             ];
             break;
-        default: // grouped or alphabetical
+        default: // alphabetical fallback
             groups = [
                 // Layout
                 ['display', 'position', 'top', 'right', 'bottom', 'left', 'float', 'clear'],

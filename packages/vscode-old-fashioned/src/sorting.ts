@@ -25,7 +25,7 @@ interface TextProcessingResult {
 }
 
 /**
- * Sort CSS properties in the active editor
+ * Sort CSS properties and then format using stylelint if available 
  * 
  * @param editor - The active text editor
  * @param sortingOptions - The sorting options
@@ -69,29 +69,7 @@ export async function sortCssProperties(
       // Parse and sort the CSS/SCSS
       const sortedText = sortCssText(text, document.languageId, {
         ...options,
-        // Add formatting options 
-        'always-semicolon': formatting.alwaysSemicolon,
-        'color-case': formatting.colorCase,
-        'block-indent': formatting.blockIndent,
-        'color-shorthand': formatting.colorShorthand,
-        'element-case': formatting.elementCase,
-        'leading-zero': formatting.leadingZero,
-        'quotes': formatting.quotes,
-        'sort-order-fallback': formatting.sortOrderFallback,
-        'space-before-colon': formatting.spaceBeforeColon,
-        'space-after-colon': formatting.spaceAfterColon,
-        'space-before-combinator': formatting.spaceBeforeCombinator,
-        'space-after-combinator': formatting.spaceAfterCombinator,
-        'space-between-declarations': formatting.spaceBetweenDeclarations,
-        'space-before-opening-brace': formatting.spaceBeforeOpeningBrace,
-        'space-after-opening-brace': formatting.spaceAfterOpeningBrace,
-        'space-after-selector-delimiter': formatting.spaceAfterSelectorDelimiter,
-        'space-before-selector-delimiter': formatting.spaceBeforeSelectorDelimiter,
-        'space-before-closing-brace': formatting.spaceBeforeClosingBrace,
-        'strip-spaces': formatting.stripSpaces,
-        'tab-size': formatting.tabSize,
-        'unitless-zero': formatting.unitlessZero,
-        'vendor-prefix-align': formatting.vendorPrefixAlign
+        // Only pass essential sorting options, no formatting options
       });
 
       if (sortedText !== text) {
@@ -113,6 +91,14 @@ export async function sortCssProperties(
 
         // Apply the edit
         await vscode.workspace.applyEdit(edit);
+
+        // Format document after sorting using VS Code's format command
+        // This will use whatever formatter is configured in VS Code settings 
+        // (could be stylelint or another formatter)
+        console.log('Formatting document after sorting...');
+        await vscode.commands.executeCommand('editor.action.formatDocument');
+        console.log('Document formatting complete');
+
         vscode.window.showInformationMessage(`CSS properties sorted successfully using ${options.strategy} strategy`);
       } else {
         vscode.window.showInformationMessage('CSS properties are already properly sorted');
@@ -333,20 +319,29 @@ function getTextToProcess(editor: vscode.TextEditor): TextProcessingResult {
 
 /**
  * Ensure SASS module directives (@use and @forward) are in the correct order at the file level
+ * Followed by top-level SASS variables, then @property definitions, then mixins and other styles
  * 
  * @param sassText - The SASS/SCSS text content
- * @returns Text with module directives properly ordered
+ * @returns Text with module directives, variables, and properties properly ordered
  */
 function ensureSassModuleDirectiveOrder(sassText: string): string {
-  // This is a simple preprocessing step for top-level module directives
+  // This is a preprocessing step for top-level module directives and variables
   const lines = sassText.split('\n');
   const useDirectives: string[] = [];
   const forwardDirectives: string[] = [];
+  const topLevelVars: string[] = [];
+  const propertyRules: string[] = []; // Array to hold @property rules
   const otherLines: string[] = [];
 
   let inComment = false;
+  let inMixin = false;
+  let inRule = false;
+  let inProperty = false;
+  let inNesting = 0;
+  let buffer: string[] = [];
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const trimmedLine = line.trim();
 
     // Track comment blocks
@@ -370,18 +365,79 @@ function ensureSassModuleDirectiveOrder(sassText: string): string {
       continue;
     }
 
-    // Only process top-level directives (not indented)
-    if (line.startsWith('@use ')) {
-      useDirectives.push(line);
-    } else if (line.startsWith('@forward ')) {
-      forwardDirectives.push(line);
+    // Track nesting level
+    if (trimmedLine.includes('{')) {
+      inNesting++;
+
+      if (trimmedLine.startsWith('@mixin')) {
+        inMixin = true;
+        buffer = [line];
+      } else if (trimmedLine.startsWith('@property')) {
+        inProperty = true;
+        buffer = [line];
+      } else if (!trimmedLine.startsWith('@') && /^[a-zA-Z0-9_\-\.\[\]"'\*\#\&\:]+\s*{/.test(trimmedLine)) {
+        inRule = true;
+        otherLines.push(line);
+      } else {
+        otherLines.push(line);
+      }
+      continue;
+    }
+
+    if (trimmedLine.includes('}')) {
+      inNesting--;
+
+      if (inNesting === 0) {
+        if (inProperty) {
+          // Collect complete @property rule
+          buffer.push(line);
+          propertyRules.push(...buffer);
+          buffer = [];
+          inProperty = false;
+        } else if (inMixin) {
+          // Add mixins to other lines
+          otherLines.push(...buffer, line);
+          buffer = [];
+          inMixin = false;
+        } else {
+          otherLines.push(line);
+        }
+        inRule = false;
+      } else {
+        if (inProperty) {
+          buffer.push(line);
+        } else {
+          otherLines.push(line);
+        }
+      }
+      continue;
+    }
+
+    // Collect lines for property rules or mixins
+    if (inProperty || inMixin) {
+      buffer.push(line);
+      continue;
+    }
+
+    // Only process top-level directives and variables (not indented or in mixins/rules)
+    if (inNesting === 0 && !inMixin && !inRule) {
+      if (line.startsWith('@use ')) {
+        useDirectives.push(line);
+      } else if (line.startsWith('@forward ')) {
+        forwardDirectives.push(line);
+      } else if (line.match(/^\$[a-zA-Z0-9_-]+\s*:/) && !line.startsWith(' ') && !line.startsWith('\t')) {
+        // This is a top-level SASS variable (not indented)
+        topLevelVars.push(line);
+      } else {
+        otherLines.push(line);
+      }
     } else {
       otherLines.push(line);
     }
   }
 
-  // Only reorder if we found directives to reorder
-  if (useDirectives.length > 0 || forwardDirectives.length > 0) {
+  // Only reorder if we found directives, variables, or property rules to reorder
+  if (useDirectives.length > 0 || forwardDirectives.length > 0 || topLevelVars.length > 0 || propertyRules.length > 0) {
     // Add empty lines between directive groups if needed
     const result: string[] = [...useDirectives];
 
@@ -391,13 +447,31 @@ function ensureSassModuleDirectiveOrder(sassText: string): string {
 
     result.push(...forwardDirectives);
 
-    if ((useDirectives.length > 0 || forwardDirectives.length > 0) && otherLines.length > 0) {
+    if ((useDirectives.length > 0 || forwardDirectives.length > 0) && topLevelVars.length > 0) {
+      result.push('');
+    }
+
+    result.push(...topLevelVars);
+
+    if ((useDirectives.length > 0 || forwardDirectives.length > 0 || topLevelVars.length > 0)
+      && propertyRules.length > 0) {
+      result.push('');
+    }
+
+    result.push(...propertyRules);
+
+    if ((useDirectives.length > 0 || forwardDirectives.length > 0 || topLevelVars.length > 0
+      || propertyRules.length > 0) && otherLines.length > 0) {
       result.push('');
     }
 
     result.push(...otherLines);
 
-    return result.join('\n');
+    // Import the reduceBlankLines function from formatter.ts
+    const { reduceBlankLines } = require('./formatter');
+
+    // Process the result to ensure no multiple consecutive blank lines
+    return reduceBlankLines(result.join('\n'));
   }
 
   // No directives to reorder, return original text

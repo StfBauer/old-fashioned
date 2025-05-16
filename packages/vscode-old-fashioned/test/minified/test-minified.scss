@@ -1,0 +1,891 @@
+// Test SCSS file with randomly ordered properties, @property rules, variables, and media queries
+$primary: #3f51b5;
+$secondary: #f50057;
+$text-dark: #212121;
+$text-light: #fafafa;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$border-radius: 4px;
+$box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+@use 'sass:math';
+@forward 'variables';
+
+@mixin flex($direction: row, $justify: flex-start, $align: stretch) {
+    display: flex;
+    flex-direction: $direction;
+    justify-content: $justify;
+    align-items: $align;
+}
+
+@mixin responsive($breakpoint) {
+    @if $breakpoint==sm {
+        @media (max-width:576px) {
+            @content;
+        }
+    }
+
+    @else if $breakpoint==md {
+        @media (max-width:768px) {
+            @content;
+        }
+    }
+
+    @else if $breakpoint==lg {
+        @media (max-width:992px) {
+            @content;
+        }
+    }
+
+    @else if $breakpoint==xl {
+        @media (max-width:1200px) {
+            @content;
+        }
+    }
+}
+
+@property--main-gradient {
+    syntax: "<color>";
+    initial-value:#{$primary};
+    inherits: false;
+}
+
+@property--accent-color {
+    syntax: "<color>";
+    initial-value:#{$secondary};
+    inherits: true;
+}
+
+.container {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: $spacing-md;
+    padding-right: $spacing-md;
+    position: relative;
+
+    @include responsive(md) {
+        padding-left: $spacing-sm;
+        padding-right: $spacing-sm;
+        max-width: 100%;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: -$spacing-sm;
+        margin-right: -$spacing-sm;
+    }
+
+    .col {
+        flex: 0 0 auto;
+        width: 100%;
+        padding-left: $spacing-sm;
+        padding-right: $spacing-sm;
+    }
+
+    &.has-sidebar {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: $spacing-lg;
+
+        @include responsive(lg) {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+@mixin card($padding: $spacing-md, $radius: $border-radius) {
+    background-color: #fff;
+    border-radius: $radius;
+    box-shadow: $box-shadow;
+    padding: $padding;
+    transition: transform .3s ease, box-shadow .3s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, .15);
+    }
+}
+
+.card {
+    @include card;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: $spacing-lg;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, .1);
+    z-index: 1;
+    background: linear-gradient(to bottom, #fff, #f5f5f5);
+    height: auto;
+    min-height: 200px;
+    color: $text-dark;
+    $card-padding: 20px;
+
+    .card-header {
+        padding: $card-padding;
+        border-bottom: 1px solid rgba(0, 0, 0, .1);
+        background:var(--main-gradient, linear-gradient(to right, #{$primary}, darken(#{$primary}, 10%)));
+        color: $text-light;
+    }
+
+    .card-body {
+        padding: $card-padding;
+        flex: 1 1 auto;
+    }
+
+    .card-footer {
+        padding: $card-padding;
+        border-top: 1px solid rgba(0, 0, 0, .1);
+        background-color: rgba(0, 0, 0, .03);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.button {
+    display: inline-block;
+    padding: $spacing-sm $spacing-lg;
+    border: none;
+    border-radius: $border-radius;
+    background-color: $primary;
+    color: $text-light;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .3s, transform .2s;
+    user-select: none;
+
+    &:hover {
+        background-color: darken($primary, 10%);
+        transform: translateY(-2px);
+    }
+
+    &:active {
+        transform: translateY(1px);
+    }
+
+    &--secondary {
+        background-color: $secondary;
+
+        &:hover {
+            background-color: darken($secondary, 10%);
+        }
+    }
+
+    &--outline {
+        background-color: transparent;
+        border: 2px solid $primary;
+        color: $primary;
+
+        &:hover {
+            background-color: rgba($primary, .1);
+        }
+    }
+
+    &--small {
+        padding:#{$spacing-sm/2} $spacing-sm;
+        font-size: .875rem;
+    }
+
+    &--large {
+        padding: $spacing-md $spacing-lg;
+        font-size: 1.125rem;
+    }
+}
+
+@media (max-width:768px) {
+    .button {
+        padding:#{$spacing-sm/1.5} $spacing-md;
+    }
+}
+
+.form-group {
+    margin-bottom: $spacing-md;
+
+    label {
+        display: block;
+        margin-bottom: $spacing-sm;
+        font-weight: 500;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        padding: $spacing-sm;
+        border: 1px solid rgba(0, 0, 0, .2);
+        border-radius: $border-radius;
+        font-size: 1rem;
+        transition: border-color .3s, box-shadow .3s;
+
+        &:focus {
+            outline: none;
+            border-color: $primary;
+            box-shadow: 0 0 0 3px rgba($primary, .2);
+        }
+    }
+
+    textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .error-message {
+        color: $secondary;
+        font-size: .875rem;
+        margin-top: $spacing-sm/2;
+    }
+}
+
+@property--form-bg {
+    syntax: "<color>";
+    initial-value: #f8f8f8;
+    inherits: false;
+}
+
+.header {
+    background-color: $primary;
+    padding: $spacing-lg 0;
+
+    @include responsive(md) {
+        padding: $spacing-md 0;
+    }
+
+    .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: $text-light;
+            text-decoration: none;
+        }
+
+        .menu {
+            display: flex;
+            gap: $spacing-md;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+
+            li {
+                position: relative;
+            }
+
+            a {
+                color: $text-light;
+                text-decoration: none;
+                padding: $spacing-sm;
+                display: block;
+                transition: color .3s;
+
+                &:hover {
+                    color: rgba($text-light, .8);
+                }
+            }
+        }
+
+        @include responsive(md) {
+            .menu {
+                display: none;
+            }
+        }
+    }
+}
+
+@media (max-width:576px) {
+    .header .nav .logo {
+        font-size: 1.25rem;
+    }
+}
+
+.footer {
+    background-color: darken($primary, 20%);
+    color: $text-light;
+    padding: $spacing-lg 0;
+    margin-top: $spacing-lg*2;
+
+    .footer-content {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-lg;
+
+        @include responsive(md) {
+            flex-direction: column;
+            gap: $spacing-md;
+        }
+    }
+
+    .footer-column {
+        flex: 1 1 200px;
+
+        h3 {
+            margin-top: 0;
+            margin-bottom: $spacing-md;
+            font-size: 1.2rem;
+            border-bottom: 2px solid $secondary;
+            padding-bottom: $spacing-sm;
+            display: inline-block;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+
+            li {
+                margin-bottom: $spacing-sm;
+            }
+
+            a {
+                color: $text-light;
+                text-decoration: none;
+                transition: color .3s;
+
+                &:hover {
+                    color: $secondary;
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
+
+    .copyright {
+        margin-top: $spacing-lg;
+        padding-top: $spacing-md;
+        border-top: 1px solid rgba(255, 255, 255, .1);
+        text-align: center;
+        font-size: .875rem;
+    }
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: $spacing-lg 0;
+
+    th {
+        background-color: $primary;
+        color: $text-light;
+        font-weight: 500;
+        padding: $spacing-sm $spacing-md;
+        text-align: left;
+    }
+
+    td {
+        padding: $spacing-sm $spacing-md;
+        border-bottom: 1px solid rgba(0, 0, 0, .1);
+    }
+
+    tbody tr {
+        transition: background-color .2s;
+
+        &:hover {
+            background-color: rgba($primary, .05);
+        }
+    }
+
+    @include responsive(md) {
+        font-size: .875rem;
+
+        th,
+        td {
+            padding: $spacing-sm;
+        }
+    }
+}
+
+@mixin overlay($bg-color: rgba(0, 0, 0, .5), $z-index: 10) {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: $bg-color;
+    z-index: $z-index;
+}
+
+.modal {
+    @include overlay;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s, visibility .3s;
+
+    &.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        border-radius: $border-radius;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        transform: translateY(-20px);
+        transition: transform .3s;
+    }
+
+    .modal.active .modal-content {
+        transform: translateY(0);
+    }
+
+    .modal-header {
+        padding: $spacing-md;
+        border-bottom: 1px solid rgba(0, 0, 0, .1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-body {
+        padding: $spacing-md;
+    }
+
+    .modal-footer {
+        padding: $spacing-md;
+        border-top: 1px solid rgba(0, 0, 0, .1);
+        display: flex;
+        justify-content: flex-end;
+        gap: $spacing-sm;
+    }
+
+    .close-button {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        line-height: 1;
+        padding: 0;
+        cursor: pointer;
+        color: rgba(0, 0, 0, .5);
+        transition: color .2s;
+
+        &:hover {
+            color: rgba(0, 0, 0, .8);
+        }
+    }
+}
+
+@mixin gradient-text($gradient) {
+    background: $gradient;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+.hero {
+    position: relative;
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    background-color: $primary;
+    background-image: linear-gradient(135deg, $primary, darken($primary, 15%));
+    color: $text-light;
+    overflow: hidden;
+
+    @include responsive(md) {
+        height: auto;
+        padding: $spacing-lg*2 0;
+    }
+
+    .hero-content {
+        max-width: 600px;
+        position: relative;
+        z-index: 2;
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: $spacing-md;
+
+            @include responsive(md) {
+                font-size: 2rem;
+            }
+
+            span {
+                @include gradient-text(linear-gradient(to right, $secondary, lighten($secondary, 20%)));
+            }
+        }
+
+        p {
+            font-size: 1.25rem;
+            margin-bottom: $spacing-lg;
+            opacity: .9;
+
+            @include responsive(md) {
+                font-size: 1rem;
+            }
+        }
+    }
+
+    .hero-image {
+        position: absolute;
+        right: -5%;
+        top: 10%;
+        width: 50%;
+        max-width: 600px;
+        z-index: 1;
+
+        @include responsive(lg) {
+            opacity: .4;
+        }
+    }
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-gap: $spacing-md;
+
+    @include responsive(md) {
+        grid-template-columns: repeat(6, 1fr);
+        grid-gap: $spacing-sm;
+    }
+
+    .grid-item {
+        grid-column: span 4;
+
+        @include responsive(md) {
+            grid-column: span 6;
+        }
+
+        @include responsive(sm) {
+            grid-column: span 12;
+        }
+    }
+}
+
+.alert {
+    border-radius: $border-radius;
+    padding: $spacing-md;
+    margin-bottom: $spacing-md;
+    border-left: 4px solid transparent;
+    position: relative;
+    overflow: hidden;
+
+    &--success {
+        background-color: #e8f5e9;
+        border-color: #4caf50;
+        color: #2e7d32;
+    }
+
+    &--error {
+        background-color: #ffebee;
+        border-color: #f44336;
+        color: #c62828;
+    }
+
+    &--warning {
+        background-color: #fff8e1;
+        border-color: #ffc107;
+        color: #ff8f00;
+    }
+
+    &--info {
+        background-color: #e3f2fd;
+        border-color: #2196f3;
+        color: #0d47a1;
+    }
+
+    .close {
+        position: absolute;
+        top: $spacing-sm;
+        right: $spacing-sm;
+        background: none;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+        color: currentColor;
+        opacity: .6;
+        transition: opacity .2s;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: .75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+
+    &--primary {
+        background-color: $primary;
+        color: $text-light;
+    }
+
+    &--secondary {
+        background-color: $secondary;
+        color: $text-light;
+    }
+
+    &--success {
+        background-color: #4caf50;
+        color: $text-light;
+    }
+
+    &--error {
+        background-color: #f44336;
+        color: $text-light;
+    }
+}
+
+.skeleton {
+    background-color: #ebebeb;
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .6), rgba(255, 255, 255, 0));
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    background-position: -150% 0;
+    height: 16px;
+    border-radius: 4px;
+    margin-bottom: $spacing-sm;
+    width: 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    to {
+        background-position: 350% 0;
+    }
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: $box-shadow;
+
+    &--sm {
+        width: 30px;
+        height: 30px;
+    }
+
+    &--lg {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+.avatar-group {
+    display: flex;
+
+    .avatar {
+        margin-left: -8px;
+        transition: transform .2s;
+
+        &:hover {
+            transform: translateY(-5px);
+        }
+    }
+}
+
+@property--progress-value {
+    syntax: "<percentage>";
+    initial-value: 0%;
+    inherits: false;
+}
+
+.progress {
+    height: 8px;
+    background-color: rgba(0, 0, 0, .1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: $spacing-md 0;
+
+    .progress-bar {
+        height: 100%;
+        background-color: $primary;
+        width: var(--progress-value, 0%);
+        transition: width .5s ease-out;
+    }
+}
+
+.tabs {
+    margin: $spacing-lg 0;
+
+    .tab-nav {
+        display: flex;
+        border-bottom: 2px solid rgba(0, 0, 0, .1);
+
+        button {
+            background: none;
+            border: none;
+            padding: $spacing-sm $spacing-md;
+            font-weight: 500;
+            cursor: pointer;
+            opacity: .6;
+            transition: opacity .3s, border-bottom .3s;
+
+            &.active {
+                opacity: 1;
+                position: relative;
+
+                &:after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 0;
+                    width: 100%;
+                    height: 2px;
+                    background-color: $primary;
+                }
+            }
+
+            &:hover:not(.active) {
+                opacity: .8;
+            }
+        }
+    }
+
+    .tab-content {
+        margin-top: $spacing-md;
+
+        .tab-pane {
+            display: none;
+
+            &.active {
+                display: block;
+            }
+        }
+    }
+}
+
+@use 'sass:color';
+@use 'sass:map';
+
+@mixin theme-colors($theme-map) {
+    @each $name, $color in $theme-map {
+        --#{$name}:#{$color};
+        --#{$name}-light:#{lighten($color,10%)};
+        --#{$name}-dark:#{darken($color,10%)};
+    }
+}
+
+:root {
+    @include theme-colors(('primary':$primary, 'secondary':$secondary));
+}
+
+.dark-mode {
+    @include theme-colors(('primary':lighten($primary, 10%), 'secondary':lighten($secondary, 10%)));
+}
+
+@media print {
+    body {
+        font-size: 12pt;
+        color: #000;
+        background: #fff;
+    }
+
+    .container {
+        max-width: 100%;
+    }
+
+    .header,
+    .footer,
+    .sidebar,
+    .nav {
+        display: none;
+    }
+
+    a {
+        text-decoration: none;
+        color: #000;
+    }
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.clearfix:after {
+    content: '';
+    display: table;
+    clear: both;
+}
+
+@supports (display:grid) {
+    .legacy-float-layout {
+        display: grid;
+    }
+}
+
+$breakpoints: (
+    xs:0,
+    sm:576px,
+    md:768px,
+    lg:992px,
+    xl:1200px
+);
+
+@each $name, $width in $breakpoints {
+    .d-#{$name}-none {
+        @if $name==xs {
+            display: none;
+        }
+
+        @else {
+            @media (min-width:$width) {
+                display: none;
+            }
+        }
+    }
+
+    .d-#{$name}-block {
+        @if $name==xs {
+            display: block;
+        }
+
+        @else {
+            @media (min-width:$width) {
+                display: block;
+            }
+        }
+    }
+
+    .d-#{$name}-flex {
+        @if $name==xs {
+            display: flex;
+        }
+
+        @else {
+            @media (min-width:$width) {
+                display: flex;
+            }
+        }
+    }
+}

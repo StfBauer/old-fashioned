@@ -90,7 +90,6 @@ export function getSortingOptions(): SortingOptions {
 export function getFormattingOptions(): any {
   const config = vscode.workspace.getConfiguration('oldFashioned');
 
-  // Add the new showDebugComments option
   return {
     alwaysSemicolon: config.get<boolean>('formatting.alwaysSemicolon', true),
     colorCase: config.get<'lower' | 'upper'>('formatting.colorCase', 'lower'),
@@ -104,6 +103,8 @@ export function getFormattingOptions(): any {
     vendorPrefixAlign: config.get<boolean>('formatting.vendorPrefixAlign', true),
     stripSpaces: config.get<boolean>('formatting.stripSpaces', true),
     showDebugComments: config.get<boolean>('showDebugComments', false),
+    formatMinified: config.get<boolean>('formatting.formatMinified', true),
+    reduceBlankLines: config.get<boolean>('formatting.reduceBlankLines', true),
 
     // Spacing settings
     spaceBeforeColon: config.get<string>('spacing.spaceBeforeColon', ''),
