@@ -1,6 +1,6 @@
 {
   "name": "old-fashioned",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -59,6 +59,7 @@
     "eslint": "^9.26.0",
     "nx": "^21.0.3",
     "standard-version": "^9.5.0",
+    "tmp": "^0.2.3",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
