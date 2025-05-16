@@ -20,5 +20,6 @@ vitest.config.ts
 # Exclude .gitkeep files
 **/.gitkeep
 ../.gitkeep
-# Exclude large demo gif (using the one from GitHub instead)
+
+# Exclude large demo gif (using GitHub URL in README instead)
 images/old-fashioned-demo.gif
