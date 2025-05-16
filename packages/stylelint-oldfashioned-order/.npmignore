@@ -1,0 +1,24 @@
+# Source files
+src/
+test/
+
+# Build artifacts
+*.tsbuildinfo
+*.map
+
+# Configs
+.eslintrc
+tsconfig.*.json
+tsconfig.json
+stylelint.config.js
+test-setup.ts
+
+# Development files
+node_modules/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Nx specific
+.nx/

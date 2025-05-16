@@ -1,0 +1,22 @@
+# Source files
+src/
+test/
+
+# Build artifacts
+*.tsbuildinfo
+*.map
+
+# Configs
+.eslintrc
+tsconfig.json
+tsconfig.*.json
+
+# Development files
+node_modules/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Nx specific
+.nx/

@@ -27,12 +27,28 @@ A Visual Studio Code extension that helps you keep your CSS properties organized
 ## Usage
 
 1. Open a CSS, SCSS, or SASS file
-2. Run the command "Sort CSS Properties (Old Fashioned)" from the command palette (Ctrl+Shift+P or Cmd+Shift+
+2. Run the command "Sort CSS Properties (Old Fashioned)" from the command palette (Ctrl+Shift+P or Cmd+Shift+P)
 3. Your properties will be sorted according to your chosen strategy
 
 ## Demo
 
 ![Old Fashioned CSS Formatter in action](https://raw.githubusercontent.com/StfBauer/old-fashioned/60febaf8ba2468a4541d44633c47b7f6f8a2e912/packages/vscode-old-fashioned/images/old-fashioned-demo.gif)
+
+## 🎯 Feature Comparison Table
+
+| 🧩 Feature / Tool Capability                      | CSSComb                         | Stylelint (w/ plugins)              | Prettier                  | Old-Fashioned CSS             |
+|--------------------------------------------------|----------------------------------|-------------------------------------|---------------------------|-------------------------------|
+| 📅 Multiple sorting methodologies                | ✅ (via presets)                 | ⚠️ (manual setup only)              | ❌                         | ✅ Alphabetical, Concentric   |
+| 🧱 Idiomatic sorting (SMACSS, BEM, etc.)         | ✅                               | ⚠️ (plugin-dependent)              | ❌                         | ✅ Built-in presets           |
+| 🧠 Property grouping & spacing                   | ✅                               | ⚠️ (needs config)                  | ❌                         | ✅ Automatic                  |
+| 💡 Intelligent formatting (before sorting)       | ❌                               | ⚠️ (not default)                   | ✅ Formatting only         | ✅ Context aware              |
+| 🧱 SCSS support (nesting, variables)             | ✅                               | ✅ (via `stylelint-scss`)          | ⚠️ Partial                 | ✅ Full                       |
+| 🧬 Handles @rules like `@property`, `@media`     | ⚠️ Limited                       | ⚠️ Some support                    | ⚠️ Basic                   | ✅ Extensive                  |
+| ⚙️ Fine-grained configurability                  | ✅ via `.csscomb.json`           | ✅ with multiple plugins            | ❌ (non-configurable)      | ✅ Built-in + Workspace local |
+| 🛠️ Integration with editors & workflows         | ⚠️ Outdated                      | ✅ Modern integrations              | ✅ Excellent               | ✅ Designed for VS Code       |
+| 🛰️ Community preset sharing                      | ✅                               | ⚠️ Limited                         | ❌                         | 🟡 Planned                    |
+| 👷 Maintained / actively developed               | ❌ Abandoned                     | ✅ Active                           | ✅ Active                  | ✅ Active                     |
+| 🧭 Learning-friendly (teaches logical order)     | ⚠️ Implicit                      | ⚠️ Depends on rules                | ❌                         | ✅ Explicit via strategy      |
 
 ## Extension Settings
 
