@@ -30,7 +30,13 @@ A Visual Studio Code extension that helps you keep your CSS properties organized
 2. Run the command "Sort CSS Properties (Old Fashioned)" from the command palette (Ctrl+Shift+P or Cmd+Shift+P)
 3. Your properties will be sorted according to your chosen strategy
 
-![Demo of Old Fashioned CSS Sorter](images/demo.gif)
+## Demo
+
+![Old Fashioned CSS Formatter in action](images/demo.gif)
+
+You can also watch a full demonstration of the extension in action:
+
+[![Old Fashioned CSS Formatter Video](images/video-thumbnail.png)](https://youtu.be/YOUR_VIDEO_ID)
 
 ## Extension Settings
 
