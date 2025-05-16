@@ -42,6 +42,18 @@ This extension contributes the following settings:
 * `oldFashioned.showActivationMessage`: Show a message when the extension is activated
 * `oldFashioned.showDebugComments`: Show debug comments in the sorted CSS output (default: false)
 
+## Configuration
+
+### Sorting Configuration
+
+- **Sorting Strategy**: Choose the sorting strategy (alphabetical, concentric, idiomatic)
+- **Empty Lines Between Groups**: Add empty lines between property groups
+- **Sort Properties Within Groups**: Sort properties alphabetically within each group
+
+### Formatting Configuration
+
+- **Format Before Sorting:** Enable or disable automatic formatting using VS Code's built-in formatter before sorting properties (default: true)
+
 ## Sorting Strategies Explained
 
 ### Alphabetical
@@ -149,6 +161,49 @@ A: Check that `oldFashioned.sorting.emptyLinesBetweenGroups` is set to `true` in
 ### Getting Support
 
 If you encounter issues not addressed here, please [open an issue](https://github.com/n8design/old-fashioned/issues) on our GitHub repository.
+
+## Keyboard Shortcuts
+
+By default, Old Fashioned doesn't come with predefined keyboard shortcuts to avoid conflicts with other extensions. However, you can easily set up your own shortcuts:
+
+1. Open VS Code and go to **File > Preferences > Keyboard Shortcuts** (or press `Ctrl+K Ctrl+S` / `Cmd+K Cmd+S` on macOS)
+2. Click on the "Open Keyboard Shortcuts (JSON)" button in the top right corner of the editor
+3. Add your preferred shortcut to the `keybindings.json` file. 
+
+Here are some suggested keyboard shortcuts that shouldn't conflict with VS Code's default bindings:
+
+```json
+// Option 1: Similar to Format Document (Shift+Alt+F with additional Ctrl key)
+{
+  "key": "ctrl+shift+alt+f",
+  "command": "oldFashioned.sortProperties",
+  "when": "editorTextFocus && (editorLangId == 'css' || editorLangId == 'scss' || editorLangId == 'sass')"
+}
+
+// Option 2: Alternative using Ctrl+K prefix (common in VS Code)
+{
+  "key": "ctrl+k s",
+  "command": "oldFashioned.sortProperties",
+  "when": "editorTextFocus && (editorLangId == 'css' || editorLangId == 'scss' || editorLangId == 'sass')"
+}
+
+// Option 3: For Mac users
+{
+  "key": "cmd+k s",
+  "command": "oldFashioned.sortProperties", 
+  "when": "editorTextFocus && (editorLangId == 'css' || editorLangId == 'scss' || editorLangId == 'sass')"
+}
+```
+
+Choose the option that works best for your workflow. The first option adds an additional Ctrl key to the standard Format Document shortcut, while the second and third options use the Ctrl+K/Cmd+K chord system common in VS Code.
+
+### Available Commands
+
+- `oldFashioned.sortProperties`: Sort properties using the configured strategy
+- `oldFashioned.sortPropertiesAlphabetical`: Sort properties alphabetically
+- `oldFashioned.sortPropertiesConcentric`: Sort properties using the concentric strategy
+- `oldFashioned.sortPropertiesIdiomatic`: Sort properties using the idiomatic strategy
+- `oldFashioned.sortPropertiesGrouped`: Sort properties using the grouped strategy
 
 ## Release Notes
 
