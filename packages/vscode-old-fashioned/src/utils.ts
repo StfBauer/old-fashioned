@@ -87,53 +87,38 @@ export function getSortingOptions(): SortingOptions {
  * 
  * @returns The formatting options from VS Code settings
  */
-export function getFormattingOptions(): FormattingOptions {
+export function getFormattingOptions(): any {
   const config = vscode.workspace.getConfiguration('oldFashioned');
-  console.log('Accessed oldFashioned configuration:', config);
 
-  // For backward compatibility, check both old and new paths
-  const getConfigValue = <T>(newPath: string, oldPath: string, defaultValue: T): T => {
-    // Try the new path first
-    const newValue = config.get<T>(newPath);
-    if (newValue !== undefined) {
-      return newValue;
-    }
-    // Fall back to old path
-    const oldValue = config.get<T>(oldPath);
-    if (oldValue !== undefined) {
-      return oldValue;
-    }
-    // If neither exists, return default
-    return defaultValue;
-  };
-
+  // Add the new showDebugComments option
   return {
-    alwaysSemicolon: getConfigValue('formatting.alwaysSemicolon', 'alwaysSemicolon', true),
-    colorCase: getConfigValue('formatting.colorCase', 'colorCase', 'lower' as 'lower' | 'upper'),
-    blockIndent: getConfigValue('formatting.blockIndent', 'blockIndent', '\t'),
-    colorShorthand: getConfigValue('formatting.colorShorthand', 'colorShorthand', true),
-    elementCase: getConfigValue('formatting.elementCase', 'elementCase', 'lower' as 'lower' | 'upper'),
-    leadingZero: getConfigValue('formatting.leadingZero', 'leadingZero', false),
-    quotes: getConfigValue('formatting.quotes', 'quotes', 'double' as 'double' | 'single'),
-    sortOrderFallback: getConfigValue('formatting.sortOrderFallback', 'sortOrderFallback', 'abc' as 'abc' | 'none'),
-    unitlessZero: getConfigValue('formatting.unitlessZero', 'unitlessZero', true),
-    vendorPrefixAlign: getConfigValue('formatting.vendorPrefixAlign', 'vendorPrefixAlign', true),
-    stripSpaces: getConfigValue('formatting.stripSpaces', 'stripSpaces', true),
+    alwaysSemicolon: config.get<boolean>('formatting.alwaysSemicolon', true),
+    colorCase: config.get<'lower' | 'upper'>('formatting.colorCase', 'lower'),
+    blockIndent: config.get<string>('formatting.blockIndent', '\t'),
+    colorShorthand: config.get<boolean>('formatting.colorShorthand', true),
+    elementCase: config.get<'lower' | 'upper'>('formatting.elementCase', 'lower'),
+    leadingZero: config.get<boolean>('formatting.leadingZero', false),
+    quotes: config.get<'double' | 'single'>('formatting.quotes', 'double'),
+    sortOrderFallback: config.get<'abc' | 'none'>('formatting.sortOrderFallback', 'abc'),
+    unitlessZero: config.get<boolean>('formatting.unitlessZero', true),
+    vendorPrefixAlign: config.get<boolean>('formatting.vendorPrefixAlign', true),
+    stripSpaces: config.get<boolean>('formatting.stripSpaces', true),
+    showDebugComments: config.get<boolean>('showDebugComments', false),
 
     // Spacing settings
-    spaceBeforeColon: getConfigValue('spacing.spaceBeforeColon', 'spaceBeforeColon', ''),
-    spaceAfterColon: getConfigValue('spacing.spaceAfterColon', 'spaceAfterColon', ' '),
-    spaceBeforeCombinator: getConfigValue('spacing.spaceBeforeCombinator', 'spaceBeforeCombinator', ' '),
-    spaceAfterCombinator: getConfigValue('spacing.spaceAfterCombinator', 'spaceAfterCombinator', ' '),
-    spaceBetweenDeclarations: getConfigValue('spacing.spaceBetweenDeclarations', 'spaceBetweenDeclarations', '\n'),
-    spaceBeforeOpeningBrace: getConfigValue('spacing.spaceBeforeOpeningBrace', 'spaceBeforeOpeningBrace', ''),
-    spaceAfterOpeningBrace: getConfigValue('spacing.spaceAfterOpeningBrace', 'spaceAfterOpeningBrace', '\n'),
-    spaceAfterSelectorDelimiter: getConfigValue('spacing.spaceAfterSelectorDelimiter', 'spaceAfterSelectorDelimiter', '\n'),
-    spaceBeforeSelectorDelimiter: getConfigValue('spacing.spaceBeforeSelectorDelimiter', 'spaceBeforeSelectorDelimiter', ''),
-    spaceBeforeClosingBrace: getConfigValue('spacing.spaceBeforeClosingBrace', 'spaceBeforeClosingBrace', '\n'),
+    spaceBeforeColon: config.get<string>('spacing.spaceBeforeColon', ''),
+    spaceAfterColon: config.get<string>('spacing.spaceAfterColon', ' '),
+    spaceBeforeCombinator: config.get<string>('spacing.spaceBeforeCombinator', ' '),
+    spaceAfterCombinator: config.get<string>('spacing.spaceAfterCombinator', ' '),
+    spaceBetweenDeclarations: config.get<string>('spacing.spaceBetweenDeclarations', '\n'),
+    spaceBeforeOpeningBrace: config.get<string>('spacing.spaceBeforeOpeningBrace', ''),
+    spaceAfterOpeningBrace: config.get<string>('spacing.spaceAfterOpeningBrace', '\n'),
+    spaceAfterSelectorDelimiter: config.get<string>('spacing.spaceAfterSelectorDelimiter', '\n'),
+    spaceBeforeSelectorDelimiter: config.get<string>('spacing.spaceBeforeSelectorDelimiter', ''),
+    spaceBeforeClosingBrace: config.get<string>('spacing.spaceBeforeClosingBrace', '\n'),
 
     // General settings
-    tabSize: getConfigValue('general.tabSize', 'tabSize', true)
+    tabSize: config.get<boolean>('general.tabSize', true)
   };
 }
 

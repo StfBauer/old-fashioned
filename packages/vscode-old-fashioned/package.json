@@ -1,39 +1,31 @@
 {
-  "name": "old-fashioned",
-  "displayName": "Old Fashioned CSS Property Sorter",
+  "name": "vscode-old-fashioned",
+  "displayName": "Old Fashioned CSS Sorter",
+  "description": "Sort CSS properties in a clean, consistent way",
   "version": "0.0.1",
-  "description": "A CSS property sorter with multiple sorting strategies",
   "publisher": "n8design",
-  "author": {
-    "name": "n8design"
-  },
-  "license": "MIT",
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.76.0"
   },
-  "icon": "images/old-fashioned.png",
   "categories": [
     "Formatters",
     "Linters"
   ],
-  "keywords": [
-    "css",
-    "sorting",
-    "formatter",
-    "scss",
-    "less"
-  ],
   "activationEvents": [
     "onLanguage:css",
     "onLanguage:scss",
-    "onLanguage:less"
+    "onLanguage:sass"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "old-fashioned.sortProperties",
-        "title": "Old Fashioned: Sort CSS Properties"
+        "title": "Sort CSS Properties (Old Fashioned)"
+      },
+      {
+        "command": "old-fashioned.openSettings",
+        "title": "Open Old Fashioned Settings"
       }
     ],
     "configuration": {
@@ -64,33 +56,50 @@
           "default": true,
           "description": "Sort properties alphabetically within each group"
         },
-        "oldFashioned.formatting.alwaysSemicolon": {
+        "oldFashioned.showActivationMessage": {
           "type": "boolean",
           "default": true,
-          "description": "Always add a semicolon after property declarations."
+          "description": "Show a message when the extension is activated"
+        },
+        "oldFashioned.showDebugComments": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show debug comments in the sorted CSS output"
         }
       }
     }
   },
   "scripts": {
-    "build": "node esbuild.config.js",
-    "test": "vitest run"
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
   },
   "dependencies": {
-    "stylelint-oldfashioned-order": "^0.0.1",
-    "postcss": "^8.4.24",
-    "postcss-scss": "^4.0.9",
-    "stylelint": "^16.0.0",
-    "stylelint-order": "^6.0.4",
-    "stylelint-scss": "^6.2.1"
+    "@old-fashioned/shared": "file:../shared",
+    "postcss": "^8.4.35",
+    "postcss-scss": "^4.0.9"
   },
   "devDependencies": {
-    "@vscode/vsce": "^2.22.0",
-    "@types/node": "^18.0.0",
-    "@types/vscode": "^1.60.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/n8design/old-fashioned"
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.76.0",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
+    "@vscode/test-electron": "^2.2.3",
+    "copy-webpack-plugin": "^12.0.2",
+    "eslint": "^8.34.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "ts-loader": "^9.4.2",
+    "typescript": "^4.9.5",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
   }
 }

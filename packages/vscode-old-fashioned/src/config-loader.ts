@@ -33,7 +33,7 @@ export interface ConfigWithSource {
  * Default sorting options
  */
 export const DEFAULT_SORTING_OPTIONS: SortingOptions = {
-    strategy: 'alphabetical', // Changed from 'grouped' to 'alphabetical'
+    strategy: 'alphabetical',
     emptyLinesBetweenGroups: true,
     sortPropertiesWithinGroups: true
 };
@@ -90,7 +90,6 @@ function findStylelintConfig(docOrPath: vscode.TextDocument | string): { config:
                     }
                 } else {
                     // For other config files, load the entire file
-                    let config;
                     if (configFile.endsWith('.js')) {
                         // For JS files, we can't require them directly in VS Code extension
                         // We'd need a more complex solution, but for now we'll skip them
@@ -98,7 +97,7 @@ function findStylelintConfig(docOrPath: vscode.TextDocument | string): { config:
                     } else {
                         // For JSON and YAML files, read them as JSON
                         try {
-                            config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
                             return {
                                 config,
                                 configPath
@@ -120,7 +119,7 @@ function findStylelintConfig(docOrPath: vscode.TextDocument | string): { config:
         // If no config found, return null
         return { config: null, configPath: null };
     } catch (error) {
-        console.error('Error finding stylelint config:', error);
+        console.error('Error finding stylelint config:', error instanceof Error ? error.message : String(error));
         return { config: null, configPath: null };
     }
 }
@@ -141,10 +140,10 @@ function mapToSortingStrategy(value: string): SortingStrategy {
         outsidein: 'concentric',
         'outside-in': 'concentric',
         idiomatic: 'idiomatic',
-        smacss: 'idiomatic',
+        smacss: 'idiomatic'
     };
 
-    return valueMap[valueLower] || 'alphabetical'; // Default to 'alphabetical'
+    return valueMap[valueLower] || 'alphabetical';
 }
 
 /**
@@ -181,7 +180,7 @@ function getSortingOptionsFromStylelint(stylelintConfig: any): { options: Sortin
         }
 
         // Extract the strategy (order) from the rule
-        let strategy: SortingStrategy = 'alphabetical'; // Default strategy
+        let strategy: SortingStrategy = 'alphabetical';
         if (orderConfig === 'alphabetical') {
             strategy = 'alphabetical';
         } else if (orderConfig === 'concentric' || orderConfig === 'outside-in') {
@@ -219,7 +218,7 @@ function getSortingOptionsFromStylelint(stylelintConfig: any): { options: Sortin
         }
 
         // Map the stylelint-order configuration to our strategy
-        let strategy: SortingStrategy = 'alphabetical'; // Default strategy
+        let strategy: SortingStrategy = 'alphabetical';
         if (orderConfig === 'alphabetical') {
             strategy = 'alphabetical';
         } else if (orderConfig === 'concentric' || orderConfig === 'outside-in' || orderConfig === 'smacss') {
@@ -241,7 +240,7 @@ function getSortingOptionsFromStylelint(stylelintConfig: any): { options: Sortin
     // If no valid configuration is found, use default options
     return {
         options: {
-            strategy: 'alphabetical', // Default strategy
+            strategy: 'alphabetical',
             emptyLinesBetweenGroups: true,
             sortPropertiesWithinGroups: true
         },
@@ -286,17 +285,10 @@ export function getDocumentSortingOptions(document: vscode.TextDocument): Config
             };
         }
 
-        // Configure sorting options to match stylelint-order configuration
-        const options: SortingOptions = {
-            strategy: 'alphabetical', // Default strategy
-            emptyLinesBetweenGroups: true,
-            sortPropertiesWithinGroups: true
-        };
-
         // If no configuration was found, use defaults
         return {
             source: ConfigSource.DEFAULT,
-            options,
+            options: DEFAULT_SORTING_OPTIONS,
             configPath: null
         };
     } catch (error) {

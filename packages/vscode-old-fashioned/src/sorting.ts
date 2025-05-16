@@ -284,11 +284,17 @@ function sortCssText(cssText: string, languageId: string, options: any): string 
 
     // If empty lines between groups is enabled, use the formatter to add them
     if (options.emptyLinesBetweenGroups) {
-      return addEmptyLinesBetweenGroups(result, strategy);
+      return addEmptyLinesBetweenGroups(result, strategy, {
+        showDebugComments: options.showDebugComments
+      });
     }
 
-    // Otherwise just add the debug marker
-    return `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${strategy}) */\n${result}`;
+    // Otherwise just add the debug marker if showDebugComments is true
+    if (options.showDebugComments) {
+      return `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${strategy}) */\n${result}`;
+    }
+
+    return result;
   } catch (error) {
     console.error('Error parsing CSS:', error);
     return cssText; // Return original text if parsing fails

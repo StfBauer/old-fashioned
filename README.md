@@ -1,104 +1,48 @@
-# Old Fashioned CSS Property Sorting Toolset
+# Old Fashioned
 
-A comprehensive toolset for sorting CSS properties with customizable strategies, supporting both CSS and SCSS/SASS files.
+A collection of tools for maintaining clean, consistent CSS code through intelligent property sorting.
 
-## Overview
+## Packages
 
-Old Fashioned is a set of tools for sorting CSS properties according to various strategies, similar to the functionality provided by CSSComb but with modern tooling and TypeScript support.
+This monorepo contains the following packages:
 
-The project consists of three main components:
-
-1. **@old-fashioned/shared** - Shared types, interfaces, and utilities
-2. **stylelint-oldfashioned-order** - Stylelint plugin for sorting CSS properties
-3. **old-fashioned** - VS Code extension that provides UI and integration
-
-## Features
-
-- Multiple sorting strategies:
-  - **Alphabetical** - Sort properties alphabetically
-  - **Grouped** - Sort properties by functional groups (position, display, etc.)
-  - **Concentric** - Sort properties from outside to inside
-  - **Custom** - Use custom property groups
-- Modern CSS support:
-  - **CSS Variables** - Support for CSS custom properties
-  - **@property** - Support for CSS `@property` at-rules
-  - **Modern properties** - Support for modern CSS properties like `aspect-ratio`, `gap`, etc.
-
-- Support for CSS, SCSS, and SASS syntax
-- Handling of SCSS variables, directives, and nested rules
-- Empty line insertion between property groups
-- Auto-fix capabilities
-- VS Code integration with diagnostics and quick-fixes
+- **vscode-old-fashioned**: VS Code extension for sorting CSS properties
+- **shared**: Shared code for sorting strategies and property groups
+- **stylelint-oldfashioned-order**: Stylelint plugin for sorting CSS properties (planned)
 
 ## Getting Started
 
-### Using the VS Code Extension
+### For Users
 
-1. Install the "Old Fashioned" extension from the VS Code marketplace
-2. Open a CSS, SCSS, or SASS file
-3. Use the "Old Fashioned: Sort CSS Properties" command from the command palette
-4. Configure sorting options in VS Code settings
+Install the [Old Fashioned CSS Sorter](https://marketplace.visualstudio.com/items?itemName=n8design.old-fashioned) extension from the VS Code marketplace.
 
-### Using the Stylelint Plugin
+See the [extension README](./packages/vscode-old-fashioned/README.md) for usage instructions.
 
-1. Install the plugin:
-   ```bash
-   npm install stylelint stylelint-oldfashioned-order --save-dev
+### For Developers
+
+1. Clone this repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Build all packages:
+   ```
+   npx nx run-many --target=build --all
    ```
 
-2. Add to your Stylelint config:
-   ```js
-   module.exports = {
-     plugins: ['stylelint-oldfashioned-order'],
-     rules: {
-       'plugin/oldfashioned-order': [
-         true,
-         {
-           strategy: 'grouped',
-           emptyLinesBetweenGroups: true,
-           sortPropertiesWithinGroups: true
-         }
-       ]
-     }
-   };
-   ```
+## Development Workflow
 
-## Configuration
+This project uses Nx for monorepo management. Common commands:
 
-### Sorting Strategies
+- `npx nx build vscode-old-fashioned` - Build the VS Code extension
+- `npx nx test vscode-old-fashioned` - Run tests for the VS Code extension
+- `npx nx build shared` - Build the shared package
+- `npx nx graph` - Visualize the project graph
 
-- **alphabetical**: Sort properties alphabetically
-- **grouped**: Sort properties by functional groups
-- **concentric**: Sort properties from outside to inside
-- **custom**: Sort properties by custom property groups
+## Contributing
 
-### Options
-
-- **emptyLinesBetweenGroups**: Add empty lines between property groups
-- **sortPropertiesWithinGroups**: Sort properties within groups alphabetically
-- **propertyGroups**: Custom property groups (for custom strategy)
-
-## Development
-
-This project is built as a monorepo using Nx:
-
-```bash
-# Install dependencies
-npm install
-
-# Build all packages
-npx nx run-many --target=build --all
-
-# Test all packages
-npx nx run-many --target=test --all
-```
-
-## Package Structure
-
-- `/packages/shared` - Shared types and utilities
-- `/packages/stylelint-oldfashioned-order` - Stylelint plugin
-- `/packages/vscode-old-fashioned` - VS Code extension
+Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.

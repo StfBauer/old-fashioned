@@ -1,8 +1,9 @@
 /**
  * Old Fashioned VS Code Extension
  * 
- * This extension provides CSS property sorting in VS Code using
- * the stylelint-oldfashioned-order plugin.
+ * This extension provides CSS property sorting in VS Code based on
+ * different strategies (alphabetical, concentric, idiomatic).
+ * It can also integrate with project-level stylelint configurations.
  */
 
 import * as vscode from 'vscode';

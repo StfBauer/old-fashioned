@@ -1,32 +1,27 @@
 /**
  * CSS Formatting utilities
  * 
- * This module contains functions to format CSS code
+ * This module handles the formatting of CSS code with proper spacing
+ * between property groups according to the chosen sorting strategy.
  */
 
 import * as vscode from 'vscode';
 import { SortingStrategy } from '@old-fashioned/shared';
 
 /**
- * Add empty lines between groups of CSS properties
+ * Add empty lines between groups of CSS properties based on the chosen strategy
  * 
- * @param cssText - The CSS text to format
- * @param strategy - The sorting strategy used
- * @returns The formatted CSS text with appropriate spacing between groups
+ * This formatter processes the sorted CSS text and inserts empty lines between
+ * different logical groups of properties to improve readability.
+ * 
+ * @param cssText - The CSS text to format after property sorting
+ * @param strategy - The sorting strategy used (alphabetical, concentric, idiomatic)
+ * @param options - Additional formatting options
+ * @returns The formatted CSS text with empty lines between property groups
  */
-export function addEmptyLinesBetweenGroups(cssText: string, strategy: string): string {
+export function addEmptyLinesBetweenGroups(cssText: string, strategy: string, options?: { showDebugComments?: boolean }): string {
     console.log(`Formatting with strategy: ${strategy}`);
 
-    // For alphabetical strategy, just remove duplicate empty lines - no grouping needed
-    if (strategy === 'alphabetical') {
-        // Clean up duplicate empty lines
-        const cleanedText = cssText.replace(/\n\s*\n\s*\n/g, '\n\n');
-
-        // Add debug marker
-        return `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: alphabetical) */\n${cleanedText}`;
-    }
-
-    // For other strategies, apply group formatting
     // Remove any GROUP_BOUNDARY comments from the input
     cssText = cssText.replace(/\/\*\s*GROUP_BOUNDARY\s*\*\//g, '');
 
@@ -108,15 +103,27 @@ export function addEmptyLinesBetweenGroups(cssText: string, strategy: string): s
         result.push(line);
     }
 
-    // Add debug marker with the correct strategy
-    return `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${strategy}) */\n${result.join('\n')}`;
+    // Get the final formatted result
+    const formattedResult = result.join('\n');
+
+    // Add debug marker only if showDebugComments is true
+    const showDebugComments = options?.showDebugComments === true;
+    if (showDebugComments) {
+        return `/* DEBUG: Old Fashioned formatter applied on ${new Date().toLocaleString()} (strategy: ${strategy}) */\n${formattedResult}`;
+    }
+
+    return formattedResult;
 }
 
 /**
  * Get the group index for a CSS property based on the selected strategy
  * 
+ * This helper function determines which logical group a CSS property belongs to
+ * according to the selected sorting strategy. The group index is used to decide
+ * where to insert empty lines in the formatted output.
+ * 
  * @param property - The CSS property name
- * @param strategy - The sorting strategy
+ * @param strategy - The sorting strategy (alphabetical, concentric, idiomatic)
  * @returns The group index or -1 if not found
  */
 function getPropertyGroup(property: string, strategy: string): number {

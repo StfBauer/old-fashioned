@@ -4,6 +4,9 @@
     color: blue;
     padding: 20px;
     display: flex;
+    @media screen {
+        background-color: yellow;
+    }
     z-index: 100;
     background-color: white;
     font-size: 16px;
