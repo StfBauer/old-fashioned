@@ -2,6 +2,8 @@
 
 A professional CSS/SCSS property organization toolkit with multiple sorting strategies and smart formatting options.
 
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](docs/maintenance.md)
+
 ## Demo
 
 ![Old Fashioned CSS Formatter in action](packages/vscode-old-fashioned/images/old-fashioned-demo.gif)
@@ -63,6 +65,16 @@ Old Fashioned supports several sorting strategies:
 - **Idiomatic**: Sort according to idiomatic CSS standards
 
 See the [VS Code Extension README](/packages/vscode-old-fashioned/README.md) for detailed configuration options.
+
+## Project Maintenance
+
+This project includes several tools to help maintain a clean workspace and prepare packages for publishing.
+See the [maintenance documentation](docs/maintenance.md) for more information on:
+
+- Interactive cleanup scripts
+- Prepare-for-publish utilities
+- Periodic automated cleanup
+- And more
 
 ## Contributing
 
