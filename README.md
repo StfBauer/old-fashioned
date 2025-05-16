@@ -1,4 +1,4 @@
-# Old Fashioned
+# Old-Fashioned CSS Sorter
 
 A collection of tools for maintaining clean, consistent CSS code through intelligent property sorting.
 
