@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { sortCssProperties } from './sorting';
-import { getFormattingOptions, getSortingOptions } from './utils';
+import { getFormattingOptions, getSortingOptions, shouldShowNotification } from './utils';
 // Import diagnostics in a way that allows us to control when it's loaded
 // This helps prevent immediate activation failures
 const diagnosticsModule = './diagnostics';
@@ -99,11 +99,11 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }, 2000); // Increased delay to ensure VS Code is fully initialized
 
-    // Show a message when the extension is activated
+    // Show a message when the extension is activated, respecting notification level
     const config = vscode.workspace.getConfiguration('oldFashioned');
     const showActivationMessage = config.get<boolean>('showActivationMessage', true);
 
-    if (showActivationMessage) {
+    if (showActivationMessage && shouldShowNotification('info')) {
       vscode.window.showInformationMessage('Old Fashioned CSS Sorter is now active. Use the command "Sort CSS Properties (Old Fashioned)" to sort your CSS.');
     }
 

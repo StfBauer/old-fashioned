@@ -178,3 +178,34 @@ export function createDiagnosticFromWarning(
 export function isStyleDocument(document: vscode.TextDocument): boolean {
   return ['css', 'scss', 'sass'].includes(document.languageId);
 }
+
+/**
+ * Gets notification level configuration from VS Code settings
+ * 
+ * @returns The notification level setting (verbose, minimal, or none)
+ */
+export function getNotificationLevel(): string {
+  const config = vscode.workspace.getConfiguration('oldFashioned');
+  return config.get<string>('notificationLevel', 'verbose');
+}
+
+/**
+ * Determines if a notification should be shown based on the current notification level
+ * 
+ * @param type - The type of notification (success, info, progress)
+ * @returns True if the notification should be shown
+ */
+export function shouldShowNotification(type: 'success' | 'info' | 'progress'): boolean {
+  const level = getNotificationLevel();
+
+  switch (level) {
+    case 'none':
+      return false;
+    case 'minimal':
+      // Only show success notifications in minimal mode
+      return type === 'success';
+    case 'verbose':
+    default:
+      return true;
+  }
+}

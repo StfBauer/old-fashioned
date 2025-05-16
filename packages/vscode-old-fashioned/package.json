@@ -65,6 +65,16 @@
           "type": "boolean",
           "default": false,
           "description": "Show debug comments in the sorted CSS output"
+        },
+        "oldFashioned.notificationLevel": {
+          "type": "string",
+          "enum": [
+            "verbose",
+            "minimal",
+            "none"
+          ],
+          "default": "verbose",
+          "description": "Control how many notifications are shown during sorting operations"
         }
       }
     }

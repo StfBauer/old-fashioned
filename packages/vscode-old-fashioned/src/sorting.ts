@@ -10,7 +10,7 @@ import { sortProperties } from '@old-fashioned/shared';
 import { SortingStrategy, SortingOptions } from '@old-fashioned/shared';
 import { CONCENTRIC_PROPERTY_ORDER, IDIOMATIC_PROPERTY_GROUPS } from '@old-fashioned/shared';
 import { addEmptyLinesBetweenGroups } from './formatter';
-import { getSortingOptions, getFormattingOptions } from './utils';
+import { getSortingOptions, getFormattingOptions, shouldShowNotification } from './utils';
 import { getDocumentSortingOptions, ConfigSource } from './config-loader';
 import * as postcss from 'postcss';
 import * as postcssScss from 'postcss-scss';
@@ -60,52 +60,80 @@ export async function sortCssProperties(
     // Use provided formatting options or get from settings
     const formatting = formattingOptions || getFormattingOptions();
 
-    // Show progress indicator
-    await vscode.window.withProgress({
-      location: vscode.ProgressLocation.Notification,
-      title: `Sorting CSS properties with ${options.strategy} strategy...`,
-      cancellable: false
-    }, async () => {
-      // Parse and sort the CSS/SCSS
-      const sortedText = sortCssText(text, document.languageId, {
-        ...options,
-        // Only pass essential sorting options, no formatting options
+    // Only show progress indicator if notification level allows it
+    if (shouldShowNotification('progress')) {
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: `Sorting CSS properties with ${options.strategy} strategy...`,
+        cancellable: false
+      }, async () => {
+        await performSort(options, formatting); // Pass options to the function
       });
+    } else {
+      // Perform sorting without the progress notification
+      await performSort(options, formatting); // Pass options to the function
+    }
+  } catch (error) {
+    console.error('Error sorting properties:', error);
+    // Still show error messages regardless of notification level - these are important
+    vscode.window.showErrorMessage(`Error sorting properties: ${error instanceof Error ? error.message : String(error)}`);
+  }
 
-      if (sortedText !== text) {
-        // Apply the changes to the document
-        const edit = new vscode.WorkspaceEdit();
+  // Helper function for the actual sorting logic
+  async function performSort(sortOptions: SortingOptions, formatOptions: any) {
+    let currentText = text; // Create a mutable copy of the text
 
-        if (isEntireDocument) {
-          // Replace entire document content
-          const entireRange = new vscode.Range(
-            0, 0,
-            document.lineCount - 1,
-            document.lineAt(document.lineCount - 1).text.length
-          );
-          edit.replace(document.uri, entireRange, sortedText);
-        } else {
-          // Replace just the selected range
-          edit.replace(document.uri, selection, sortedText);
-        }
-
-        // Apply the edit
-        await vscode.workspace.applyEdit(edit);
-
-        // Format document after sorting using VS Code's format command
-        // This will use whatever formatter is configured in VS Code settings 
-        // (could be stylelint or another formatter)
-        console.log('Formatting document after sorting...');
+    // First, try to format the document using VS Code's built-in formatter
+    try {
+      // Apply VS Code's built-in formatting
+      if (isEntireDocument) {
+        // Only attempt to format if we're processing the entire document
         await vscode.commands.executeCommand('editor.action.formatDocument');
-        console.log('Document formatting complete');
 
-        vscode.window.showInformationMessage(`CSS properties sorted successfully using ${options.strategy} strategy`);
+        // Re-fetch the text after formatting
+        currentText = document.getText();
+      }
+    } catch (formattingError) {
+      console.log('Formatting skipped or failed:', formattingError);
+      // Continue even if formatting fails - we can still sort with the original text
+    }
+
+    // Then sort the properties
+    const sortedText = sortCssText(currentText, document.languageId, {
+      ...sortOptions,
+    });
+
+    // Only apply changes if sorting actually changed something
+    if (sortedText !== currentText) {
+      // Apply the changes to the document
+      const edit = new vscode.WorkspaceEdit();
+
+      if (isEntireDocument) {
+        // Replace entire document content
+        const entireRange = new vscode.Range(
+          0, 0,
+          document.lineCount - 1,
+          document.lineAt(document.lineCount - 1).text.length
+        );
+        edit.replace(document.uri, entireRange, sortedText);
       } else {
+        // Replace just the selected range
+        edit.replace(document.uri, selection, sortedText);
+      }
+
+      // Apply the edit
+      await vscode.workspace.applyEdit(edit);
+
+      // Only show success notification if notification level allows it
+      if (shouldShowNotification('success')) {
+        vscode.window.showInformationMessage(`CSS properties sorted successfully using ${sortOptions.strategy} strategy`);
+      }
+    } else {
+      // Only show info notifications if notification level allows it
+      if (shouldShowNotification('info')) {
         vscode.window.showInformationMessage('CSS properties are already properly sorted');
       }
-    });
-  } catch (error) {
-    vscode.window.showErrorMessage(`Error sorting properties: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 }
 
