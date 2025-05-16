@@ -7,42 +7,38 @@
         "build": {
             "executor": "nx:run-commands",
             "options": {
-                "commands": [
-                    "node esbuild.config.js"
-                ],
-                "cwd": "packages/vscode-old-fashioned"
+                "cwd": "packages/vscode-old-fashioned",
+                "command": "npm run esbuild"
             },
-            "dependsOn": [
-                {
-                    "projects": [
-                        "stylelint-oldfashioned-order",
-                        "shared"
-                    ],
-                    "target": "build"
-                }
+            "outputs": [
+                "{projectRoot}/dist"
             ]
         },
         "package": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "npx @vscode/vsce package",
-                "cwd": "packages/vscode-old-fashioned"
+                "cwd": "packages/vscode-old-fashioned",
+                "command": "npm run package"
             },
             "dependsOn": [
-                {
-                    "target": "build",
-                    "projects": "self"
-                }
+                "build"
+            ],
+            "outputs": [
+                "{projectRoot}/*.vsix"
             ]
         },
-        "test": {
-            "executor": "@nrwl/vite:test",
-            "outputs": [
-                "{workspaceRoot}/coverage/{projectRoot}"
-            ],
+        "lint": {
+            "executor": "nx:run-commands",
             "options": {
-                "passWithNoTests": true,
-                "config": "vitest.config.ts"
+                "cwd": "packages/vscode-old-fashioned",
+                "command": "npm run lint"
+            }
+        },
+        "test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "cwd": "packages/vscode-old-fashioned",
+                "command": "npm run test"
             }
         }
     },

@@ -32,11 +32,7 @@ A Visual Studio Code extension that helps you keep your CSS properties organized
 
 ## Demo
 
-![Old Fashioned CSS Formatter in action](images/demo.gif)
-
-You can also watch a full demonstration of the extension in action:
-
-[![Old Fashioned CSS Formatter Video](images/video-thumbnail.png)](https://youtu.be/YOUR_VIDEO_ID)
+![Old Fashioned CSS Formatter in action](https://github.com/n8design/old-fashioned/raw/main/packages/vscode-old-fashioned/images/old-fashioned-demo.gif)
 
 ## Extension Settings
 
@@ -47,6 +43,8 @@ This extension contributes the following settings:
 * `oldFashioned.sorting.sortPropertiesWithinGroups`: Sort properties alphabetically within each group
 * `oldFashioned.showActivationMessage`: Show a message when the extension is activated
 * `oldFashioned.showDebugComments`: Show debug comments in the sorted CSS output (default: false)
+* `oldFashioned.notificationLevel`: Control how many notifications are shown (verbose, minimal, none)
+* `oldFashioned.formatting.formatBeforeSorting`: Format the document before sorting (default: true)
 
 ## Configuration
 
@@ -214,3 +212,50 @@ Choose the option that works best for your workflow. The first option adds an ad
 ## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
+
+## Publishing Information
+
+This extension is published by [N8D](https://marketplace.visualstudio.com/publishers/N8D) on the Visual Studio Code Marketplace.
+
+### For Developers Looking to Publish
+
+If you're forking or contributing to this project, you'll need your own publisher ID to publish it:
+
+1. Create a publisher account at https://marketplace.visualstudio.com/manage
+2. Update the `publisher` field in `package.json` with your publisher ID
+3. Follow the [VS Code publishing instructions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
+
+## Development
+
+### Building the Extension VSIX
+
+To build the extension as a VSIX package for installation in VS Code:
+
+```bash
+# From the root of the workspace
+nx run vscode-old-fashioned:build  # First build using esbuild
+nx run vscode-old-fashioned:package  # Then package into VSIX
+
+# Or navigate to the extension directory and use npm directly
+cd packages/vscode-old-fashioned
+npm run esbuild  # Build using esbuild
+npm run package  # Package into VSIX
+```
+
+The resulting VSIX file will be available in the `packages/vscode-old-fashioned` directory.
+
+### Installing the VSIX
+
+Once you have built the VSIX file, you can install it in VS Code:
+
+1. Open VS Code
+2. Go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X`)
+3. Click on the `...` menu (top right of the Extensions view)
+4. Select "Install from VSIX..."
+5. Navigate to the VSIX file and select it
+
+Alternatively, you can install it from the command line:
+
+```bash
+code --install-extension path/to/vscode-old-fashioned-0.0.1.vsix
+```
