@@ -1,6 +1,6 @@
 {
   "name": "@old-fashioned/shared",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Shared utilities and types for Old Fashioned CSS sorting tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

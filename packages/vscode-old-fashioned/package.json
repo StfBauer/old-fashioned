@@ -2,7 +2,7 @@
   "name": "vscode-old-fashioned",
   "displayName": "Old Fashioned CSS Formatter",
   "description": "Organize CSS/SCSS properties with multiple sorting strategies and smart formatting",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "N8D",
   "engines": {
     "vscode": "^1.76.0"
@@ -126,6 +126,16 @@
   "bugs": {
     "url": "https://github.com/n8design/old-fashioned/issues"
   },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/stfbauer"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/n8design"
+    }
+  ],
   "keywords": [
     "css",
     "scss",

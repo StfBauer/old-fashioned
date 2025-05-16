@@ -1,6 +1,6 @@
 {
   "name": "stylelint-oldfashioned-order",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "🎨 Contentric, idiomatic or alphabetical CSS property ordering for Stylelint no Problem at all",
   "main": "dist/index.js",
   "keywords": [
