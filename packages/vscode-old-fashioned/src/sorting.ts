@@ -55,7 +55,8 @@ export async function sortCssProperties(
   try {
     // Use provided sorting options or get from settings
     const options = sortingOptions || getSortingOptions();
-    console.log(`Using sorting options:`, JSON.stringify(options, null, 2));
+    // Remove or make conditional in production
+    // console.log(`Using sorting options:`, JSON.stringify(options, null, 2));
 
     // Use provided formatting options or get from settings
     const formatting = formattingOptions || getFormattingOptions();
@@ -98,7 +99,8 @@ export async function sortCssProperties(
           currentText = document.getText();
         }
       } catch (formattingError) {
-        console.log('Formatting skipped or failed:', formattingError);
+        // Remove or make conditional in production
+        // console.log('Formatting skipped or failed:', formattingError);
         // Continue even if formatting fails - we can still sort with the original text
       }
     }
@@ -154,7 +156,8 @@ function sortCssText(cssText: string, languageId: string, options: any): string 
   try {
     // Ensure we have a strategy and it's a valid one
     const strategy = options.strategy || 'alphabetical';
-    console.log(`Sorting ${languageId} file with strategy: ${strategy}`);
+    // Remove or make conditional in production
+    // console.log(`Sorting ${languageId} file with strategy: ${strategy}`);
 
     // For SCSS/SASS, ensure proper module directive ordering at the file level
     if (languageId === 'scss' || languageId === 'sass') {
