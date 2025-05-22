@@ -126,16 +126,9 @@
   "bugs": {
     "url": "https://github.com/stfbauer/old-fashioned/issues"
   },
-  "funding": [
-    {
-      "type": "github",
-      "url": "https://github.com/sponsors/stfbauer"
-    },
-    {
-      "type": "github",
-      "url": "https://github.com/sponsors/n8design"
-    }
-  ],
+  "sponsor": {
+    "url": "https://github.com/sponsors/stfbauer"
+  },
   "keywords": [
     "css",
     "scss",
