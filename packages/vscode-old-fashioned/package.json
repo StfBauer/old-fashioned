@@ -121,10 +121,10 @@
   "icon": "images/old-fashioned.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/n8design/old-fashioned.git"
+    "url": "https://github.com/stfbauer/old-fashioned.git"
   },
   "bugs": {
-    "url": "https://github.com/n8design/old-fashioned/issues"
+    "url": "https://github.com/stfbauer/old-fashioned/issues"
   },
   "funding": [
     {
