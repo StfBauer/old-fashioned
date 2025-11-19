@@ -150,10 +150,10 @@ describe('Project-Level Configuration Integration Tests', () => {
         // Create a mock document
         const mockDocument = {
             languageId: 'css',
-            getText: () => '.foo { color: red; display: block; }',
+            getText: () => '.foo { z-index: 1; background: red; color: blue; display: block; }',
             uri: { fsPath: testFilePath, scheme: 'file' },
             lineCount: 1,
-            lineAt: (line: number) => ({ text: '.foo { color: red; display: block; }' }),
+            lineAt: (line: number) => ({ text: '.foo { z-index: 1; background: red; color: blue; display: block; }' }),
             fileName: testFilePath
         };
 
@@ -175,8 +175,8 @@ describe('Project-Level Configuration Integration Tests', () => {
         // Call sort function
         await sortCssProperties(mockEditor as any);
 
-        // Verify that stylelint was called (indicating sorting took place)
-        expect(mockStylelint.default.lint).toHaveBeenCalled();
+        // Verify that workspace.applyEdit was called (indicating sorting took place)
+        expect(vscode.workspace.applyEdit).toHaveBeenCalled();
         expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('CSS properties sorted successfully');
     });
 
@@ -223,8 +223,8 @@ describe('Project-Level Configuration Integration Tests', () => {
         // Call sort function
         await sortCssProperties(mockEditor as any);
 
-        // Verify stylelint was called with VS Code settings
-        expect(mockStylelint.default.lint).toHaveBeenCalled();
+        // Verify workspace.applyEdit was called with VS Code settings
+        expect(vscode.workspace.applyEdit).toHaveBeenCalled();
     });
 
     it('should handle errors gracefully when config file exists but is invalid', async () => {

@@ -20,6 +20,9 @@ export default defineConfig({
     reporters: ['verbose'],
     alias: {
       '@old-fashioned/shared': resolve(__dirname, './packages/shared/src')
-    }
+    },
+    setupFiles: [
+      './packages/vscode-old-fashioned/test/tests/setup.ts'
+    ]
   }
 });

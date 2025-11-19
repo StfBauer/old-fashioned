@@ -121,16 +121,19 @@ describe('VS Code extension', () => {
   let context: any;
 
   beforeEach(() => {
-    resetAllMocks();
     context = { subscriptions: [] };
 
-    // Reset specific mocks we need to test
+    // Reset specific mocks we need to test - use mockClear instead of resetAllMocks
     mockVSCode.window.withProgress.mockClear();
     mockStylelint.default.lint.mockClear();
+    mockVSCode.commands.registerCommand.mockClear();
+    mockVSCode.window.showInformationMessage.mockClear();
+    mockVSCode.workspace.applyEdit.mockClear();
   });
 
   afterEach(() => {
-    resetAllMocks();
+    // Clear mocks instead of resetting to preserve implementations
+    vi.clearAllMocks();
   });
 
   // GROUP 1: Extension Activation Tests
@@ -313,10 +316,10 @@ describe('VS Code extension', () => {
       const mockEditor = {
         document: {
           languageId: 'css',
-          getText: () => '.foo { color: red; display: block; }',
+          getText: () => '.foo { z-index: 1; background: red; color: blue; display: block; }',
           uri: { fsPath: '/test/style.css', scheme: 'file' },
           lineCount: 1,
-          lineAt: (line: number) => ({ text: '.foo { color: red; display: block; }' }),
+          lineAt: (line: number) => ({ text: '.foo { z-index: 1; background: red; color: blue; display: block; }' }),
           fileName: '/test/style.css'
         },
         selection: { isEmpty: true, start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
@@ -326,7 +329,7 @@ describe('VS Code extension', () => {
       // Make stylelint mock return different content to simulate changes
       mockStylelint.default.lint.mockResolvedValueOnce({
         results: [{ warnings: [] }],
-        output: '.foo { display: block; color: red; }' // Different order
+        output: '.foo { background: red; color: blue; display: block; z-index: 1; }' // Sorted alphabetically
       });
 
       // Set as active editor

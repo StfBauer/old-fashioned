@@ -49,9 +49,9 @@ describe('Alphabetical Property Sorting', () => {
         expect(sortedLowercase).toEqual([
             'background',
             'COLOR',
+            'display',
             'margin',
-            'z-index',
-            'display'
+            'z-index'
         ]);
     });
 

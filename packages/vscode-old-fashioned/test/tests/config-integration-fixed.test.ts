@@ -1,41 +1,4 @@
 import { vi } from 'vitest';
-vi.mock('vscode', () => ({
-    window: {
-        activeTextEditor: undefined,
-        showErrorMessage: vi.fn(),
-        showInformationMessage: vi.fn(),
-        showWarningMessage: vi.fn(),
-        withProgress: vi.fn().mockImplementation((options, task) => task())
-    },
-    commands: {
-        registerCommand: vi.fn(),
-        executeCommand: vi.fn()
-    },
-    workspace: {
-        getConfiguration: vi.fn(() => ({
-            get: vi.fn((key, defaultValue) => defaultValue)
-        })),
-        onDidOpenTextDocument: vi.fn(),
-        onDidChangeTextDocument: vi.fn(),
-        onDidSaveTextDocument: vi.fn(),
-        onDidCloseTextDocument: vi.fn(),
-        textDocuments: [],
-        applyEdit: vi.fn()
-    },
-    languages: {
-        registerCodeActionsProvider: vi.fn(),
-        registerDocumentFormattingEditProvider: vi.fn(),
-        createDiagnosticCollection: vi.fn(() => ({
-            set: vi.fn(),
-            delete: vi.fn(),
-            clear: vi.fn(),
-            dispose: vi.fn()
-        }))
-    },
-    Uri: {
-        file: (path) => ({ scheme: 'file', fsPath: path, toString: () => `file://${path}` })
-    }
-}));
 
 // Define mocks BEFORE importing modules
 vi.mock('fs', () => ({
@@ -44,7 +7,9 @@ vi.mock('fs', () => ({
     mkdirSync: vi.fn(),
     writeFileSync: vi.fn()
 }));
-const mockVSCode = {
+
+// Use vi.hoisted to ensure proper mock setup
+const mockVSCode = vi.hoisted(() => ({
     window: {
         activeTextEditor: undefined,
         showErrorMessage: vi.fn(),
@@ -80,11 +45,12 @@ const mockVSCode = {
     Uri: {
         file: (path: string) => ({ scheme: 'file', fsPath: path, toString: () => `file://${path}` })
     }
-};
+}));
+
 vi.mock('vscode', () => mockVSCode);
 
 // Mock stylelint
-const mockStylelint = {
+const mockStylelint = vi.hoisted(() => ({
     default: {
         lint: vi.fn().mockResolvedValue({
             output: 'sorted-css',
@@ -103,7 +69,7 @@ const mockStylelint = {
             ]
         })
     }
-};
+}));
 
 vi.mock('stylelint', () => mockStylelint);
 

@@ -2,6 +2,18 @@
 
 A Visual Studio Code extension that helps you keep your CSS properties organized and consistent using intelligent sorting strategies.
 
+## Documentation
+
+Comprehensive documentation is available in the [docs](./docs/) directory:
+
+- [Getting Started Guide](./docs/getting-started.md)
+- [Using the Extension](./docs/using-the-extension.md) (with screenshots & examples)
+- [Configuration Options](./docs/configuration.md)
+- [Sorting Strategies](./docs/sorting-strategies.md)
+- [Advanced Features](./docs/advanced-features.md)
+- [Troubleshooting](./docs/troubleshooting.md)
+- [FAQ](./docs/faq.md) - Answers to common questions
+
 ## Features
 
 - Sort CSS properties using multiple proven strategies:

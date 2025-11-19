@@ -46,9 +46,9 @@
     "prepublishOnly": "echo 'Skipping build in dist folder - already built by Nx'"
   },
   "dependencies": {
-    "postcss": "^8.4.24",
-    "stylelint": "^16.0.0",
-    "stylelint-order": "^6.0.4"
+    "postcss": "^8.5.6",
+    "stylelint": "^16.25.0",
+    "stylelint-order": "^7.0.0"
   },
   "peerDependencies": {
     "stylelint": "^14.0.0 || ^15.0.0 || ^16.0.0"

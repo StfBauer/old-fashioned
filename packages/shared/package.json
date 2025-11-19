@@ -17,9 +17,9 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "vitest": "^1.2.2",
-    "@types/node": "^20.11.5"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.10",
+    "@types/node": "^24.10.1"
   },
   "files": [
     "dist",
@@ -27,6 +27,6 @@
     "LICENSE"
   ],
   "dependencies": {
-    "csstype": "^3.1.2"
+    "csstype": "^3.2.3"
   }
 }

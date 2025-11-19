@@ -34,19 +34,31 @@ export class ConsoleSpy {
 
         // Mock console methods
         console.log = vi.fn((...args) => {
-            this.logs.push(args.map(String).join(' '));
+            const message = args.map(String).join(' ');
+            this.logs.push(message);
+            // Keep visible for debugging
+            this.originalConsole.log('[LOG]', message);
         });
 
         console.error = vi.fn((...args) => {
-            this.errors.push(args.map(String).join(' '));
+            const message = args.map(String).join(' ');
+            this.errors.push(message);
+            // Keep visible for debugging
+            this.originalConsole.error('[ERROR]', message);
         });
 
         console.warn = vi.fn((...args) => {
-            this.warnings.push(args.map(String).join(' '));
+            const message = args.map(String).join(' ');
+            this.warnings.push(message);
+            // Keep visible for debugging
+            this.originalConsole.warn('[WARN]', message);
         });
 
         console.info = vi.fn((...args) => {
-            this.infos.push(args.map(String).join(' '));
+            const message = args.map(String).join(' ');
+            this.infos.push(message);
+            // Keep visible for debugging
+            this.originalConsole.info('[INFO]', message);
         });
     }
 
