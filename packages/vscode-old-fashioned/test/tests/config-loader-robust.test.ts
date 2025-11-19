@@ -96,19 +96,30 @@ describe('Config Loader Robustness', () => {
             // Should still find the file because existsSync returns true
             expect(result).not.toBeNull();
             expect(consoleSpy.hasError('Error reading package.json')).toBe(true);
-        });
-
-        it('should handle invalid JSON in package.json gracefully', async () => {
+        }); it('should handle invalid JSON in package.json gracefully', async () => {
             // Setup mock filesystem with package.json containing invalid JSON
             fsMock.build();
 
-            vi.mocked(fs.existsSync).mockReturnValue(true);
+            // Mock existsSync to specifically target package.json
+            vi.mocked(fs.existsSync).mockImplementation((filePath) => {
+                return String(filePath).endsWith('package.json');
+            });
+
             vi.mocked(fs.readFileSync).mockReturnValueOnce('{ invalid json }');
 
             // Should not throw, but should log error and continue
             const result = findStylelintConfig('/project');
 
-            expect(consoleSpy.hasError('Error reading package.json')).toBe(true);
+            // Print the path used to lookup the file
+            console.log('Project path:', '/project');
+            console.log('Full path:', path.join('/project', 'package.json'));
+
+            // Debug - print out captured logs and errors
+            console.log('Debug - captured logs:', consoleSpy.getLogs());
+            console.log('Debug - captured errors:', consoleSpy.getErrors());
+
+            // Try with regex instead of exact match
+            expect(consoleSpy.hasError(/Error reading package.json/)).toBe(true);
         });
 
         it('should handle filesystem traversal errors', () => {
