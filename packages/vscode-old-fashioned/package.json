@@ -2,10 +2,10 @@
   "name": "vscode-old-fashioned",
   "displayName": "Old Fashioned CSS Formatter",
   "description": "Organize CSS/SCSS properties with multiple sorting strategies and smart formatting",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "publisher": "N8D",
   "engines": {
-    "vscode": "^1.76.0"
+    "vscode": "^1.106.0"
   },
   "categories": [
     "Formatters",
