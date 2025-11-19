@@ -40,6 +40,16 @@
                 "cwd": "packages/vscode-old-fashioned",
                 "command": "npm run test"
             }
+        },
+        "publish": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "npx @vscode/vsce publish",
+                "cwd": "packages/vscode-old-fashioned"
+            },
+            "dependsOn": [
+                "build"
+            ]
         }
     },
     "tags": []
