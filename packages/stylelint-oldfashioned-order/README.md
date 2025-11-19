@@ -2,6 +2,17 @@
 
 🎨 A stylelint plugin for ordering CSS properties with multiple sorting strategies: alphabetical, concentric, or idiomatic.
 
+## Documentation
+
+Comprehensive documentation is available in the [docs](./docs/) directory:
+
+- [Getting Started Guide](./docs/getting-started.md)
+- [Configuration Options](./docs/configuration-options.md)
+- [Sorting Strategies](./docs/sorting-strategies.md)
+- [Integration Guide](./docs/integration-guide.md)
+- [Troubleshooting](./docs/troubleshooting.md)
+- [FAQ](./docs/faq.md) - Answers to common questions
+
 ## Installation
 
 ```bash

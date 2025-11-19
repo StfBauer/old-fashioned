@@ -3,6 +3,7 @@
 A professional CSS/SCSS property organization toolkit with multiple sorting strategies and smart formatting options.
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](docs/maintenance.md)
+[![Documentation](https://img.shields.io/badge/Documentation-comprehensive-blue.svg)](docs/README.md)
 
 ## Demo
 
@@ -22,6 +23,16 @@ The [VS Code Extension](/packages/vscode-old-fashioned) provides an easy-to-use 
 - Configurable notification levels
 - Integration with VS Code's built-in formatter
 
+### Stylelint Plugin
+
+The [Stylelint plugin](/packages/stylelint-oldfashioned-order) brings Old Fashioned's powerful sorting capabilities to your linting workflow:
+
+- Enforce consistent CSS property order through linting rules
+- Same sorting strategies as the VS Code extension
+- Integrates with existing Stylelint configurations
+- Detailed reporting of ordering issues
+- Can be used in CI/CD pipelines for code quality enforcement
+
 ### Shared Library
 
 The [shared library](/packages/shared) contains the core sorting logic used by all Old Fashioned tools:
@@ -29,6 +40,7 @@ The [shared library](/packages/shared) contains the core sorting logic used by a
 - Various property sorting algorithms
 - CSS/SCSS parsing utilities
 - Configuration options handling
+- Property group definitions
 
 ## Getting Started
 
@@ -75,6 +87,28 @@ See the [maintenance documentation](docs/maintenance.md) for more information on
 - Prepare-for-publish utilities
 - Periodic automated cleanup
 - And more
+
+## Documentation
+
+Old Fashioned comes with comprehensive documentation:
+
+### Core Documentation
+
+- [Main Documentation](docs/README.md): Entry point to all documentation
+- [Configuration Guide](docs/configuration.md): How to configure all Old Fashioned tools
+- [Sorting Strategy Comparison](docs/sorting-strategy-comparison.md): Compare all sorting approaches
+- [Custom Sorting Strategies](docs/custom-sorting-strategies.md): Create your own property ordering
+
+### Sorting Strategies
+
+- [Alphabetical Sorting](docs/sorting-strategies/alphabetical.md): A-Z property ordering
+- [Concentric Sorting](docs/sorting-strategies/concentric.md): Outside-in box model approach
+- [Idiomatic Sorting](docs/sorting-strategies/idiomatic.md): Based on CSS best practices
+
+### Package-Specific Documentation
+
+- [VS Code Extension Docs](packages/vscode-old-fashioned/docs/README.md)
+- [Stylelint Plugin Docs](packages/stylelint-oldfashioned-order/docs/README.md)
 
 ## Contributing
 
