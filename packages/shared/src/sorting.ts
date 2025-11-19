@@ -57,9 +57,12 @@ export function sortProperties(properties: string[], options: SortingOptions): S
                 const cssVariables = properties.filter(prop => prop.startsWith('--')).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
                 const regularProperties = properties.filter(prop => !prop.startsWith('--')).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
-                if (cssVariables.length > 0) {
+                if (cssVariables.length > 0 && regularProperties.length > 0) {
                     // Place CSS variables at the beginning, then empty line, then regular properties
                     sortedProperties = [...cssVariables, '', ...regularProperties];
+                } else if (cssVariables.length > 0) {
+                    // Only CSS variables, no empty line needed
+                    sortedProperties = cssVariables;
                 } else {
                     // No CSS variables, just sort alphabetically
                     sortedProperties = regularProperties;
@@ -76,12 +79,20 @@ export function sortProperties(properties: string[], options: SortingOptions): S
                 sortedProperties = sortByGroups(properties, DEFAULT_PROPERTY_GROUPS, !!options.sortPropertiesWithinGroups, !!options.emptyLinesBetweenGroups);
                 break;
             case 'custom':
-                // For custom strategy, use DEFAULT_PROPERTY_GROUPS as fallback
-                sortedProperties = sortByGroups(properties, DEFAULT_PROPERTY_GROUPS, !!options.sortPropertiesWithinGroups, !!options.emptyLinesBetweenGroups);
+                // Custom strategy requires propertyGroups to be provided
+                if (!options.propertyGroups || !Array.isArray(options.propertyGroups)) {
+                    return {
+                        success: false,
+                        error: 'Custom strategy requires propertyGroups option'
+                    };
+                }
+                sortedProperties = sortByGroups(properties, options.propertyGroups, !!options.sortPropertiesWithinGroups, !!options.emptyLinesBetweenGroups);
                 break;
             default:
-                // Default to alphabetical if the strategy isn't recognized
-                sortedProperties = [...properties].sort((a, b) => a.localeCompare(b));
+                return {
+                    success: false,
+                    error: `Unknown strategy: ${strategy}`
+                };
         }
 
         return {
@@ -127,7 +138,11 @@ function sortByGroups(properties: string[], groups: string[][], sortWithinGroups
 
     // Start with CSS variables if there are any
     if (cssVariables.length > 0) {
-        sorted.push(...cssVariables, ''); // Always add empty line after variables
+        sorted.push(...cssVariables);
+        // Only add empty line if there are regular properties to follow
+        if (remainingProps.length > 0) {
+            sorted.push('');
+        }
     }
 
     // Then process the remaining properties by groups
