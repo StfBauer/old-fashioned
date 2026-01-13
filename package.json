@@ -1,6 +1,6 @@
 {
   "name": "old-fashioned",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -31,6 +31,10 @@
     "prepare:publish": "./tools/prepare-for-publish.sh",
     "fix-nx": "nx g @nx/workspace:fix-configuration",
     "test-vscode": "cd packages/vscode-old-fashioned && code --extensionDevelopmentPath=.",
+    "version:sync": "node tools/scripts/sync-versions.js",
+    "version:sync-to": "node tools/scripts/sync-versions.js",
+    "release:prepare": "npm run build && npm run prepare:publish",
+    "release:publish": "nx run-many --target=publish --all",
     "benchmark:debug": "npx tsx benchmark/debug-exports.ts",
     "benchmark": "npm run benchmark:debug && npx tsx benchmark/index.ts",
     "benchmark:strategies": "npx tsx benchmark/strategies-benchmark.ts",
@@ -43,31 +47,32 @@
     "release:patch": "standard-version --release-as patch"
   },
   "devDependencies": {
-    "@nrwl/devkit": "^19.8.4",
-    "@nrwl/esbuild": "^19.8.4",
-    "@nrwl/eslint-plugin-nx": "^19.8.4",
-    "@nrwl/js": "^19.8.4",
-    "@nrwl/linter": "^19.8.4",
-    "@nrwl/workspace": "^19.8.4",
-    "@nx/vite": "^22.0.4",
-    "@types/node": "^24.10.1",
-    "@vitest/coverage-v8": "^4.0.10",
-    "@vitest/ui": "^4.0.10",
-    "@vscode/vsce": "^3.7.0",
+    "@nrwl/devkit": "^19.8.14",
+    "@nrwl/esbuild": "^19.8.14",
+    "@nrwl/eslint-plugin-nx": "^19.8.14",
+    "@nrwl/js": "^19.8.14",
+    "@nrwl/linter": "^19.8.14",
+    "@nrwl/workspace": "^19.8.14",
+    "@nx/vite": "^22.3.3",
+    "@types/node": "^24.10.7",
+    "@vitest/coverage-v8": "^4.0.17",
+    "@vitest/ui": "^4.0.17",
+    "@vscode/vsce": "^3.7.1",
     "conventional-changelog-cli": "^5.0.0",
-    "esbuild": "^0.27.0",
-    "eslint": "^9.39.1",
-    "nx": "^22.0.4",
+    "esbuild": "^0.27.2",
+    "eslint": "^9.39.2",
+    "nx": "^22.3.3",
     "standard-version": "^9.5.0",
     "tmp": "^0.2.5",
     "ts-node": "^10.9.2",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.10"
+    "vitest": "^4.0.17"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "standard-version": {
     "scripts": {
+      "precommit": "npm run version:sync",
       "postchangelog": "nx run vscode-old-fashioned:version"
     }
   }
