@@ -20,5 +20,5 @@
     "**/dist": true
   },
   "typescript.preferences.importModuleSpecifier": "relative",
-  "nxConsole.generateAiAgentRules": true
+  "nxConsole.generateAiAgentRules": false
 }
