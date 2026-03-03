@@ -12,6 +12,11 @@ import { CONCENTRIC_PROPERTY_ORDER, IDIOMATIC_PROPERTY_GROUPS } from '@old-fashi
 import { addEmptyLinesBetweenGroups } from './formatter';
 import { getSortingOptions, getFormattingOptions, shouldShowNotification } from './utils';
 import { getDocumentSortingOptions, ConfigSource } from './config-loader';
+import {
+  categorizeNodesWithComments,
+  sortDeclarationsWithComments,
+  flattenDeclarationsWithComments,
+} from './comment-association';
 import * as postcss from 'postcss';
 import * as postcssScss from 'postcss-scss';
 
@@ -165,18 +170,16 @@ export async function sortCssProperties(
 
 /**
  * Sort CSS/SCSS text by parsing it and reordering properties
- * 
+ *
  * @param cssText - The CSS/SCSS text to sort
  * @param languageId - The language ID (css, scss, sass)
  * @param options - Sorting options
  * @returns Sorted CSS/SCSS text
  */
-function sortCssText(cssText: string, languageId: string, options: any): string {
+export function sortCssText(cssText: string, languageId: string, options: any): string {
   try {
     // Ensure we have a strategy and it's a valid one
     const strategy = options.strategy || 'alphabetical';
-    // Remove or make conditional in production
-    // console.log(`Sorting ${languageId} file with strategy: ${strategy}`);
 
     // For SCSS/SASS, ensure proper module directive ordering at the file level
     if (languageId === 'scss' || languageId === 'sass') {
@@ -194,103 +197,27 @@ function sortCssText(cssText: string, languageId: string, options: any): string 
 
     // Process each rule
     root.walkRules((rule) => {
-      // Separate different types of nodes within this rule
-      const declarations: any[] = [];
-      const customProps: any[] = [];
-      const sassVars: any[] = [];
-      const mediaAtRules: any[] = [];
-      const includeAtRules: any[] = [];
-      const otherAtRules: any[] = [];
-      const nestedRules: any[] = [];
-      const comments: any[] = [];
-      const otherNodes: any[] = [];
+      // Categorize nodes with comments associated to their declarations
+      const categorized = categorizeNodesWithComments(rule.nodes);
 
-      // Sort the rule's nodes into categories
-      rule.nodes.forEach((node: any) => {
-        if (node.type === 'decl') {
-          // Check if it's a custom property or SASS variable
-          if (typeof node.prop === 'string') {
-            if (node.prop.startsWith('--')) {
-              customProps.push(node);
-            } else if (node.prop.startsWith('$')) {
-              sassVars.push(node);
-            } else {
-              declarations.push(node);
-            }
-          } else {
-            declarations.push(node);
-          }
-        } else if (node.type === 'atrule') {
-          if (node.name === 'media') {
-            mediaAtRules.push(node);
-          } else if (node.name === 'include') {
-            includeAtRules.push(node);
-          } else {
-            otherAtRules.push(node);
-          }
-        } else if (node.type === 'rule') {
-          nestedRules.push(node);
-        } else if (node.type === 'comment') {
-          comments.push(node);
-        } else {
-          otherNodes.push(node);
-        }
-      });
-
-      // Sort declarations if we have any
-      if (declarations.length > 0) {
-        // Extract property names for sorting
-        const declProps = declarations.map((decl: any) => decl.prop);
-
-        // Sort the properties
-        const sortingResult = sortProperties(declProps, options);
-
-        if (sortingResult.success && sortingResult.sortedProperties) {
-          // Create a map of property index in the sorted array
-          const sortedIndexMap = new Map<string, number>();
-          // Fix the forEach call with explicit types
-          sortingResult.sortedProperties.forEach((prop: string, index: number) => {
-            if (prop !== '') { // Skip empty line markers
-              sortedIndexMap.set(prop, index);
-            }
-          });
-
-          // Sort the declarations
-          declarations.sort((a: any, b: any) => {
-            const indexA = sortedIndexMap.get(a.prop) ?? Number.MAX_SAFE_INTEGER;
-            const indexB = sortedIndexMap.get(b.prop) ?? Number.MAX_SAFE_INTEGER;
-            return indexA - indexB;
-          });
-        }
-      }
-
-      // Filter comments to find those that were at the beginning
-      const topComments = comments.filter((comment: any) => {
-        const commentIndex = rule.nodes.indexOf(comment);
-        // Consider a comment as "top" if it appears before any non-comment node
-        for (let i = 0; i < commentIndex; i++) {
-          if (rule.nodes[i].type !== 'comment') {
-            return false;
-          }
-        }
-        return true;
-      });
-
-      // Filter out top comments from the main comments array
-      const remainingComments = comments.filter((comment: any) => !topComments.includes(comment));
+      // Sort declarations — comments travel with their associated properties
+      const sortedDecls = sortDeclarationsWithComments(
+        categorized.declarationsWithComments,
+        options
+      );
 
       // Rebuild the rule's nodes in the correct order
       rule.nodes = [
-        ...topComments,
-        ...customProps,
-        ...sassVars,
-        ...declarations,
-        ...includeAtRules,
-        ...otherAtRules,
-        ...remainingComments,
-        ...nestedRules,
-        ...otherNodes,
-        ...mediaAtRules  // Media queries at the very end
+        ...categorized.topComments,
+        ...flattenDeclarationsWithComments(categorized.customPropsWithComments),
+        ...flattenDeclarationsWithComments(categorized.sassVarsWithComments),
+        ...flattenDeclarationsWithComments(sortedDecls),
+        ...categorized.includeAtRules,
+        ...categorized.otherAtRules,
+        ...categorized.trailingComments,
+        ...categorized.nestedRules,
+        ...categorized.otherNodes,
+        ...categorized.mediaAtRules,
       ];
     });
 
