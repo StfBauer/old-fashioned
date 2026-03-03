@@ -19,13 +19,13 @@ npm run benchmark:strategies
 npm run benchmark:property-count
 ```
 
-Or directly using ts-node from the benchmark directory:
+Or directly using tsx from the benchmark directory:
 
 ```bash
 # In the benchmark directory
-npx ts-node index.ts
-npx ts-node strategies-benchmark.ts
-npx ts-node property-count-benchmark.ts
+npx tsx index.ts
+npx tsx strategies-benchmark.ts
+npx tsx property-count-benchmark.ts
 ```
 
 ## Benchmark Results
@@ -39,7 +39,7 @@ npm run benchmark:visualize
 This generates both HTML and Markdown reports in the `results/reports` directory. If you encounter any issues, you can run the visualization directly:
 
 ```bash
-npx ts-node benchmark/utils/visualization-cli.ts
+npx tsx benchmark/utils/visualization-cli.ts
 ```
 
 ### Report Types

@@ -18,8 +18,8 @@
   "license": "MIT",
   "devDependencies": {
     "typescript": "^5.9.3",
-    "vitest": "^4.0.10",
-    "@types/node": "^24.10.1"
+    "vitest": "^4.0.18",
+    "@types/node": "^24.11.0"
   },
   "files": [
     "dist",
