@@ -21,7 +21,8 @@ export default [
         // Mandatory meta information
         meta: {
             url: 'https://github.com/n8design/old-fashioned/tree/main/packages/stylelint-oldfashioned-order',
-            deprecated: false
+            deprecated: false,
+            fixable: true
         }
     }
 ];

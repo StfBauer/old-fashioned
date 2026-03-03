@@ -26,6 +26,10 @@
       {
         "command": "old-fashioned.openSettings",
         "title": "Open Old Fashioned Settings"
+      },
+      {
+        "command": "old-fashioned.autofixWithStylelint",
+        "title": "Autofix CSS Property Order (Old Fashioned)"
       }
     ],
     "configuration": {

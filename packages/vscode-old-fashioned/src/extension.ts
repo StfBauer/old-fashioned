@@ -10,7 +10,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { sortCssProperties } from './sorting';
-import { getFormattingOptions, getSortingOptions, shouldShowNotification } from './utils';
+import { getFormattingOptions, getSortingOptions, shouldShowNotification, getParseSyntax } from './utils';
+import { OldFashionedCodeActionProvider } from './code-actions';
 // Import diagnostics in a way that allows us to control when it's loaded
 // This helps prevent immediate activation failures
 const diagnosticsModule = './diagnostics';
@@ -78,8 +79,89 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.commands.executeCommand('workbench.action.openSettings', 'oldFashioned');
     });
 
+    // Register autofix command using stylelint's fix mode
+    const autofixCommand = vscode.commands.registerCommand('old-fashioned.autofixWithStylelint', async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showInformationMessage('No active editor');
+        return;
+      }
+
+      const document = editor.document;
+      if (document.languageId !== 'css' && document.languageId !== 'scss' && document.languageId !== 'sass') {
+        vscode.window.showInformationMessage('Not a CSS, SCSS, or SASS file');
+        return;
+      }
+
+      try {
+        const stylelint = await import('stylelint');
+        const sortingOptions = getSortingOptions();
+        const syntax = getParseSyntax(document.languageId);
+        let customSyntax: string | undefined;
+        if (syntax === 'scss') {
+          customSyntax = 'postcss-scss';
+        } else if (syntax === 'sass') {
+          customSyntax = 'postcss-sass';
+        }
+
+        const result = await stylelint.default.lint({
+          code: document.getText(),
+          config: {
+            plugins: ['stylelint-oldfashioned-order'],
+            rules: {
+              'oldfashioned-order/properties-order': [
+                sortingOptions.strategy || 'alphabetical',
+                {
+                  emptyLinesBetweenGroups: sortingOptions.emptyLinesBetweenGroups,
+                  sortPropertiesWithinGroups: sortingOptions.sortPropertiesWithinGroups,
+                },
+              ],
+            },
+            customSyntax,
+          },
+          fix: true,
+        });
+
+        const fixedCode = result.code || result.output;
+        if (fixedCode && fixedCode !== document.getText()) {
+          const fullRange = new vscode.Range(
+            document.positionAt(0),
+            document.positionAt(document.getText().length)
+          );
+          await editor.edit((editBuilder) => {
+            editBuilder.replace(fullRange, fixedCode);
+          });
+          if (shouldShowNotification('info')) {
+            vscode.window.showInformationMessage('CSS properties sorted using stylelint autofix');
+          }
+        } else {
+          if (shouldShowNotification('info')) {
+            vscode.window.showInformationMessage('Properties are already in order');
+          }
+        }
+      } catch (err) {
+        console.error('Autofix failed:', err);
+        vscode.window.showErrorMessage(
+          `Autofix failed: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    });
+
+    // Register Code Action Provider for CSS/SCSS/SASS
+    const codeActionProvider = vscode.languages.registerCodeActionsProvider(
+      [
+        { language: 'css', scheme: 'file' },
+        { language: 'scss', scheme: 'file' },
+        { language: 'sass', scheme: 'file' },
+      ],
+      new OldFashionedCodeActionProvider(),
+      {
+        providedCodeActionKinds: OldFashionedCodeActionProvider.providedCodeActionKinds,
+      }
+    );
+
     // Add commands to context subscriptions first
-    context.subscriptions.push(sortCommand, openSettingsCommand);
+    context.subscriptions.push(sortCommand, openSettingsCommand, autofixCommand, codeActionProvider);
 
     // Defer diagnostics activation
     setTimeout(() => {
