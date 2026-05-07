@@ -10,8 +10,7 @@ import {
 // Define rule name according to stylelint conventions
 export const ruleName = 'oldfashioned-order/properties-order';
 
-// Get the appropriate utils based on stylelint version (compatible with v14-16)
-const utils = 'utils' in stylelint ? stylelint.utils : require('stylelint/lib/utils');
+const utils = (stylelint as any).utils;
 
 // Create rule messages
 export const messages = utils.ruleMessages(ruleName, {
@@ -25,8 +24,7 @@ export const messages = utils.ruleMessages(ruleName, {
  */
 function rule(
   primaryOption: string,
-  secondaryOptions?: Record<string, any>,
-  context?: { fix?: boolean }
+  secondaryOptions?: Record<string, any>
 ) {
   const options = {
     strategy: primaryOption as any,
@@ -55,10 +53,6 @@ function rule(
     if (!validOptions) {
       return;
     }
-
-    // Check fix mode from context (v15+) or result.opts (v14 compat)
-    const isFixMode =
-      (context && context.fix) || (result.opts as any)?.fix === true;
 
     root.walkRules((ruleNode) => {
       if (!ruleNode.nodes || ruleNode.nodes.length === 0) {
@@ -106,13 +100,6 @@ function rule(
         return;
       }
 
-      // --- Fix mode: reorder declarations with comment preservation ---
-      if (isFixMode) {
-        fixRuleOrder(ruleNode, options);
-        return;
-      }
-
-      // --- Report mode: emit one violation per rule block ---
       const currentSummary = currentOrder.slice(0, 5).join(', ');
       const expectedSummary = expectedOrder.slice(0, 5).join(', ');
 
@@ -121,6 +108,7 @@ function rule(
         node: declarations[0],
         result,
         ruleName,
+        fix: () => fixRuleOrder(ruleNode, options),
       });
     });
   };

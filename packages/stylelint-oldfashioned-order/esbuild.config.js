@@ -11,5 +11,5 @@ build({
     format: 'cjs',
     tsconfig: './tsconfig.json',
     logLevel: 'info',
-    external: ['stylelint/lib/utils'], // Exclude stylelint/lib/utils from the bundle
+    external: [],
 }).catch(() => process.exit(1));
