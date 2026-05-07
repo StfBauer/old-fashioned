@@ -36,12 +36,12 @@ describe('CSS Property Sorting - Comprehensive Tests', () => {
 
             const result = sortProperties(properties, { strategy: 'alphabetical' });
 
-            // Vendor prefixes should be sorted alphabetically too
+            // Vendor-prefixed props sort immediately before their base property
             expect(result.success).toBe(true);
             expect(result.sortedProperties).toEqual([
+                'color',
                 '-moz-transform',
                 '-webkit-transform',
-                'color',
                 'transform'
             ]);
         });

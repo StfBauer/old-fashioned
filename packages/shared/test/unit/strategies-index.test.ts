@@ -41,7 +41,8 @@ describe('Sorting Strategies', () => {
             const result = sortProperties(properties, options);
 
             testSortedProperties(result, (sortedProps) => {
-                expect(sortedProps).toEqual(['-moz-transform', '-webkit-transform', 'color', 'transform']);
+                // Vendor-prefixed props sort immediately before their base property
+                expect(sortedProps).toEqual(['color', '-moz-transform', '-webkit-transform', 'transform']);
             });
         });
 

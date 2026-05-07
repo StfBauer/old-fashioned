@@ -1,5 +1,5 @@
-// Import property group definitions - only import what's needed
-import { DEFAULT_PROPERTY_GROUPS } from './index';
+// Import property group definitions directly to avoid circular dependency with index.ts
+import { DEFAULT_PROPERTY_GROUPS, CONCENTRIC_PROPERTY_GROUPS, IDIOMATIC_PROPERTY_GROUPS } from './property-groups';
 
 // Sorting strategy types
 export type SortingStrategy = 'alphabetical' | 'concentric' | 'idiomatic' | 'grouped' | 'custom';
@@ -30,11 +30,15 @@ const VENDOR_PREFIXES = [
     '-o-'
 ];
 
+function stripVendorPrefix(prop: string): string {
+    for (const prefix of VENDOR_PREFIXES) {
+        if (prop.startsWith(prefix)) return prop.slice(prefix.length);
+    }
+    return prop;
+}
+
 // Create a cache for sorted results
 const sortingCache = new Map<string, string[]>();
-
-// Define concentric property order - use the one from index.ts
-import { CONCENTRIC_PROPERTY_GROUPS, IDIOMATIC_PROPERTY_GROUPS } from './index';
 
 /**
  * Sort properties based on the chosen strategy
@@ -52,10 +56,15 @@ export function sortProperties(properties: string[], options: SortingOptions): S
         let sortedProperties: string[] = [];
 
         switch (strategy) {
-            case 'alphabetical':
-                // For alphabetical sorting, handle CSS variables specially and use case-insensitive sort
+            case 'alphabetical': {
+                // Vendor-prefixed props sort immediately before their base property
+                const sortKey = (p: string) => {
+                    const lower = p.toLowerCase();
+                    const base = stripVendorPrefix(lower);
+                    return base !== lower ? base + ' ' + lower : lower + '~';
+                };
                 const cssVariables = properties.filter(prop => prop.startsWith('--')).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-                const regularProperties = properties.filter(prop => !prop.startsWith('--')).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+                const regularProperties = properties.filter(prop => !prop.startsWith('--')).sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
 
                 if (cssVariables.length > 0 && regularProperties.length > 0) {
                     // Place CSS variables at the beginning, then empty line, then regular properties
@@ -69,6 +78,7 @@ export function sortProperties(properties: string[], options: SortingOptions): S
                 }
                 console.log('Alphabetical sorting applied with CSS variables handling');
                 break;
+            }
             case 'concentric':
                 sortedProperties = sortByGroups(properties, CONCENTRIC_PROPERTY_GROUPS, !!options.sortPropertiesWithinGroups, !!options.emptyLinesBetweenGroups);
                 break;
@@ -150,7 +160,14 @@ function sortByGroups(properties: string[], groups: string[][], sortWithinGroups
 
     for (let i = 0; i < groups.length; i++) {
         const group = groups[i];
-        const groupProperties = remainingProps.filter(prop => group.includes(prop));
+        const groupProperties = remainingProps.filter(prop => {
+            const lower = prop.toLowerCase();
+            const base = stripVendorPrefix(lower);
+            return group.some(g => {
+                const gl = g.toLowerCase();
+                return gl === lower || gl === base;
+            });
+        });
 
         // Skip empty groups
         if (groupProperties.length === 0) continue;
@@ -170,9 +187,13 @@ function sortByGroups(properties: string[], groups: string[][], sortWithinGroups
     }
 
     // Process unknown properties alphabetically at the end
-    const knownProps = new Set();
-    groups.forEach(group => group.forEach(prop => knownProps.add(prop)));
-    const unknownProps = remainingProps.filter(prop => !knownProps.has(prop)).sort();
+    const knownProps = new Set<string>();
+    groups.forEach(g => g.forEach(p => knownProps.add(p.toLowerCase())));
+    const unknownProps = remainingProps.filter(prop => {
+        const lower = prop.toLowerCase();
+        const base = stripVendorPrefix(lower);
+        return !knownProps.has(lower) && !knownProps.has(base);
+    }).sort();
 
     if (unknownProps.length > 0 && lastNonEmptyGroupIndex !== -1 && emptyLinesBetweenGroups) {
         sorted.push('');
