@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/StfBauer/old-fashioned/compare/v1.1.0...v1.2.0) (2026-05-07)
+
+
+### Features
+
+* upgrade stylelint v16 → v17 and stylelint-order v7 → v8 (Group 2) ([636419d](https://github.com/StfBauer/old-fashioned/commit/636419d7d187ba53eb8f58bcfe4b1503430152e7))
+
 ## [1.1.0](https://github.com/StfBauer/old-fashioned/compare/v1.0.0...v1.1.0) (2026-05-07)
 
 
