@@ -119,7 +119,7 @@
     "eslint": "^9.39.4",
     "glob": "^13.0.6",
     "mocha": "^11.7.5",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "icon": "images/old-fashioned.png",
   "repository": {
