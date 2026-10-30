@@ -56,17 +56,17 @@
       "options": {
         "commands": [
           "nx build stylelint-oldfashioned-order",
-          "nx run stylelint-oldfashioned-order:bundle-shared",
-          "cd packages/stylelint-oldfashioned-order/dist && npm publish"
+          "cd packages/stylelint-oldfashioned-order && npm publish"
         ],
         "parallel": false
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ]
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint src/**/*.ts",
+        "cwd": "packages/stylelint-oldfashioned-order"
+      }
     },
     "test": {
       "executor": "nx:run-commands",

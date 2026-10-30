@@ -11,5 +11,7 @@ build({
     format: 'cjs',
     tsconfig: './tsconfig.json',
     logLevel: 'info',
-    external: [],
+    // stylelint expects the plugin as module.exports when loading it by package name
+    footer: { js: 'module.exports = module.exports.default;' },
+    external: ['stylelint', 'postcss'], // Use the versions the consumer installs
 }).catch(() => process.exit(1));

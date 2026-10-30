@@ -34,7 +34,7 @@
     }
   ],
   "files": [
-    "dist/**/*",
+    "dist/index.js",
     "README.md",
     "LICENSE.md"
   ],
@@ -46,11 +46,12 @@
     "prepublishOnly": "echo 'Skipping build in dist folder - already built by Nx'"
   },
   "dependencies": {
-    "postcss": "^8.5.14",
-    "stylelint": "^17.11.0",
-    "stylelint-order": "^8.1.1"
+    "postcss": "^8.5.32"
   },
   "peerDependencies": {
-    "stylelint": "^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0"
+    "stylelint": "^16.18.0 || ^17.0.0"
+  },
+  "devDependencies": {
+    "stylelint": "^17.16.0"
   }
 }
