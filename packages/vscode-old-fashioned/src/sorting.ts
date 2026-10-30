@@ -279,7 +279,7 @@ function getTextToProcess(editor: vscode.TextEditor): TextProcessingResult {
   const document = editor.document;
   const selection = editor.selection;
   let text: string;
-  let isEntireDocument = false;
+  let isEntireDocument: boolean;
 
   if (selection.isEmpty) {
     // No text selected, process entire document
@@ -357,7 +357,7 @@ function ensureSassModuleDirectiveOrder(sassText: string): string {
       } else if (trimmedLine.startsWith('@property')) {
         inProperty = true;
         buffer = [line];
-      } else if (!trimmedLine.startsWith('@') && /^[a-zA-Z0-9_\-\.\[\]"'\*\#\&\:]+\s*{/.test(trimmedLine)) {
+      } else if (!trimmedLine.startsWith('@') && /^[a-zA-Z0-9_\-.[\]"'*#&:]+\s*{/.test(trimmedLine)) {
         inRule = true;
         otherLines.push(line);
       } else {

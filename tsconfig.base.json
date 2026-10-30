@@ -2,23 +2,22 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "strict": true,
     "declaration": true,
     "sourceMap": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "paths": {
       "@old-fashioned/shared": [
-        "packages/shared/dist"
+        "./packages/shared/dist"
       ],
       "@old-fashioned/stylelint-oldschool-order": [
-        "packages/stylelint-oldschool-order/src"
+        "./packages/stylelint-oldschool-order/src"
       ],
       "@old-fashioned/vscode-old-fashioned": [
-        "packages/vscode-old-fashioned/src"
+        "./packages/vscode-old-fashioned/src"
       ]
     },
     "composite": true,
