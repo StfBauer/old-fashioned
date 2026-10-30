@@ -4,6 +4,7 @@
 dist
 tmp
 out-tsc
+packages/vscode-old-fashioned/out
 *.tsbuildinfo
 *.map
 *.vsix

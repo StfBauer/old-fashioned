@@ -1,21 +1,37 @@
 {
     "packageFiles": [
         {
-            "filename": "packages/vscode-old-fashioned/package.json",
+            "filename": "package.json",
             "type": "json"
         },
         {
-            "filename": "package.json",
+            "filename": "packages/shared/package.json",
+            "type": "json"
+        },
+        {
+            "filename": "packages/stylelint-oldfashioned-order/package.json",
+            "type": "json"
+        },
+        {
+            "filename": "packages/vscode-old-fashioned/package.json",
             "type": "json"
         }
     ],
     "bumpFiles": [
         {
-            "filename": "packages/vscode-old-fashioned/package.json",
+            "filename": "package.json",
             "type": "json"
         },
         {
-            "filename": "package.json",
+            "filename": "packages/shared/package.json",
+            "type": "json"
+        },
+        {
+            "filename": "packages/stylelint-oldfashioned-order/package.json",
+            "type": "json"
+        },
+        {
+            "filename": "packages/vscode-old-fashioned/package.json",
             "type": "json"
         }
     ],
