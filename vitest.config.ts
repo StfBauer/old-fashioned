@@ -17,7 +17,7 @@ export default defineConfig({
       reporter: ['text', 'html'],
       exclude: ['**/node_modules/**', '**/test/**']
     },
-    reporters: ['verbose'],
+    reporters: ['tree'],
     alias: {
       '@old-fashioned/shared': resolve(__dirname, './packages/shared/src')
     },

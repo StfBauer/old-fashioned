@@ -47,8 +47,8 @@
     "release:patch": "standard-version --release-as patch"
   },
   "devDependencies": {
-    "@nx/devkit": "^22.7.1",
-    "@nx/vite": "^22.7.1",
+    "@nx/devkit": "24.0.2",
+    "@nx/vite": "24.0.2",
     "@types/node": "^24.12.2",
     "@vitest/coverage-v8": "^4.1.5",
     "@vitest/ui": "^4.1.5",
@@ -56,7 +56,7 @@
     "conventional-changelog-cli": "^5.0.0",
     "esbuild": "^0.27.7",
     "eslint": "^9.39.4",
-    "nx": "^22.7.1",
+    "nx": "24.0.2",
     "standard-version": "^9.5.0",
     "tmp": "^0.2.5",
     "tsx": "^4.21.0",
