@@ -48,7 +48,7 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "npm pack",
-        "cwd": "dist/packages/stylelint-oldfashioned-order"
+        "cwd": "packages/stylelint-oldfashioned-order"
       }
     },
     "publish": {

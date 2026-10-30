@@ -53,7 +53,7 @@
         "publish": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "npx @vscode/vsce publish",
+                "command": "npx @vscode/vsce publish --no-dependencies",
                 "cwd": "packages/vscode-old-fashioned"
             },
             "dependsOn": [
