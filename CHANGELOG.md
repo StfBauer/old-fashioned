@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/StfBauer/old-fashioned/compare/v1.2.0...v1.3.0) (2026-10-30)
+
+
+### Features
+
+* integrate modern CSS properties and fix all test failures ([a947939](https://github.com/StfBauer/old-fashioned/commit/a947939d6de106390d1260d39d3ddd7a2d911940))
+
+
+### Bug Fixes
+
+* **stylelint:** make the published plugin loadable and stop bundling stylelint ([eeb4510](https://github.com/StfBauer/old-fashioned/commit/eeb4510ab7709d86d7c467354d4cbae3f6a51654))
+* update engines.vscode to ^1.118.0 to match @types/vscode upgrade ([6a9c97a](https://github.com/StfBauer/old-fashioned/commit/6a9c97a7900efd64b0add56faa8a36b4bfc73b76))
+* **vscode:** make diagnostics and stylelint autofix work in the packaged extension ([6f18ee6](https://github.com/StfBauer/old-fashioned/commit/6f18ee69ccab282265f1d37d3470157806407553))
+
+
+### Documentation
+
+* add v1.2.0 manual and automated testing guide ([5fbeac3](https://github.com/StfBauer/old-fashioned/commit/5fbeac348c767b713be66e55318b9e936d3b0cae))
+
 ## [1.2.0](https://github.com/StfBauer/old-fashioned/compare/v1.1.0...v1.2.0) (2026-05-07)
 
 

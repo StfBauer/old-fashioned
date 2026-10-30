@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-10-30
+
+### Added
+- Stylelint diagnostics that flag incorrect property order, with autofix and quick fixes
+- Support for modern CSS properties
+
+### Changed
+- Requires VS Code ^1.118.0
+- Updated all dependencies, resolving all known security advisories
+- Smaller package: about 4 MB, with source maps and build leftovers removed
+
+### Fixed
+- Comments are preserved when sorting CSS properties
+
 ## [1.0.0] - 2025-11-19
 
 ### Added
