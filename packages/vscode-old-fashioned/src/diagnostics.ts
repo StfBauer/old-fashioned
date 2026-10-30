@@ -5,8 +5,9 @@
  */
 import * as fs from 'fs';
 import * as vscode from 'vscode';
-import * as stylelint from 'stylelint';
+import stylelint from 'stylelint';
 import * as path from 'path';
+import { stylelintPlugins, getCustomSyntax, oldFashionedRuleName } from './stylelint-support';
 import { getParseSyntax, createDiagnosticFromWarning, isStyleDocument, getSortingOptions, getFormattingOptions } from './utils';
 
 /**
@@ -35,9 +36,9 @@ interface StylelintResultItem {
  * Interface for Stylelint configuration
  */
 interface StylelintConfig {
-  plugins: string[];
+  plugins: unknown[];
   rules: Record<string, any>;
-  customSyntax?: string;
+  customSyntax?: unknown;
 }
 
 // Create a diagnostics collection for property order issues
@@ -152,7 +153,7 @@ async function updateDiagnostics(document: vscode.TextDocument): Promise<void> {
         if (styleResult.warnings && styleResult.warnings.length > 0) {
           for (const warning of styleResult.warnings) {
             // Check if warning is from our plugin
-            if (warning.rule && warning.rule.startsWith('plugin/oldfashioned-order')) {
+            if (warning.rule && warning.rule === oldFashionedRuleName) {
               // Create a diagnostic and add it to the collection
               const diagnostic = createDiagnosticFromWarning(warning, document);
               diagnostics.push(diagnostic);
@@ -191,12 +192,7 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
   const formattingOptions = getFormattingOptions();
 
   // Determine the appropriate custom syntax based on the document type
-  let customSyntax: string | undefined;
-  if (syntax === 'scss') {
-    customSyntax = 'postcss-scss';
-  } else if (syntax === 'sass') {
-    customSyntax = 'postcss-sass';
-  }
+  const customSyntax = getCustomSyntax(syntax);
 
   // Create combined options for the stylelint plugin
   const combinedOptions = {
@@ -291,17 +287,18 @@ async function lintDocument(document: vscode.TextDocument, text: string): Promis
       console.log(`Document has no filename, using synthetic name: ${codeFilename}`);
     }
 
-    // In development, the plugin might be in the workspace node_modules
-    // In production, the plugin should be bundled with the extension
     return stylelint.lint({
       code: text,
       codeFilename: codeFilename,
       config: {
-        plugins: ['stylelint-oldfashioned-order'],
+        plugins: stylelintPlugins,
         rules: {
-          'plugin/oldfashioned-order': [
-            true,
-            combinedOptions
+          [oldFashionedRuleName]: [
+            sortingOptions.strategy || 'alphabetical',
+            {
+              emptyLinesBetweenGroups: sortingOptions.emptyLinesBetweenGroups,
+              sortPropertiesWithinGroups: sortingOptions.sortPropertiesWithinGroups,
+            }
           ]
         },
         customSyntax

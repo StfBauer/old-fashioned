@@ -9,7 +9,9 @@ test/**
 .git/**
 **/.DS_Store
 **/*.ts
-!**/*.d.ts
+**/*.map
+tsconfig.tsbuildinfo
+fix-test-files.js
 .eslintrc.json
 ../../**/*
 ../shared/**/*

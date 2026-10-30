@@ -12,6 +12,15 @@
             },
             "outputs": [
                 "{projectRoot}/dist"
+            ],
+            "dependsOn": [
+                {
+                    "projects": [
+                        "shared",
+                        "stylelint-oldfashioned-order"
+                    ],
+                    "target": "build"
+                }
             ]
         },
         "package": {
@@ -38,7 +47,7 @@
             "executor": "nx:run-commands",
             "options": {
                 "cwd": "packages/vscode-old-fashioned",
-                "command": "npm run test"
+                "command": "vitest run"
             }
         },
         "publish": {

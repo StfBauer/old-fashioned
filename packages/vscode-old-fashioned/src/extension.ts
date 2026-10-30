@@ -12,9 +12,6 @@ import * as path from 'path';
 import { sortCssProperties } from './sorting';
 import { getFormattingOptions, getSortingOptions, shouldShowNotification, getParseSyntax } from './utils';
 import { OldFashionedCodeActionProvider } from './code-actions';
-// Import diagnostics in a way that allows us to control when it's loaded
-// This helps prevent immediate activation failures
-const diagnosticsModule = './diagnostics';
 
 /**
  * Activate the extension
@@ -94,20 +91,16 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       try {
+        // Loaded on demand so a stylelint failure cannot break activation or sorting
         const stylelint = await import('stylelint');
+        const { stylelintPlugins, getCustomSyntax } = await import('./stylelint-support');
         const sortingOptions = getSortingOptions();
-        const syntax = getParseSyntax(document.languageId);
-        let customSyntax: string | undefined;
-        if (syntax === 'scss') {
-          customSyntax = 'postcss-scss';
-        } else if (syntax === 'sass') {
-          customSyntax = 'postcss-sass';
-        }
+        const customSyntax = getCustomSyntax(getParseSyntax(document.languageId));
 
         const result = await stylelint.default.lint({
           code: document.getText(),
           config: {
-            plugins: ['stylelint-oldfashioned-order'],
+            plugins: stylelintPlugins,
             rules: {
               'oldfashioned-order/properties-order': [
                 sortingOptions.strategy || 'alphabetical',
@@ -122,7 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
           fix: true,
         });
 
-        const fixedCode = result.code || result.output;
+        const fixedCode = result.code;
         if (fixedCode && fixedCode !== document.getText()) {
           const fullRange = new vscode.Range(
             document.positionAt(0),
@@ -168,7 +161,7 @@ export function activate(context: vscode.ExtensionContext) {
       try {
         console.log('Dynamically importing diagnostics module...');
         // Dynamic import to delay loading the module until we're ready
-        import(diagnosticsModule).then(module => {
+        import('./diagnostics').then(module => {
           console.log('Diagnostics module loaded successfully');
           const diagnosticDisposables = module.activateDiagnostics(context);
           diagnosticDisposables.forEach((disposable: vscode.Disposable) => context.subscriptions.push(disposable));
