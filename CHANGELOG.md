@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Bug Fixes
 
+* keep inline comments with their own property and preserve `//` comments when sorting (closes [#2](https://github.com/StfBauer/old-fashioned/issues/2))
+* report and autofix project stylelint rules, add selection autofix and mark autofix as beta (closes [#3](https://github.com/StfBauer/old-fashioned/issues/3))
 * **stylelint:** make the published plugin loadable and stop bundling stylelint ([eeb4510](https://github.com/StfBauer/old-fashioned/commit/eeb4510ab7709d86d7c467354d4cbae3f6a51654))
 * update engines.vscode to ^1.118.0 to match @types/vscode upgrade ([6a9c97a](https://github.com/StfBauer/old-fashioned/commit/6a9c97a7900efd64b0add56faa8a36b4bfc73b76))
 * **vscode:** make diagnostics and stylelint autofix work in the packaged extension ([6f18ee6](https://github.com/StfBauer/old-fashioned/commit/6f18ee69ccab282265f1d37d3470157806407553))

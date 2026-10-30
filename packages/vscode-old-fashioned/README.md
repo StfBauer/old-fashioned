@@ -177,6 +177,26 @@ This extension can optionally integrate with project-level stylelint configurati
 - You can define your sorting preferences at the project level through stylelint rather than in VS Code settings
 - If both are present, the VS Code settings take precedence
 
+### Diagnostics
+
+Issues are highlighted in the editor as you type and listed in the Problems panel:
+
+- **With a stylelint config in your project**, all of its rules are reported, plus property order. If the config already sets `order/properties-order` or `order/properties-alphabetical-order` from `stylelint-order`, that rule decides the order instead.
+- **Without a config**, only property order is reported, using your Old Fashioned settings.
+- If your config can't be loaded, for example because a plugin it names isn't installed, only property order is reported. The reason is written to the extension host log.
+
+Set `oldFashioned.diagnostics.useProjectStylelintConfig` to `false` to check property order only. Do this if you also use the official Stylelint extension and see duplicate warnings.
+
+### Autofix (Beta)
+
+Run **Old Fashioned: Autofix CSS with Stylelint (Beta)** from the Command Palette, or use the quick fix on a highlighted issue.
+
+- It fixes the current selection, or the whole file if nothing is selected.
+- It applies the same rules as diagnostics. Issues stylelint can't fix automatically stay highlighted, and the result message says how many remain.
+- If the file or selection isn't complete CSS, nothing is changed.
+
+Autofix is in beta, so review the changes before committing them, and please report problems on the [issue tracker](https://github.com/StfBauer/old-fashioned/issues).
+
 ## Troubleshooting
 
 ### Common Issues
@@ -208,21 +228,21 @@ Here are some suggested keyboard shortcuts that shouldn't conflict with VS Code'
 // Option 1: Similar to Format Document (Shift+Alt+F with additional Ctrl key)
 {
   "key": "ctrl+shift+alt+f",
-  "command": "oldFashioned.sortProperties",
+  "command": "old-fashioned.sortProperties",
   "when": "editorTextFocus && (editorLangId == 'css' || editorLangId == 'scss' || editorLangId == 'sass')"
 }
 
 // Option 2: Alternative using Ctrl+K prefix (common in VS Code)
 {
   "key": "ctrl+k s",
-  "command": "oldFashioned.sortProperties",
+  "command": "old-fashioned.sortProperties",
   "when": "editorTextFocus && (editorLangId == 'css' || editorLangId == 'scss' || editorLangId == 'sass')"
 }
 
 // Option 3: For Mac users
 {
   "key": "cmd+k s",
-  "command": "oldFashioned.sortProperties", 
+  "command": "old-fashioned.sortProperties", 
   "when": "editorTextFocus && (editorLangId == 'css' || editorLangId == 'scss' || editorLangId == 'sass')"
 }
 ```
@@ -231,11 +251,9 @@ Choose the option that works best for your workflow. The first option adds an ad
 
 ### Available Commands
 
-- `oldFashioned.sortProperties`: Sort properties using the configured strategy
-- `oldFashioned.sortPropertiesAlphabetical`: Sort properties alphabetically
-- `oldFashioned.sortPropertiesConcentric`: Sort properties using the concentric strategy
-- `oldFashioned.sortPropertiesIdiomatic`: Sort properties using the idiomatic strategy
-- `oldFashioned.sortPropertiesGrouped`: Sort properties using the grouped strategy
+- `old-fashioned.sortProperties`: Sort properties using the configured strategy
+- `old-fashioned.autofixWithStylelint`: Fix auto-fixable stylelint issues in the file or selection (Beta)
+- `old-fashioned.openSettings`: Open the Old Fashioned settings
 
 ## Release Notes
 

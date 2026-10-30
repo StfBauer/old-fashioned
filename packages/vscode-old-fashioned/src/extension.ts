@@ -92,45 +92,53 @@ export function activate(context: vscode.ExtensionContext) {
 
       try {
         // Loaded on demand so a stylelint failure cannot break activation or sorting
-        const stylelint = await import('stylelint');
-        const { stylelintPlugins, getCustomSyntax } = await import('./stylelint-support');
-        const sortingOptions = getSortingOptions();
-        const customSyntax = getCustomSyntax(getParseSyntax(document.languageId));
+        const { lintWithStylelint } = await import('./stylelint-support');
 
-        const result = await stylelint.default.lint({
-          code: document.getText(),
-          config: {
-            plugins: stylelintPlugins,
-            rules: {
-              'oldfashioned-order/properties-order': [
-                sortingOptions.strategy || 'alphabetical',
-                {
-                  emptyLinesBetweenGroups: sortingOptions.emptyLinesBetweenGroups,
-                  sortPropertiesWithinGroups: sortingOptions.sortPropertiesWithinGroups,
-                },
-              ],
-            },
-            customSyntax,
-          },
-          fix: true,
-        });
+        const { start, end } = editor.selection;
+        // Include the first line's indentation, otherwise that property moves without it
+        const startsAfterIndent = document.lineAt(start.line).text.slice(0, start.character).trim() === '';
+        const range = editor.selection.isEmpty
+          ? new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length))
+          : new vscode.Range(startsAfterIndent ? start.with({ character: 0 }) : start, end);
+        const original = document.getText(range);
 
-        const fixedCode = result.code;
-        if (fixedCode && fixedCode !== document.getText()) {
-          const fullRange = new vscode.Range(
-            document.positionAt(0),
-            document.positionAt(document.getText().length)
+        // Declarations selected inside a rule are not valid CSS on their own, so lint them in a temporary rule
+        const wrapSelection = !editor.selection.isEmpty && !original.includes('{');
+        const prefix = wrapSelection ? '.old-fashioned-selection {\n' : '';
+        const suffix = wrapSelection ? '\n}' : '';
+
+        const result = await lintWithStylelint(document, prefix + original + suffix, true);
+        const warnings = result.results[0]?.warnings ?? [];
+
+        if (warnings.some((warning) => warning.rule === 'CssSyntaxError')) {
+          vscode.window.showWarningMessage(
+            editor.selection.isEmpty
+              ? 'Autofix (Beta): this file has a syntax error, so nothing was changed'
+              : 'Autofix (Beta): the selection is not complete CSS, so nothing was changed'
           );
+          return;
+        }
+
+        const code = result.code ?? '';
+        const fixedCode = code.startsWith(prefix) && code.endsWith(suffix)
+          ? code.slice(prefix.length, code.length - suffix.length)
+          : original;
+        const changed = fixedCode !== '' && fixedCode !== original;
+        if (changed) {
           await editor.edit((editBuilder) => {
-            editBuilder.replace(fullRange, fixedCode);
+            editBuilder.replace(range, fixedCode);
           });
-          if (shouldShowNotification('info')) {
-            vscode.window.showInformationMessage('CSS properties sorted using stylelint autofix');
-          }
-        } else {
-          if (shouldShowNotification('info')) {
-            vscode.window.showInformationMessage('Properties are already in order');
-          }
+        }
+
+        if (shouldShowNotification('info')) {
+          const remaining = warnings.length > 0
+            ? ` ${warnings.length} issue(s) must be fixed manually.`
+            : '';
+          vscode.window.showInformationMessage(
+            changed
+              ? `Autofix (Beta): stylelint fixes applied.${remaining}`
+              : `Autofix (Beta): nothing to fix automatically.${remaining}`
+          );
         }
       } catch (err) {
         console.error('Autofix failed:', err);

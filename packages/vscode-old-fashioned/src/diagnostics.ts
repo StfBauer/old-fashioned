@@ -1,14 +1,11 @@
 /**
  * Diagnostics provider for Old Fashioned VS Code extension
  * 
- * This file handles diagnostics for CSS property ordering issues
+ * This file reports stylelint warnings for CSS documents as diagnostics
  */
-import * as fs from 'fs';
 import * as vscode from 'vscode';
-import stylelint from 'stylelint';
-import * as path from 'path';
-import { stylelintPlugins, getCustomSyntax, oldFashionedRuleName } from './stylelint-support';
-import { getParseSyntax, createDiagnosticFromWarning, isStyleDocument, getSortingOptions, getFormattingOptions } from './utils';
+import { lintWithStylelint } from './stylelint-support';
+import { createDiagnosticFromWarning, isStyleDocument } from './utils';
 
 /**
  * Interface for Stylelint warning object
@@ -143,7 +140,7 @@ async function updateDiagnostics(document: vscode.TextDocument): Promise<void> {
   try {
     // Run Stylelint on the document
     const text = document.getText();
-    const result = await lintDocument(document, text);
+    const result = await lintWithStylelint(document, text);
 
     if (result && result.results && result.results.length > 0) {
       const diagnostics: vscode.Diagnostic[] = [];
@@ -152,12 +149,9 @@ async function updateDiagnostics(document: vscode.TextDocument): Promise<void> {
       for (const styleResult of result.results) {
         if (styleResult.warnings && styleResult.warnings.length > 0) {
           for (const warning of styleResult.warnings) {
-            // Check if warning is from our plugin
-            if (warning.rule && warning.rule === oldFashionedRuleName) {
-              // Create a diagnostic and add it to the collection
-              const diagnostic = createDiagnosticFromWarning(warning, document);
-              diagnostics.push(diagnostic);
-            }
+            // Create a diagnostic and add it to the collection
+            const diagnostic = createDiagnosticFromWarning(warning, document);
+            diagnostics.push(diagnostic);
           }
         }
       }
@@ -169,145 +163,9 @@ async function updateDiagnostics(document: vscode.TextDocument): Promise<void> {
       diagnosticsCollection.delete(document.uri);
     }
   } catch (error) {
-    // Replace console.error with VS Code API
-    vscode.window.showErrorMessage(`Error running diagnostics: ${error instanceof Error ? error.message : String(error)}`);
+    // This runs while typing, so log instead of showing a popup
+    console.error('Error running diagnostics:', error);
     // Clear diagnostics on error
     diagnosticsCollection.delete(document.uri);
-  }
-}
-
-/**
- * Lint a document with Stylelint
- * 
- * @param document - The document to lint
- * @param text - The text to lint
- * @returns The Stylelint linter result
- */
-async function lintDocument(document: vscode.TextDocument, text: string): Promise<stylelint.LinterResult> {
-  // Get the document syntax (css, scss, sass)
-  const syntax = getParseSyntax(document.languageId);
-
-  // Get configuration from user settings
-  const sortingOptions = getSortingOptions();
-  const formattingOptions = getFormattingOptions();
-
-  // Determine the appropriate custom syntax based on the document type
-  const customSyntax = getCustomSyntax(syntax);
-
-  // Create combined options for the stylelint plugin
-  const combinedOptions = {
-    ...sortingOptions,
-    // Add formatting options
-    'always-semicolon': formattingOptions.alwaysSemicolon,
-    'color-case': formattingOptions.colorCase,
-    'block-indent': formattingOptions.blockIndent,
-    'color-shorthand': formattingOptions.colorShorthand,
-    'element-case': formattingOptions.elementCase,
-    'leading-zero': formattingOptions.leadingZero,
-    'quotes': formattingOptions.quotes,
-    'sort-order-fallback': formattingOptions.sortOrderFallback,
-    'space-before-colon': formattingOptions.spaceBeforeColon,
-    'space-after-colon': formattingOptions.spaceAfterColon,
-    'space-before-combinator': formattingOptions.spaceBeforeCombinator,
-    'space-after-combinator': formattingOptions.spaceAfterCombinator,
-    'space-between-declarations': formattingOptions.spaceBetweenDeclarations,
-    'space-before-opening-brace': formattingOptions.spaceBeforeOpeningBrace,
-    'space-after-opening-brace': formattingOptions.spaceAfterOpeningBrace,
-    'space-after-selector-delimiter': formattingOptions.spaceAfterSelectorDelimiter,
-    'space-before-selector-delimiter': formattingOptions.spaceBeforeSelectorDelimiter,
-    'space-before-closing-brace': formattingOptions.spaceBeforeClosingBrace,
-    'strip-spaces': formattingOptions.stripSpaces,
-    'tab-size': formattingOptions.tabSize,
-    'unitless-zero': formattingOptions.unitlessZero,
-    'vendor-prefix-align': formattingOptions.vendorPrefixAlign
-  };
-
-  // Try multiple possible extension IDs to find the correct one
-  let extensionId = '';
-  let extensionPath = '';
-
-  // List of possible extension IDs
-  const possibleIds = [
-    'n8design.old-fashioned',
-    'n8design.vscode-old-fashioned',
-    'n8design.oldfashioned'
-  ];
-
-  // Try to find the extension using different potential IDs
-  for (const id of possibleIds) {
-    const ext = vscode.extensions.getExtension(id);
-    if (ext) {
-      extensionId = id;
-      extensionPath = ext.extensionPath;
-      console.log(`Found extension with ID: ${id}`);
-      break;
-    }
-  }
-
-  // If we didn't find the extension, log all extensions and use __dirname as fallback
-  if (!extensionPath) {
-    console.log('Extension not found. Available extensions:');
-    vscode.extensions.all.forEach(ext => {
-      console.log(`- ${ext.id} (${ext.extensionPath})`);
-    });
-    extensionPath = __dirname;
-    console.warn(`Using fallback path: ${extensionPath}`);
-  }
-
-  // For development environments, try to use the local workspace path
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  const isDevelopment = extensionPath.includes('old-fashioned/packages/vscode-old-fashioned');
-
-  // Determine the best configBasedir to find the plugin
-  let configBasedir = extensionPath;
-
-  // In development, we want to use the workspace root
-  if (isDevelopment && workspaceFolders && workspaceFolders.length > 0) {
-    // Go up two directories from extension path to get to workspace root
-    configBasedir = path.resolve(extensionPath, '../..');
-    console.log('Using development workspace path:', configBasedir);
-  }
-
-  try {
-    console.log('Running stylelint with configBasedir:', configBasedir);
-
-    // Check if the configBasedir exists
-    if (!fs.existsSync(configBasedir)) {
-      console.error(`configBasedir does not exist: ${configBasedir}`);
-      throw new Error(`Configuration directory does not exist: ${configBasedir}`);
-    }
-
-    // Ensure we have a valid filename or provide a fallback
-    let codeFilename: string;
-    if (document.uri.scheme === 'file' && document.fileName) {
-      codeFilename = document.fileName;
-    } else {
-      // For non-file documents, create a synthetic filename based on language
-      codeFilename = `untitled.${document.languageId}`;
-      console.log(`Document has no filename, using synthetic name: ${codeFilename}`);
-    }
-
-    return stylelint.lint({
-      code: text,
-      codeFilename: codeFilename,
-      config: {
-        plugins: stylelintPlugins,
-        rules: {
-          [oldFashionedRuleName]: [
-            sortingOptions.strategy || 'alphabetical',
-            {
-              emptyLinesBetweenGroups: sortingOptions.emptyLinesBetweenGroups,
-              sortPropertiesWithinGroups: sortingOptions.sortPropertiesWithinGroups,
-            }
-          ]
-        },
-        customSyntax
-      },
-      // This is the key setting that helps stylelint locate the plugin
-      configBasedir: configBasedir
-    });
-  } catch (err) {
-    console.error('Error initializing stylelint:', err);
-    throw err;
   }
 }

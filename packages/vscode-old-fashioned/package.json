@@ -29,7 +29,7 @@
       },
       {
         "command": "old-fashioned.autofixWithStylelint",
-        "title": "Autofix CSS Property Order (Old Fashioned)"
+        "title": "Old Fashioned: Autofix CSS with Stylelint (Beta)"
       }
     ],
     "configuration": {
@@ -79,6 +79,11 @@
           ],
           "default": "verbose",
           "description": "Control how many notifications are shown during sorting operations"
+        },
+        "oldFashioned.diagnostics.useProjectStylelintConfig": {
+          "type": "boolean",
+          "default": true,
+          "description": "When the project has a stylelint config, report and autofix all of its rules. Turn this off to check property order only, for example if you also use the official Stylelint extension."
         },
         "oldFashioned.formatting.formatBeforeSorting": {
           "type": "boolean",

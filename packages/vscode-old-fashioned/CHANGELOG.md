@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.0] - 2026-10-30
 
 ### Added
-- Stylelint diagnostics that flag incorrect property order, with autofix and quick fixes
+- Diagnostics in the editor: all rules from your project's stylelint config plus property order, or property order only if there is no config
+- `Old Fashioned: Autofix CSS with Stylelint (Beta)` for the current file or selection, also available as a quick fix
+- `oldFashioned.diagnostics.useProjectStylelintConfig` setting to check property order only
 - Support for modern CSS properties
 
 ### Changed
@@ -17,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Smaller package: about 4 MB, with source maps and build leftovers removed
 
 ### Fixed
-- Comments are preserved when sorting CSS properties
+- Comments stay with their properties when sorting: inline comments stay on the same line, and full-line comments stay above the property they describe
+- `//` comments are no longer rewritten to `/* */`, and no longer cause an error in `.css` files
 
 ## [1.0.0] - 2025-11-19
 
