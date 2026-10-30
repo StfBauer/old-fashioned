@@ -41,7 +41,7 @@ function sortWithComments(css: string, options: any = { strategy: 'alphabetical'
     ];
   });
 
-  return root.toString();
+  return lang === 'css' ? root.toString() : root.toString(postcssScss as any);
 }
 
 describe('Comment Preservation', () => {
@@ -229,5 +229,80 @@ describe('Comment Preservation', () => {
     expect(colorComment).toBe(colorIndex - 1);
     expect(displayComment).toBe(displayIndex - 1);
     expect(widthComment).toBe(widthIndex - 1);
+  });
+
+  it('should keep inline comments on the same line as their own property', () => {
+    const input = `.test {
+  margin: 0; // about margin
+  // about color
+  color: red; // color inline
+}`;
+
+    const result = sortWithComments(input, { strategy: 'alphabetical' }, 'scss');
+
+    expect(result).toBe(`.test {
+  // about color
+  color: red; // color inline
+  margin: 0; // about margin
+}`);
+  });
+
+  it('should keep inline block comments with their own property', () => {
+    const input = `.test {
+  width: 1px; /* w */
+  color: red; /* c */
+}`;
+
+    expect(sortWithComments(input)).toBe(`.test {
+  color: red; /* c */
+  width: 1px; /* w */
+}`);
+  });
+
+  it('should keep a comment on the opening brace line at the top of the block', () => {
+    const input = `.test { // block note
+  width: 1px;
+  color: red;
+}`;
+
+    const result = sortWithComments(input, { strategy: 'alphabetical' }, 'scss');
+
+    expect(result).toBe(`.test { // block note
+  color: red;
+  width: 1px;
+}`);
+  });
+
+  it('should keep an inline comment after an include with that include', () => {
+    const input = `.test {
+  @include thing; // about include
+  width: 1px;
+  color: red;
+}`;
+
+    const result = sortWithComments(input, { strategy: 'alphabetical' }, 'scss');
+
+    expect(result).toContain('@include thing; // about include');
+    expect(result).toMatch(/color: red;\n\s*width: 1px;/);
+  });
+
+  it('should leave the custom property example from issue #2 unchanged', () => {
+    const input = `:root {
+  // Edgerunner Color Palette
+  --c-complete: #7bed9f; // Bright lime green
+  --c-incomplete: #e5e7eb; // Light gray
+  --c-billed: #ff6348; // Coral/salmon
+  --c-unbilled: #ffa502; // Orange
+  --c-collected: #1dd1a1; // Turquoise/cyan
+  --c-aging-30: #ff6348; // Coral (0-30 days)
+  --c-aging-60: #ffa502; // Orange (30-60 days)
+  --c-aging-over: #5f27cd; // Deep magenta (60+ days)
+  --c-spent: #ff9ff3; // Light pink
+
+  // Legacy support
+  --c-progress: #7bed9f;
+}`;
+
+    expect(sortWithComments(input, { strategy: 'alphabetical' }, 'scss')).toBe(input);
   });
 });

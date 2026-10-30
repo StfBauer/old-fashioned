@@ -187,10 +187,18 @@ export function sortCssText(cssText: string, languageId: string, options: any): 
     }
 
     let root;
+    let parsedAsScss = false;
     // Choose parser based on language
     if (languageId === 'css') {
-      root = postcss.parse(cssText);
+      try {
+        root = postcss.parse(cssText);
+      } catch {
+        // Plain CSS has no // comments, but people write them. The SCSS parser keeps them intact
+        root = postcssScss.parse(cssText);
+        parsedAsScss = true;
+      }
     } else {
+      parsedAsScss = true;
       // For SCSS/SASS, use the SCSS parser
       root = postcssScss.parse(cssText);
     }
@@ -248,7 +256,8 @@ export function sortCssText(cssText: string, languageId: string, options: any): 
     }
 
     // Stringify the result
-    let result = root.toString();
+    // The default stringifier would rewrite // comments to /* */
+    let result = parsedAsScss ? root.toString(postcssScss) : root.toString();
 
     // If empty lines between groups is enabled, use the formatter to add them
     if (options.emptyLinesBetweenGroups) {

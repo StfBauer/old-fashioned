@@ -121,7 +121,7 @@ function fixRuleOrder(
   ruleNode: { nodes: ChildNode[] },
   options: Record<string, any>
 ): void {
-  const { declarationsWithComments, otherNodes } =
+  const { declarationsWithComments, topComments, otherNodes } =
     associateCommentsWithDeclarations(ruleNode.nodes);
 
   if (declarationsWithComments.length < 2) {
@@ -137,7 +137,7 @@ function fixRuleOrder(
   const flatSorted = flattenDeclarationsWithComments(sorted);
 
   // Simple strategy: sorted declarations, then all other nodes in original order
-  ruleNode.nodes = [...flatSorted, ...otherNodes];
+  ruleNode.nodes = [...topComments, ...flatSorted, ...otherNodes];
 }
 
 /**

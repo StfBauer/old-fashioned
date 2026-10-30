@@ -8,16 +8,26 @@
 import { ChildNode, Declaration, Comment, AtRule, Rule } from 'postcss';
 
 /**
- * Associates a declaration with any leading comments that describe it.
+ * Associates a declaration with the comments that describe it: full-line
+ * comments above it and inline comments on the same line after it.
  */
 export interface DeclarationWithComments {
   leadingComments: ChildNode[];
   declaration: Declaration;
+  trailingComments: ChildNode[];
 }
 
 /**
- * Walk nodes sequentially and associate each comment with the declaration
- * that immediately follows it. A comment "belongs to" the next declaration.
+ * Check whether a comment starts on the same line as whatever precedes it.
+ */
+function isInlineComment(comment: ChildNode): boolean {
+  return !(comment.raws.before || '').includes('\n');
+}
+
+/**
+ * Walk nodes sequentially and associate each comment with its declaration.
+ * An inline comment belongs to the node before it; a full-line comment
+ * belongs to the next declaration.
  *
  * Returns only regular declarations (skips --custom-props and $sass-vars).
  * Non-declaration nodes (atrules, nested rules, etc.) are returned separately.
@@ -26,17 +36,37 @@ export function associateCommentsWithDeclarations(
   nodes: readonly ChildNode[]
 ): {
   declarationsWithComments: DeclarationWithComments[];
+  topComments: ChildNode[];
   otherNodes: ChildNode[];
 } {
   const declarationsWithComments: DeclarationWithComments[] = [];
+  const topComments: ChildNode[] = [];
   const otherNodes: ChildNode[] = [];
   let pendingComments: ChildNode[] = [];
+  let previousDeclaration: DeclarationWithComments | undefined;
+  let previousInOtherNodes = false;
+  let atBlockStart = true;
 
   for (const node of nodes) {
     if (node.type === 'comment') {
-      pendingComments.push(node);
+      if (isInlineComment(node) && atBlockStart) {
+        topComments.push(node);
+      } else if (isInlineComment(node) && previousDeclaration) {
+        previousDeclaration.trailingComments.push(node);
+      } else if (isInlineComment(node) && previousInOtherNodes) {
+        otherNodes.push(node);
+      } else {
+        atBlockStart = false;
+        previousDeclaration = undefined;
+        previousInOtherNodes = false;
+        pendingComments.push(node);
+      }
       continue;
     }
+
+    atBlockStart = false;
+    previousDeclaration = undefined;
+    previousInOtherNodes = false;
 
     if (node.type === 'decl') {
       const decl = node as Declaration;
@@ -47,11 +77,14 @@ export function associateCommentsWithDeclarations(
         otherNodes.push(...pendingComments);
         pendingComments = [];
         otherNodes.push(node);
+        previousInOtherNodes = true;
       } else {
-        declarationsWithComments.push({
+        previousDeclaration = {
           leadingComments: pendingComments,
           declaration: decl,
-        });
+          trailingComments: [],
+        };
+        declarationsWithComments.push(previousDeclaration);
         pendingComments = [];
       }
     } else {
@@ -59,13 +92,14 @@ export function associateCommentsWithDeclarations(
       otherNodes.push(...pendingComments);
       pendingComments = [];
       otherNodes.push(node);
+      previousInOtherNodes = true;
     }
   }
 
   // Any remaining pending comments go to otherNodes
   otherNodes.push(...pendingComments);
 
-  return { declarationsWithComments, otherNodes };
+  return { declarationsWithComments, topComments, otherNodes };
 }
 
 /**
@@ -80,6 +114,9 @@ export function flattenDeclarationsWithComments(
       result.push(comment);
     }
     result.push(item.declaration);
+    for (const comment of item.trailingComments) {
+      result.push(comment);
+    }
   }
   return result;
 }
